@@ -1,16 +1,34 @@
-# vezem_zerno
+## **Везем Зерно - мобильное приложение для взаимодействия заказчиков и перевозчиков**
 
-A new Flutter project.
+### Описание
 
-## Getting Started
+"Везем Зерно" — это приложение грузоперевозок для заказчиков и перевозчиков, разработанное на Flutter.
 
-This project is a starting point for a Flutter application.
+---
+### **Функции для пользователей:**
 
-A few resources to get you started if this is your first Flutter project:
+  ***Заказчик:***
+  * Создание заявки
+  * Получение и принятие / отклонение отклика на заявку
+  * Просмотр информации о перевозчике
+  * Просмотр информации о перевозках и рейсах
+  * Подписывание документов электронно-цифровой подписью
+  * Получение на проверку актов выполненных работ, принимать / отклонять их
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+  ***Перевозчик:***
+  * Создание водителей и транспорта
+  * Просмотр информации о заказчиках
+  * Просмотр заявки и отправление отклика на перевозку
+  * Отслеживание статусов своих откликов
+  * Подписывание документов электронно-цифровой подписью
+  * Формирование актов выполненных работ и отправление их на подписание заказчику
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### **Технологический стек**
+
+* **Frontend**:
+
+  * Flutter
+* **Backend**:
+
+  * Firebase
