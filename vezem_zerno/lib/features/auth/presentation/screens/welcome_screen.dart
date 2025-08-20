@@ -1,9 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:vezem_zerno/core/assets_constants.dart';
-import 'package:vezem_zerno/core/colors_constants.dart';
-import 'package:vezem_zerno/features/auth/presentation/widgets/primary_button.dart';
+import 'package:vezem_zerno/core/constants/assets_constants.dart';
+import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/routes/router.dart';
 
 @RoutePage()
 class WelcomeScreen extends StatefulWidget {
@@ -48,13 +49,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   PrimaryButton(
                     text: "Регистрация",
                     onPressed: () {
-                      AutoRouter.of(context).pushPath('/registration');
+                      AutoRouter.of(context).push(const RegistrationRoute());
                     },
                   ),
                   SizedBox(height: 24.h),
                   Center(
                     child: InkWell(
-                      onTap: () => AutoRouter.of(context).pushPath('/login'),
+                      onTap: () => AutoRouter.of(context).push(const LoginRoute()),
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       child: Padding(

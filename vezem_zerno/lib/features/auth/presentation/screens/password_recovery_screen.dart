@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:vezem_zerno/core/colors_constants.dart';
-import 'package:vezem_zerno/features/auth/presentation/widgets/primary_button.dart';
-import 'package:vezem_zerno/features/auth/presentation/widgets/primary_text_form_field.dart';
+import 'package:vezem_zerno/core/constants/colors_constants.dart';
+//import 'package:vezem_zerno/core/widgets/primary_button.dart';
+//import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 
 @RoutePage()
 class PasswordRecoveryScreen extends StatefulWidget {
@@ -15,9 +15,9 @@ class PasswordRecoveryScreen extends StatefulWidget {
 }
 
 class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
-  final _phoneController = TextEditingController();
+  //final _phoneController = TextEditingController();
 
-  bool _isFirstInteraction = true;
+  //bool _isFirstInteraction = true;
 
   late MaskTextInputFormatter phoneMaskFormatter;
 

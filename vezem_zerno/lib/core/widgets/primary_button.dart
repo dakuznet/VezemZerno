@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:vezem_zerno/core/colors_constants.dart';
+import 'package:vezem_zerno/core/constants/colors_constants.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed; // Разрешаем null
 
-  const PrimaryButton({super.key, required this.text, required this.onPressed});
+  const PrimaryButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +22,7 @@ class PrimaryButton extends StatelessWidget {
         fixedSize: Size(320.w, 60.h),
         backgroundColor: ColorsConstants.primaryButtonBackgroundColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadiusGeometry.circular(32.r),
+          borderRadius: BorderRadius.circular(32.r),
           side: BorderSide(
             color: ColorsConstants.primaryButtonBorderColor,
             width: 3.w,

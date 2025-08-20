@@ -11,6 +11,22 @@
 part of 'router.dart';
 
 /// generated route for
+/// [HomeScreen]
+class HomeRoute extends PageRouteInfo<void> {
+  const HomeRoute({List<PageRouteInfo>? children})
+    : super(HomeRoute.name, initialChildren: children);
+
+  static const String name = 'HomeRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const HomeScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [LoginScreen]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})
@@ -44,18 +60,73 @@ class PasswordRecoveryRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [PhoneVerificationScreen]
-class PhoneVerificationRoute extends PageRouteInfo<void> {
-  const PhoneVerificationRoute({List<PageRouteInfo>? children})
-    : super(PhoneVerificationRoute.name, initialChildren: children);
+class PhoneVerificationRoute extends PageRouteInfo<PhoneVerificationRouteArgs> {
+  PhoneVerificationRoute({
+    Key? key,
+    required String phone,
+    required String password,
+    List<PageRouteInfo>? children,
+  }) : super(
+         PhoneVerificationRoute.name,
+         args: PhoneVerificationRouteArgs(
+           key: key,
+           phone: phone,
+           password: password,
+         ),
+         rawPathParams: {'phone': phone, 'password': password},
+         initialChildren: children,
+       );
 
   static const String name = 'PhoneVerificationRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const PhoneVerificationScreen();
+      final pathParams = data.inheritedPathParams;
+      final args = data.argsAs<PhoneVerificationRouteArgs>(
+        orElse: () => PhoneVerificationRouteArgs(
+          phone: pathParams.getString('phone'),
+          password: pathParams.getString('password'),
+        ),
+      );
+      return PhoneVerificationScreen(
+        key: args.key,
+        phone: args.phone,
+        password: args.password,
+      );
     },
   );
+}
+
+class PhoneVerificationRouteArgs {
+  const PhoneVerificationRouteArgs({
+    this.key,
+    required this.phone,
+    required this.password,
+  });
+
+  final Key? key;
+
+  final String phone;
+
+  final String password;
+
+  @override
+  String toString() {
+    return 'PhoneVerificationRouteArgs{key: $key, phone: $phone, password: $password}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! PhoneVerificationRouteArgs) return false;
+    return key == other.key &&
+        phone == other.phone &&
+        password == other.password;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ phone.hashCode ^ password.hashCode;
 }
 
 /// generated route for
@@ -86,6 +157,22 @@ class RegistrationRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const RegistrationScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [SplashScreen]
+class SplashRoute extends PageRouteInfo<void> {
+  const SplashRoute({List<PageRouteInfo>? children})
+    : super(SplashRoute.name, initialChildren: children);
+
+  static const String name = 'SplashRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const SplashScreen();
     },
   );
 }

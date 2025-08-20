@@ -2,7 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:vezem_zerno/core/colors_constants.dart';
+import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/routes/router.dart';
 
 class PrivacyCheckbox extends StatefulWidget {
   final bool initialValue;
@@ -37,7 +38,6 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Кастомный чекбокс
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -66,7 +66,6 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
               ),
             ),
             SizedBox(width: 12.w),
-            // Текст соглашения
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,8 +90,7 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              print('Открыта политика конфиденциальности');
-                              AutoRouter.of(context).pushPath('/privacyPolicy');
+                              AutoRouter.of(context).push(const PrivacyPolicyRoute());
                             },
                         ),
                       ],
@@ -103,7 +101,6 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
             ),
           ],
         ),
-        // Отображение ошибки
         if (widget.errorText != null)
           Padding(
             padding: EdgeInsets.only(top: 8.h, left: 36.w),
