@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         } else if (state is LoginSuccess) {
-          AutoRouter.of(context).replaceAll([const HomeRoute()]);
+          AutoRouter.of(context).replaceAll([const MapRoute()]);
         }
       },
       child: Scaffold(

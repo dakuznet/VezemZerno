@@ -14,7 +14,7 @@ class SplashScreen extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is SessionRestored || state is LoginSuccess) {
-          AutoRouter.of(context).replaceAll([const HomeRoute()]);
+          AutoRouter.of(context).replaceAll([const MapRoute()]);
         } else if (state is Unauthenticated || state is AuthFailure) {
           AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
         }

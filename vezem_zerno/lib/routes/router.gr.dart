@@ -11,22 +11,6 @@
 part of 'router.dart';
 
 /// generated route for
-/// [HomeScreen]
-class HomeRoute extends PageRouteInfo<void> {
-  const HomeRoute({List<PageRouteInfo>? children})
-    : super(HomeRoute.name, initialChildren: children);
-
-  static const String name = 'HomeRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const HomeScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [LoginScreen]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})
@@ -38,6 +22,22 @@ class LoginRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const LoginScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [MapScreen]
+class MapRoute extends PageRouteInfo<void> {
+  const MapRoute({List<PageRouteInfo>? children})
+    : super(MapRoute.name, initialChildren: children);
+
+  static const String name = 'MapRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const MapScreen();
     },
   );
 }
@@ -146,6 +146,22 @@ class PrivacyPolicyRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [ProfileScreen]
+class ProfileRoute extends PageRouteInfo<void> {
+  const ProfileRoute({List<PageRouteInfo>? children})
+    : super(ProfileRoute.name, initialChildren: children);
+
+  static const String name = 'ProfileRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ProfileScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [RegistrationScreen]
 class RegistrationRoute extends PageRouteInfo<void> {
   const RegistrationRoute({List<PageRouteInfo>? children})
@@ -189,6 +205,40 @@ class WelcomeRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const WelcomeScreen();
+    },
+  );
+}
+
+
+/// generated route for
+/// [SettingScreen]
+class SettingRoute extends PageRouteInfo<void> {
+  const SettingRoute({List<PageRouteInfo>? children})
+    : super(SettingRoute.name, initialChildren: children);
+
+  static const String name = 'SettingRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const SettingScreen();
+    },
+  );
+}
+
+
+/// generated route for
+/// [ProfileSettingScreen]
+class ProfileSettingRoute extends PageRouteInfo<void> {
+  const ProfileSettingRoute({List<PageRouteInfo>? children})
+    : super(ProfileSettingRoute.name, initialChildren: children);
+
+  static const String name = 'ProfileSettingRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ProfileSettingScreen();
     },
   );
 }

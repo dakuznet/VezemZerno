@@ -3,19 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/widgets/bottom_navigation_bar.dart';
 import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
+
 import 'package:vezem_zerno/routes/router.dart';
 
 @RoutePage()
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<MapScreen> createState() => _MapScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _MapScreenState extends State<MapScreen> {
+ 
+  int _currentIndex = 0;
+ 
+  void _handleNavigationTap(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    switch (index) {
+      case 0:
+        AutoRouter.of(context).replace(const MapRoute());
+        break;
+      case 1:
+        AutoRouter.of(context).replace(const ProfileRoute());
+        break;
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -60,12 +78,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? (state).user
                             : (state as SessionRestored).user,
                       ),
-
-                    // Остальные элементы интерфейса...
                   ],
                 ),
               ),
             ),
+
+            bottomNavigationBar: CustomBottomNavigationBar(currentIndex: _currentIndex, onTap: _handleNavigationTap)
           ),
         );
       },

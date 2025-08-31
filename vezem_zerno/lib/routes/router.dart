@@ -2,13 +2,16 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/splash_screen.dart';
-import 'package:vezem_zerno/features/home/presentations/screens/home_screen.dart';
+import 'package:vezem_zerno/features/map/presentations/screens/map_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/login_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/password_recovery_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/phone_verification_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/privacy_policy_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/registration_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:vezem_zerno/features/profile/presentations/screens/profile_screen.dart';
+import 'package:vezem_zerno/features/profile_setting/presentations/screens/profile_setting_screen.dart';
+import 'package:vezem_zerno/features/setting/presentation/screens/setting_screen.dart';
 
 part 'router.gr.dart';
 
@@ -28,10 +31,13 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: PasswordRecoveryRoute.page, path: '/passwordRecovery'),
     AutoRoute(page: PhoneVerificationRoute.page, path: '/phoneVerification'),
     AutoRoute(
-      page: HomeRoute.page,
+      page: MapRoute.page,
       path: '/home',
       guards: [AuthGuard(authBloc: authBloc)],
     ),
+AutoRoute(page: ProfileRoute.page, path: '/profile'),
+AutoRoute(page: SettingRoute.page, path: '/setting'),
+AutoRoute(page: ProfileSettingRoute.page, path: '/profileSetting')
   ];
 }
 
