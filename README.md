@@ -31,4 +31,4 @@
   * Flutter
 * **Backend**:
 
-  * Firebase
+  * Appwrite
