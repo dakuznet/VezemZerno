@@ -107,6 +107,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   StatefulBuilder(
                     builder: (context, setLocalState) {
                       return PrimaryTextFormField(
+                        readOnly: false,
+                        labelBehavior: FloatingLabelBehavior.auto,
                         autoValidateMode: AutovalidateMode.onUnfocus,
                         controller: _phoneController,
                         labelText: 'Номер телефона',
@@ -145,6 +147,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   StatefulBuilder(
                     builder: (context, setLocalState) {
                       return PrimaryTextFormField(
+                        readOnly: false,
+                        labelBehavior: FloatingLabelBehavior.auto,
                         autoValidateMode: AutovalidateMode.onUnfocus,
                         controller: _passwordController,
                         labelText: 'Пароль',

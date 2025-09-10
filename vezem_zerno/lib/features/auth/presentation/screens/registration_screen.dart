@@ -189,9 +189,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       SizedBox(height: 48.h),
                       PrimaryTextFormField(
+                        readOnly: false,
+                        labelBehavior: FloatingLabelBehavior.auto,
                         autoValidateMode: AutovalidateMode.onUnfocus,
                         controller: _nameController,
-                        labelText: 'Ваше имя',
+                        labelText: 'Имя',
                         keyboardType: TextInputType.name,
                         prefixIcon: const Icon(Icons.person),
                         validator: (value) {
@@ -203,9 +205,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       SizedBox(height: 12.h),
                       PrimaryTextFormField(
+                        readOnly: false,
+                        labelBehavior: FloatingLabelBehavior.auto,
                         autoValidateMode: AutovalidateMode.onUnfocus,
                         controller: _surnameController,
-                        labelText: 'Ваша фамилия',
+                        labelText: 'Фамилия',
                         keyboardType: TextInputType.name,
                         prefixIcon: const Icon(Icons.person),
                         validator: (value) {
@@ -217,9 +221,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       SizedBox(height: 12.h),
                       PrimaryTextFormField(
+                        readOnly: false,
+                        labelBehavior: FloatingLabelBehavior.auto,
                         autoValidateMode: AutovalidateMode.onUnfocus,
                         controller: _organizationController,
-                        labelText: 'Название организации',
+                        labelText: 'Организация',
                         prefixIcon: const Icon(Icons.business),
                         keyboardType: TextInputType.text,
                         validator: (value) {
@@ -315,6 +321,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       StatefulBuilder(
                         builder: (context, setLocalState) {
                           return PrimaryTextFormField(
+                            readOnly: false,
                             autoValidateMode: AutovalidateMode.onUnfocus,
                             controller: _phoneController,
                             labelText: 'Номер телефона',
@@ -353,6 +360,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       StatefulBuilder(
                         builder: (context, setLocalState) {
                           return PrimaryTextFormField(
+                            readOnly: false,
+                            labelBehavior: FloatingLabelBehavior.never,
                             autoValidateMode: AutovalidateMode.onUnfocus,
                             controller: _passwordController,
                             labelText: 'Пароль',
@@ -376,6 +385,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       StatefulBuilder(
                         builder: (context, setLocalState) {
                           return PrimaryTextFormField(
+                            readOnly: false,
+                            labelBehavior: FloatingLabelBehavior.never,
                             controller: _confirmPasswordController,
                             labelText: 'Повторите пароль',
                             obscureText: _obscureConfirmPassword,

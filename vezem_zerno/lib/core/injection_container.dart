@@ -8,6 +8,7 @@ import 'package:vezem_zerno/features/auth/domain/usecases/login_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/register_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/verify_code_usecase.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -21,6 +22,8 @@ void init() {
       appwriteService: getIt(),
     ),
   );
+
+  getIt.registerFactory(() => ProfileBloc(getIt<AppwriteService>()));
 
   // Use cases
   getIt.registerLazySingleton(() => LoginUseCase(getIt()));

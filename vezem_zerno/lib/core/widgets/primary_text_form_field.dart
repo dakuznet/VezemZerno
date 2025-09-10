@@ -13,15 +13,19 @@ class PrimaryTextFormField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
   final int? maxLines;
+  final bool readOnly;
+  final FloatingLabelBehavior? labelBehavior;
   final Function()? onTap;
   final AutovalidateMode? autoValidateMode;
 
   const PrimaryTextFormField({
     super.key,
+    required this.readOnly,
     this.controller,
     required this.labelText,
     this.obscureText = false,
     this.keyboardType,
+    this.labelBehavior,
     this.autoValidateMode,
     this.prefixIcon,
     this.suffixIcon,
@@ -35,11 +39,13 @@ class PrimaryTextFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       style: TextStyle(
-          fontFamily: 'Unbounded',
-          fontWeight: FontWeight.w500,
-          fontSize: 14.sp,
-          color: ColorsConstants.primaryBrownColor,
-        ),
+        fontFamily: 'Unbounded',
+        fontWeight: FontWeight.w500,
+        fontSize: 14.sp,
+        color: ColorsConstants.primaryBrownColor,
+      ),
+      readOnly: readOnly,
+      textCapitalization: TextCapitalization.words,
       autovalidateMode: autoValidateMode,
       onTap: onTap,
       cursorColor: ColorsConstants.primaryBrownColor,
@@ -54,7 +60,7 @@ class PrimaryTextFormField extends StatelessWidget {
         filled: true,
         fillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
         labelText: labelText,
-        floatingLabelBehavior: FloatingLabelBehavior.never,
+        floatingLabelBehavior: labelBehavior,
         labelStyle: TextStyle(
           fontFamily: 'Unbounded',
           fontWeight: FontWeight.w400,

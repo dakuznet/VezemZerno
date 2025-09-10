@@ -113,6 +113,8 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                   ),
                   SizedBox(height: 32.h),
                   PrimaryTextFormField(
+                    readOnly: false,
+                    labelBehavior: FloatingLabelBehavior.auto,
                     controller: _codeController,
                     labelText: 'Код из SMS',
                     keyboardType: TextInputType.number,

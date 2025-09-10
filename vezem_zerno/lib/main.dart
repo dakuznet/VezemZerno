@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/injection_container.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
 void main() async {
@@ -18,15 +19,18 @@ void main() async {
   init();
 
   final authBloc = getIt<AuthBloc>();
+  final profileBloc = getIt<ProfileBloc>();
+
   authBloc.add(RestoreSessionEvent());
 
-  runApp(MyApp(authBloc: authBloc));
+  runApp(MyApp(authBloc: authBloc, profileBloc: profileBloc));
 }
 
 class MyApp extends StatelessWidget {
   final AuthBloc authBloc;
+  final ProfileBloc profileBloc;
 
-  const MyApp({super.key, required this.authBloc});
+  const MyApp({super.key, required this.authBloc, required this.profileBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +38,11 @@ class MyApp extends StatelessWidget {
       designSize: const Size(412, 917),
       minTextAdapt: true,
       builder: (_, child) {
-        return BlocProvider.value(
-          value: authBloc,
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: authBloc),
+            BlocProvider.value(value: profileBloc),
+          ],
           child: MaterialApp.router(
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,

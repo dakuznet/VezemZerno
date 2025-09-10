@@ -1,13 +1,18 @@
+import 'dart:io' as io;
 import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
+import 'package:appwrite/models.dart' as appwrite_models;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
+import 'package:path/path.dart' as path;
 
 class AppwriteService {
   late final Client _client;
   late final Account _account;
   late final Functions _functions;
   late final Databases _databases;
+  late final Storage _imageStorage;
 
   final _storage = const FlutterSecureStorage();
   static const _sessionKey = 'session_id';
@@ -22,6 +27,88 @@ class AppwriteService {
     _account = Account(_client);
     _functions = Functions(_client);
     _databases = Databases(_client);
+    _imageStorage = Storage(_client);
+  }
+
+  Future<String> uploadProfileImage(io.File imageFile) async {
+    try {
+      String filePath = imageFile.path;
+
+      String fileName =
+          'profile_${DateTime.now().millisecondsSinceEpoch}${path.extension(filePath)}';
+
+      final response = await _imageStorage.createFile(
+        bucketId: '68bc5a62002b49eb959e',
+        fileId: ID.unique(),
+        file: InputFile.fromPath(path: filePath, filename: fileName),
+      );
+
+      final String imageUrl =
+          'https://cloud.appwrite.io/v1/storage/buckets/68bc5a62002b49eb959e/files/${response.$id}/view?project=6876329200226340a8bb';
+
+      return imageUrl;
+    } catch (e) {
+      throw Exception('Failed to upload image: $e');
+    }
+  }
+
+  Future<UserModel> getCurrentUser() async {
+    final appwrite_models.User user = await account.get();
+    final docs = await _databases.listDocuments(
+      databaseId: '687f60b70012988ce25a',
+      collectionId: '687f723c0008097bda88',
+      queries: [Query.equal('userId', user.$id)],
+    );
+    if (docs.documents.isNotEmpty) {
+      final doc = docs.documents.first;
+      return UserModel(
+        id: doc.$id,
+        name: doc.data['name'] ?? '',
+        surname: doc.data['surname'] ?? '',
+        organization: doc.data['organization'] ?? '',
+        role: doc.data['role'] ?? '',
+        phone: doc.data['phone'] ?? '',
+        profileImage: doc.data['profileImage'] ?? '',
+      );
+    } else {
+      throw Exception('Пользователь не найден');
+    }
+  }
+
+  Future<void> updateUserProfile({
+    String? name,
+    String? surname,
+    String? organization,
+    String? role,
+    String? phone,
+    String? profileImage,
+  }) async {
+    final appwrite_models.User user = await account.get();
+    final docs = await _databases.listDocuments(
+      databaseId: '687f60b70012988ce25a',
+      collectionId: '687f723c0008097bda88',
+      queries: [Query.equal('userId', user.$id)],
+    );
+    if (docs.documents.isNotEmpty) {
+      final docId = docs.documents.first.$id;
+      Map<String, dynamic> data = {};
+
+      if (name != null) data['name'] = name;
+      if (surname != null) data['surname'] = surname;
+      if (organization != null) data['organization'] = organization;
+      if (role != null) data['role'] = role;
+      if (phone != null) data['phone'] = phone;
+      if (profileImage != null) data['profileImage'] = profileImage;
+
+      await _databases.updateDocument(
+        databaseId: '687f60b70012988ce25a',
+        collectionId: '687f723c0008097bda88',
+        documentId: docId,
+        data: data,
+      );
+    } else {
+      throw Exception('Пользователь не найден');
+    }
   }
 
   Future<void> saveSession(String sessionId) async {

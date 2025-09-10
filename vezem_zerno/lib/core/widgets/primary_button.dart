@@ -33,7 +33,7 @@ class PrimaryButton extends StatelessWidget {
         text,
         style: TextStyle(
           color: ColorsConstants.primaryBrownColor,
-          fontSize: 18.sp,
+          fontSize: 16.sp,
           fontFamily: 'Unbounded',
           fontWeight: FontWeight.w600,
         ),

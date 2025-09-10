@@ -8,6 +8,7 @@ class UserModel extends UserEntity {
     super.surname,
     super.organization,
     super.role,
+    super.profileImage,
     super.sessionId,
   });
 
@@ -20,6 +21,7 @@ class UserModel extends UserEntity {
       organization: json['organization'],
       role: json['role'],
       sessionId: json['sessionId'],
+      profileImage: json['profileImage']
     );
   }
 }
