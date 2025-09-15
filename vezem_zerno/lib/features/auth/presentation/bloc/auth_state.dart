@@ -18,6 +18,14 @@ final class LoginSuccess extends AuthState {
   LoginSuccess(this.user);
 }
 
+class AuthUserAlreadyExists extends AuthState {
+  final String message;
+  
+  AuthUserAlreadyExists(this.message);
+  
+  List<Object> get props => [message];
+}
+
 final class SessionRestored extends AuthState {
   final UserEntity user;
 

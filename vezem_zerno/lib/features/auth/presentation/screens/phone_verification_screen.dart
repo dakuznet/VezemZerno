@@ -94,19 +94,21 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Подтверждение номера',
+                    'Мы отправили SMS с кодом подтверждения на номер:\n',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Unbounded',
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16.sp,
                       color: ColorsConstants.primaryBrownColor,
                     ),
                   ),
-                  SizedBox(height: 24.h),
                   Text(
-                    'Мы отправили SMS с кодом подтверждения на номер\n${widget.phone}',
+                    widget.phone,
                     textAlign: TextAlign.center,
                     style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontWeight: FontWeight.w600,
                       fontSize: 16.sp,
                       color: ColorsConstants.primaryBrownColor,
                     ),

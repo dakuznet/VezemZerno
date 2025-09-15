@@ -32,9 +32,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (data['success'] == true) {
         return const Right(null);
       } else {
-        return Left(ServerFailure(data['error'] ?? 'Ошибка отправки SMS'));
+        if (data['error'] == 'USER_ALREADY_EXISTS') {
+          return Left(UserAlreadyExistsFailure());
+        } else {
+          return Left(ServerFailure(data['error'] ?? 'Ошибка отправки SMS'));
+        }
       }
+    } on AppwriteException catch (e) {
+      if (e.message?.contains('USER_ALREADY_EXISTS') == true) {
+        return Left(UserAlreadyExistsFailure());
+      }
+      return Left(ServerFailure('Ошибка отправки SMS: ${e.message}'));
     } catch (e) {
+      if (e.toString().contains('USER_ALREADY_EXISTS')) {
+        return Left(UserAlreadyExistsFailure());
+      }
       return Left(ServerFailure('Ошибка отправки SMS: $e'));
     }
   }
@@ -60,7 +72,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Either<Failure, UserModel>> login(
     String phone,
-    String password
+    String password,
   ) async {
     try {
       final session = await _appwriteService.createSession(phone, password);

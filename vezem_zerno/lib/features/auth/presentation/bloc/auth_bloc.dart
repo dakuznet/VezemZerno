@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vezem_zerno/core/error/failures.dart';
 import 'package:vezem_zerno/core/services/appwrite_service.dart';
 import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/login_usecase.dart';
@@ -88,8 +89,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (_) => emit(VerificationCodeSent()),
+    (failure) {
+      if (failure is UserAlreadyExistsFailure) {
+        emit(AuthUserAlreadyExists(failure.message));
+      } else {
+        emit(AuthFailure(failure.message));
+      }
+    },
+    (_) => emit(VerificationCodeSent()),
     );
   }
 

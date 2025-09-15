@@ -145,6 +145,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               behavior: SnackBarBehavior.floating,
             ),
           );
+        } else if (state is AuthUserAlreadyExists) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.message,
+                style: TextStyle(
+                  fontFamily: 'Unbounded',
+                  fontSize: 14.sp,
+                  color: ColorsConstants.primaryBrownColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor:
+                  ColorsConstants.primaryTextFormFieldBackgorundColor,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         } else if (state is VerificationCodeSent) {
           AutoRouter.of(context).push(
             PhoneVerificationRoute(

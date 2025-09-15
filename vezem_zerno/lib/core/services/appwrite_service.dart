@@ -152,20 +152,34 @@ class AppwriteService {
     final normalizedPhone = _normalizePhone(phone);
     final email = _buildEmailFromPhone(normalizedPhone);
 
-    final response = await _functions.createExecution(
-      functionId: '687f672c003d9a81e0d6',
-      body: jsonEncode({
-        'phone': normalizedPhone,
-        'email': email,
-        'name': name,
-        'surname': surname,
-        'organization': organization,
-        'role': role,
-        'password': password,
-      }),
-    );
+    try {
+      final response = await _functions.createExecution(
+        functionId: '687f672c003d9a81e0d6',
+        body: jsonEncode({
+          'phone': normalizedPhone,
+          'email': email,
+          'name': name,
+          'surname': surname,
+          'organization': organization,
+          'role': role,
+          'password': password,
+        }),
+      );
 
-    return jsonDecode(response.responseBody);
+      return jsonDecode(response.responseBody);
+    } on AppwriteException catch (e) {
+      if (e.response != null) {
+        try {
+          final responseBody = jsonDecode(e.response!);
+          if (responseBody['error'] == 'USER_ALREADY_EXISTS') {
+            throw Exception('USER_ALREADY_EXISTS');
+          }
+        } catch (_) {
+
+        }
+      }
+      rethrow;
+    }
   }
 
   Future<Map<String, dynamic>> getUserByPhone(String phone) async {
