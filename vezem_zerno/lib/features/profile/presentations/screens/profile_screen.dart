@@ -286,31 +286,36 @@ class UserInfoAppBar extends StatelessWidget implements PreferredSizeWidget {
                   )
                 : null,
           ),
-          Column(
-            spacing: 10.h,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (user.name != null && user.surname != null)
-                Text(
-                  '${user.name} ${user.surname}',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w600,
-                    color: ColorsConstants.primaryBrownColor,
+          SizedBox(width: 12.w,),
+          Expanded(
+            child: Column(
+              spacing: 10.h,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (user.name != null && user.surname != null)
+                  Text(
+                    '${user.name} ${user.surname}',
+                    softWrap: true,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontFamily: 'Unbounded',
+                      fontWeight: FontWeight.w600,
+                      color: ColorsConstants.primaryBrownColor,
+                    ),
                   ),
-                ),
-              if (user.role != null)
-                Text(
-                  user.role == 'customer' ? 'Заказчик' : 'Перевозчик',
-                  style: TextStyle(
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w300,
-                    fontSize: 14.sp,
-                    color: ColorsConstants.primaryBrownColor,
+                if (user.role != null)
+                  Text(
+                    user.role == 'customer' ? 'Заказчик' : 'Перевозчик',
+                    style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontWeight: FontWeight.w300,
+                      fontSize: 14.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

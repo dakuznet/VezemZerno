@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
-import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
@@ -29,7 +29,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
   @override
   void dispose() {
-    _codeController.dispose();
     super.dispose();
   }
 
@@ -114,12 +113,39 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                     ),
                   ),
                   SizedBox(height: 32.h),
-                  PrimaryTextFormField(
-                    readOnly: false,
-                    labelBehavior: FloatingLabelBehavior.auto,
-                    controller: _codeController,
-                    labelText: 'Код из SMS',
+                  PinCodeTextField(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    appContext: context,
+                    length: 6,
+                    obscureText: false,
+                    animationType: AnimationType.fade,
                     keyboardType: TextInputType.number,
+                    cursorColor: ColorsConstants.primaryBrownColor,
+                    pinTheme: PinTheme(
+                      shape: PinCodeFieldShape.box,
+                      borderRadius: BorderRadius.circular(5.r).r,
+                      fieldHeight: 50.h,
+                      fieldWidth: 40.w,
+                      selectedFillColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      selectedColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      inactiveFillColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      inactiveColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      activeFillColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      activeColor: ColorsConstants.primaryBrownColor,
+                    ),
+                    animationDuration: Duration(milliseconds: 300),
+                    enableActiveFill: true,
+                    controller: _codeController,
+                    onChanged: (value) {
+                      setState(() {
+                        _codeController.text = value;
+                      });
+                    },
                   ),
 
                   if (state is AuthFailure && _codeController.text.isNotEmpty)

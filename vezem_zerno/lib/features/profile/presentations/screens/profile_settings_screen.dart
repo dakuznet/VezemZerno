@@ -315,45 +315,67 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                             color: ColorsConstants.primaryBrownColor,
                           ),
                         ),
-                        RadioListTile(
-                          selected: _selectedRole == 'carrier',
-                          activeColor: ColorsConstants.primaryBrownColor,
-                          title: Text(
-                            'Перевозчик',
-                            style: TextStyle(
-                              fontFamily: 'Unbounded',
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: ColorsConstants.primaryBrownColor,
-                            ),
-                          ),
-                          value: 'carrier',
+                        RadioGroup<String>(
                           groupValue: _selectedRole,
-                          onChanged: (value) {
+                          onChanged: (String? value) {
                             setState(() {
-                              _selectedRole = value!;
+                              _selectedRole = value;
                             });
                           },
-                        ),
-                        RadioListTile(
-                          selected: _selectedRole == 'customer',
-                          activeColor: ColorsConstants.primaryBrownColor,
-                          title: Text(
-                            'Заказчик',
-                            style: TextStyle(
-                              fontFamily: 'Unbounded',
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: ColorsConstants.primaryBrownColor,
-                            ),
+                          child: Column(
+                            children: [
+                              RadioListTile<String>(
+                                fillColor:
+                                    WidgetStateProperty.resolveWith<Color?>((
+                                      Set<WidgetState> states,
+                                    ) {
+                                      if (states.contains(
+                                        WidgetState.selected,
+                                      )) {
+                                        return ColorsConstants
+                                            .primaryBrownColor;
+                                      }
+                                      return null;
+                                    }),
+                                selected: _selectedRole == 'carrier',
+                                title: Text(
+                                  'Перевозчик',
+                                  style: TextStyle(
+                                    fontFamily: 'Unbounded',
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: ColorsConstants.primaryBrownColor,
+                                  ),
+                                ),
+                                value: 'carrier',
+                              ),
+                              RadioListTile<String>(
+                                fillColor:
+                                    WidgetStateProperty.resolveWith<Color?>((
+                                      Set<WidgetState> states,
+                                    ) {
+                                      if (states.contains(
+                                        WidgetState.selected,
+                                      )) {
+                                        return ColorsConstants
+                                            .primaryBrownColor;
+                                      }
+                                      return null;
+                                    }),
+                                selected: _selectedRole == 'customer',
+                                title: Text(
+                                  'Заказчик',
+                                  style: TextStyle(
+                                    fontFamily: 'Unbounded',
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: ColorsConstants.primaryBrownColor,
+                                  ),
+                                ),
+                                value: 'customer',
+                              ),
+                            ],
                           ),
-                          value: 'customer',
-                          groupValue: _selectedRole,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedRole = value!;
-                            });
-                          },
                         ),
                       ],
                     ),
