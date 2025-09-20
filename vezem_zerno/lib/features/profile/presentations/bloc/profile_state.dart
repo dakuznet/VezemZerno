@@ -54,3 +54,16 @@ class ProfileImageError extends ProfileState {
   @override
   List<Object> get props => [message];
 }
+
+class AccountDeleting extends ProfileState {}
+
+class AccountDeleted extends ProfileState {}
+
+class AccountDeleteError extends ProfileState {
+  final String message;
+
+  AccountDeleteError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

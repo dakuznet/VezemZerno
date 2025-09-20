@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Ошибка входа....\n${state.message}',
+                'Ошибка входа в аккаунт',
                 style: TextStyle(
                   fontFamily: 'Unbounded',
                   fontSize: 14.sp,
@@ -65,6 +65,10 @@ class _LoginScreenState extends State<LoginScreen> {
               backgroundColor:
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
             ),
           );
         } else if (state is LoginSuccess) {

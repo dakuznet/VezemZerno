@@ -52,7 +52,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Ошибка регистрации...',
+                    'Ошибка регистрации',
                     style: TextStyle(
                       fontFamily: 'Unbounded',
                       fontSize: 14.sp,
@@ -63,9 +63,34 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                   backgroundColor:
                       ColorsConstants.primaryTextFormFieldBackgorundColor,
                   behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0.r).r,
+                    side: BorderSide(color: Colors.red, width: 2.0.w),
+                  ),
                 ),
               );
             } else if (state is VerificationCodeSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: Duration(seconds: 10),
+                  content: Text(
+                    'Регистрация выполнена успешно!\nЧтобы продолжить войдите в аккаунт',
+                    style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontSize: 14.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0.r),
+                    side: BorderSide(color: Colors.green, width: 2.0.w),
+                  ),
+                ),
+              );
               AutoRouter.of(context).replaceAll([const LoginRoute()]);
               // } else if (state is VerificationCodeResent) {
               //   ScaffoldMessenger.of(context).showSnackBar(
@@ -159,8 +184,8 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
                   SizedBox(height: 24.h),
                   if (state is AuthLoading)
-                    const CircularProgressIndicator(
-                      strokeWidth: 5,
+                    CircularProgressIndicator(
+                      strokeWidth: 5.w,
                       backgroundColor:
                           ColorsConstants.primaryTextFormFieldBackgorundColor,
                       color: ColorsConstants.primaryBrownColor,

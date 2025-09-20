@@ -52,11 +52,26 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка при выборе изображения: ${e.toString()}'),
-          ),
-        );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Ошибка при выборе изображения',
+                style: TextStyle(
+                  fontFamily: 'Unbounded',
+                  fontSize: 14.sp,
+                  color: ColorsConstants.primaryBrownColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor:
+                  ColorsConstants.primaryTextFormFieldBackgorundColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
+            ),
+          );
       }
     } finally {
       if (mounted && _profileImage == null) {
@@ -105,13 +120,34 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
               backgroundColor:
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.green, width: 2.0.w),
+              ),
             ),
           );
         }
         if (state is ProfileError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Ошибка сохранения профиля',
+                style: TextStyle(
+                  fontFamily: 'Unbounded',
+                  fontSize: 14.sp,
+                  color: ColorsConstants.primaryBrownColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor:
+                  ColorsConstants.primaryTextFormFieldBackgorundColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
+            ),
+          );
         }
       },
       builder: (context, state) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vezem_zerno/core/services/appwrite_service.dart';
 import 'profile_event.dart';
@@ -9,6 +11,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc(this.appwriteService) : super(ProfileInitial()) {
     on<LoadProfileEvent>(_onLoadProfile);
     on<SaveProfileEvent>(_onSaveProfile);
+    on<DeleteAccountEvent>(_onDeleteAccount);
   }
 
   Future<void> _onLoadProfile(
@@ -49,6 +52,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       add(LoadProfileEvent());
     } catch (e) {
       emit(ProfileError('Ошибка сохранения профиля: $e'));
+    }
+  }
+
+  Future<void> _onDeleteAccount(
+    DeleteAccountEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(AccountDeleting());
+    try {
+      await appwriteService.deleteUser();
+      emit(AccountDeleted());
+    } catch (e) {
+      emit(AccountDeleteError('Ошибка удаления аккаунта: $e'));
     }
   }
 }

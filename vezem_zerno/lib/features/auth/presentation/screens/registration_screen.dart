@@ -132,7 +132,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Ошибка регистрации...',
+                'Ошибка регистрации',
                 style: TextStyle(
                   fontFamily: 'Unbounded',
                   fontSize: 14.sp,
@@ -143,6 +143,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               backgroundColor:
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
             ),
           );
         } else if (state is AuthUserAlreadyExists) {
@@ -160,6 +164,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               backgroundColor:
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
             ),
           );
         } else if (state is VerificationCodeSent) {

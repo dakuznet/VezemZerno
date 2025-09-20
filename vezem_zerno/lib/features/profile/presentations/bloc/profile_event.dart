@@ -47,3 +47,5 @@ class UploadProfileImageEvent extends ProfileEvent {
   @override
   List<Object> get props => [imageFile];
 }
+
+class DeleteAccountEvent extends ProfileEvent {}

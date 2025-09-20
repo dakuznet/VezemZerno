@@ -30,27 +30,7 @@ class AppwriteService {
     _imageStorage = Storage(_client);
   }
 
-  Future<String> uploadProfileImage(io.File imageFile) async {
-    try {
-      String filePath = imageFile.path;
-
-      String fileName =
-          'profile_${DateTime.now().millisecondsSinceEpoch}${path.extension(filePath)}';
-
-      final response = await _imageStorage.createFile(
-        bucketId: '68bc5a62002b49eb959e',
-        fileId: ID.unique(),
-        file: InputFile.fromPath(path: filePath, filename: fileName),
-      );
-
-      final String imageUrl =
-          'https://cloud.appwrite.io/v1/storage/buckets/68bc5a62002b49eb959e/files/${response.$id}/view?project=6876329200226340a8bb';
-
-      return imageUrl;
-    } catch (e) {
-      throw Exception('Failed to upload image: $e');
-    }
-  }
+  // USER
 
   Future<UserModel> getCurrentUser() async {
     final appwrite_models.User user = await account.get();
@@ -72,6 +52,71 @@ class AppwriteService {
       );
     } else {
       throw Exception('Пользователь не найден');
+    }
+  }
+
+  Future<Map<String, dynamic>> getUserByPhone(String phone) async {
+    try {
+      final response = await _databases.listDocuments(
+        databaseId: '687f60b70012988ce25a',
+        collectionId: '687f723c0008097bda88',
+        queries: [Query.equal('phone', phone)],
+      );
+
+      if (response.documents.isEmpty) {
+        throw Exception('Пользователь не найден');
+      }
+
+      return response.documents.first.data;
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка получения данных о пользователе: ${e.message}');
+    }
+  }
+
+  Future<void> deleteUser() async {
+    try {
+      final user = await _account.get();
+      final userId = user.$id;
+
+      final response = await _functions.createExecution(
+        functionId: '68cde36900053573d8ab',
+        body: jsonEncode({'userId': userId}),
+      );
+
+      final result = jsonDecode(response.responseBody);
+      if (result['success'] != true) {
+        throw Exception(result['message'] ?? 'Не удалось удалить пользователя');
+      }
+
+      await logout();
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при удалении пользователя: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при удалении пользователя: $e');
+    }
+  }
+
+  //PROFILE
+
+  Future<String> uploadProfileImage(io.File imageFile) async {
+    try {
+      String filePath = imageFile.path;
+
+      String fileName =
+          'profile_${DateTime.now().millisecondsSinceEpoch}${path.extension(filePath)}';
+
+      final response = await _imageStorage.createFile(
+        bucketId: '68bc5a62002b49eb959e',
+        fileId: ID.unique(),
+        file: InputFile.fromPath(path: filePath, filename: fileName),
+      );
+
+      final String imageUrl =
+          'https://cloud.appwrite.io/v1/storage/buckets/68bc5a62002b49eb959e/files/${response.$id}/view?project=6876329200226340a8bb';
+
+      return imageUrl;
+    } catch (e) {
+      throw Exception('Failed to upload image: $e');
     }
   }
 
@@ -111,8 +156,20 @@ class AppwriteService {
     }
   }
 
+  // SESSION
+
   Future<void> saveSession(String sessionId) async {
     await _storage.write(key: _sessionKey, value: sessionId);
+  }
+
+  Future<Session> createSession(String phone, String password) {
+    final normalizedPhone = _normalizePhone(phone);
+    final email = _buildEmailFromPhone(normalizedPhone);
+
+    return _account.createEmailPasswordSession(
+      email: email,
+      password: password,
+    );
   }
 
   Future<bool> restoreSession() async {
@@ -130,11 +187,17 @@ class AppwriteService {
     return false;
   }
 
+  // AUTH
+
   Future<void> logout() async {
     try {
       final sessionId = await _storage.read(key: _sessionKey);
       if (sessionId != null) {
         await _account.deleteSession(sessionId: sessionId);
+      }
+    } on AppwriteException catch (e) {
+      if (e.code != 401) {
+        rethrow;
       }
     } finally {
       await _storage.delete(key: _sessionKey);
@@ -174,29 +237,9 @@ class AppwriteService {
           if (responseBody['error'] == 'USER_ALREADY_EXISTS') {
             throw Exception('USER_ALREADY_EXISTS');
           }
-        } catch (_) {
-
-        }
+        } catch (_) {}
       }
       rethrow;
-    }
-  }
-
-  Future<Map<String, dynamic>> getUserByPhone(String phone) async {
-    try {
-      final response = await _databases.listDocuments(
-        databaseId: '687f60b70012988ce25a',
-        collectionId: '687f723c0008097bda88',
-        queries: [Query.equal('phone', phone)],
-      );
-
-      if (response.documents.isEmpty) {
-        throw Exception('Пользователь не найден');
-      }
-
-      return response.documents.first.data;
-    } on AppwriteException catch (e) {
-      throw Exception('Ошибка получения данных о пользователе: ${e.message}');
     }
   }
 
@@ -212,16 +255,6 @@ class AppwriteService {
     );
 
     return jsonDecode(response.responseBody);
-  }
-
-  Future<Session> createSession(String phone, String password) {
-    final normalizedPhone = _normalizePhone(phone);
-    final email = _buildEmailFromPhone(normalizedPhone);
-
-    return _account.createEmailPasswordSession(
-      email: email,
-      password: password,
-    );
   }
 
   String _normalizePhone(String phone) {
