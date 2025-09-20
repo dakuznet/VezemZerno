@@ -1,4 +1,6 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:vezem_zerno/core/services/appwrite_service.dart';
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source_impl.dart';
@@ -20,8 +22,13 @@ void init() {
       verifyCodeUseCase: getIt(),
       loginUseCase: getIt(),
       appwriteService: getIt(),
+      connectionChecker: getIt(),
+      connectivity: getIt(),
     ),
   );
+
+  getIt.registerLazySingleton(() => Connectivity());
+  getIt.registerLazySingleton(() => InternetConnection());
 
   getIt.registerFactory(() => ProfileBloc(getIt<AppwriteService>()));
 

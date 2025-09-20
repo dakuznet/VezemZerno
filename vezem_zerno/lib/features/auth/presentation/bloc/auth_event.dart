@@ -48,3 +48,5 @@ final class ResendCodeEvent extends AuthEvent {
 final class RestoreSessionEvent extends AuthEvent {}
 
 final class LogoutEvent extends AuthEvent {}
+
+final class CheckInternetConnection extends AuthEvent {}

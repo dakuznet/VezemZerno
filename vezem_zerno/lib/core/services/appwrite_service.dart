@@ -4,6 +4,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:appwrite/models.dart' as appwrite_models;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:vezem_zerno/core/constants/string_constants.dart';
 import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
 import 'package:path/path.dart' as path;
 
@@ -11,8 +12,8 @@ class AppwriteService {
   late final Client _client;
   late final Account _account;
   late final Functions _functions;
-  late final Databases _databases;
   late final Storage _imageStorage;
+  late final TablesDB _tablesDB;
 
   final _storage = const FlutterSecureStorage();
   static const _sessionKey = 'session_id';
@@ -21,34 +22,35 @@ class AppwriteService {
 
   AppwriteService() {
     _client = Client()
-        .setEndpoint('https://cloud.appwrite.io/v1')
-        .setProject('6876329200226340a8bb');
+        .setEndpoint(StringConstants.endPoint)
+        .setProject(StringConstants.projectId);
 
     _account = Account(_client);
     _functions = Functions(_client);
-    _databases = Databases(_client);
     _imageStorage = Storage(_client);
+    _tablesDB = TablesDB(_client);
   }
 
   // USER
 
   Future<UserModel> getCurrentUser() async {
     final appwrite_models.User user = await account.get();
-    final docs = await _databases.listDocuments(
-      databaseId: '687f60b70012988ce25a',
-      collectionId: '687f723c0008097bda88',
+    final response = await _tablesDB.listRows(
+      databaseId: StringConstants.dbAuthId,
+      tableId: StringConstants.tableUsersId,
       queries: [Query.equal('userId', user.$id)],
     );
-    if (docs.documents.isNotEmpty) {
-      final doc = docs.documents.first;
+
+    if (response.rows.isNotEmpty) {
+      final row = response.rows.first;
       return UserModel(
-        id: doc.$id,
-        name: doc.data['name'] ?? '',
-        surname: doc.data['surname'] ?? '',
-        organization: doc.data['organization'] ?? '',
-        role: doc.data['role'] ?? '',
-        phone: doc.data['phone'] ?? '',
-        profileImage: doc.data['profileImage'] ?? '',
+        id: row.$id,
+        name: row.data['name'] ?? '',
+        surname: row.data['surname'] ?? '',
+        organization: row.data['organization'] ?? '',
+        role: row.data['role'] ?? '',
+        phone: row.data['phone'] ?? '',
+        profileImage: row.data['profileImage'] ?? '',
       );
     } else {
       throw Exception('Пользователь не найден');
@@ -57,17 +59,17 @@ class AppwriteService {
 
   Future<Map<String, dynamic>> getUserByPhone(String phone) async {
     try {
-      final response = await _databases.listDocuments(
-        databaseId: '687f60b70012988ce25a',
-        collectionId: '687f723c0008097bda88',
+      final response = await _tablesDB.listRows(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
         queries: [Query.equal('phone', phone)],
       );
 
-      if (response.documents.isEmpty) {
+      if (response.rows.isEmpty) {
         throw Exception('Пользователь не найден');
       }
 
-      return response.documents.first.data;
+      return response.rows.first.data;
     } on AppwriteException catch (e) {
       throw Exception('Ошибка получения данных о пользователе: ${e.message}');
     }
@@ -79,7 +81,7 @@ class AppwriteService {
       final userId = user.$id;
 
       final response = await _functions.createExecution(
-        functionId: '68cde36900053573d8ab',
+        functionId: StringConstants.funcDeleteUserId,
         body: jsonEncode({'userId': userId}),
       );
 
@@ -106,7 +108,7 @@ class AppwriteService {
           'profile_${DateTime.now().millisecondsSinceEpoch}${path.extension(filePath)}';
 
       final response = await _imageStorage.createFile(
-        bucketId: '68bc5a62002b49eb959e',
+        bucketId: StringConstants.bucketProfileImagesId,
         fileId: ID.unique(),
         file: InputFile.fromPath(path: filePath, filename: fileName),
       );
@@ -120,6 +122,19 @@ class AppwriteService {
     }
   }
 
+  Future<void> changePassword(String oldPassword, String newPassword) async {
+    try {
+      await _account.updatePassword(
+        password: newPassword,
+        oldPassword: oldPassword,
+      );
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при изменении пароля: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при изменении пароля: $e');
+    }
+  }
+
   Future<void> updateUserProfile({
     String? name,
     String? surname,
@@ -129,13 +144,14 @@ class AppwriteService {
     String? profileImage,
   }) async {
     final appwrite_models.User user = await account.get();
-    final docs = await _databases.listDocuments(
-      databaseId: '687f60b70012988ce25a',
-      collectionId: '687f723c0008097bda88',
+    final response = await _tablesDB.listRows(
+      databaseId: StringConstants.dbAuthId,
+      tableId: StringConstants.tableUsersId,
       queries: [Query.equal('userId', user.$id)],
     );
-    if (docs.documents.isNotEmpty) {
-      final docId = docs.documents.first.$id;
+
+    if (response.rows.isNotEmpty) {
+      final rowId = response.rows.first.$id;
       Map<String, dynamic> data = {};
 
       if (name != null) data['name'] = name;
@@ -145,10 +161,10 @@ class AppwriteService {
       if (phone != null) data['phone'] = phone;
       if (profileImage != null) data['profileImage'] = profileImage;
 
-      await _databases.updateDocument(
-        databaseId: '687f60b70012988ce25a',
-        collectionId: '687f723c0008097bda88',
-        documentId: docId,
+      await _tablesDB.updateRow(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        rowId: rowId,
         data: data,
       );
     } else {
@@ -217,7 +233,7 @@ class AppwriteService {
 
     try {
       final response = await _functions.createExecution(
-        functionId: '687f672c003d9a81e0d6',
+        functionId: StringConstants.funcSendVerfCodeId,
         body: jsonEncode({
           'phone': normalizedPhone,
           'email': email,
@@ -250,7 +266,7 @@ class AppwriteService {
     final normalizedPhone = _normalizePhone(phone);
 
     final response = await _functions.createExecution(
-      functionId: '687f73a60022fe36c951',
+      functionId: StringConstants.funcVerifyCodeId,
       body: jsonEncode({'phone': normalizedPhone, 'code': code}),
     );
 

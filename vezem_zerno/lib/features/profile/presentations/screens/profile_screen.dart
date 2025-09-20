@@ -43,6 +43,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
             profileImage: state.user.profileImage,
           );
         }
+
+        if (state is ProfileError) {
+          return Scaffold(
+            backgroundColor:
+                ColorsConstants.primaryTextFormFieldBackgorundColor,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Возникла ошибка при загрузке профиля...',
+                    style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 20.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  TextButton(
+                    onPressed: () {
+                      context.read<ProfileBloc>().add(LoadProfileEvent());
+                    },
+                    child: Text(
+                      'Повторить',
+                      style: TextStyle(
+                        fontFamily: 'Unbounded',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.sp,
+                        color: ColorsConstants.primaryBrownColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         return Scaffold(
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(150.h),
@@ -66,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Кнопка управления профилем
+                      // Переход к управлению профилем
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
@@ -107,7 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         thickness: 1.0,
                         color: ColorsConstants.primaryBrownColorWithOpacity,
                       ),
-                      // Здесь можно добавить другие кнопки управления
+                      // Переход к изменению пароля
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
@@ -115,15 +154,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent,
                           borderRadius: BorderRadius.circular(32.r),
-                          onTap: () {},
+                          onTap: () {
+                            AutoRouter.of(
+                              context,
+                            ).replace(const ChangePasswordRoute());
+                          },
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 8.0.h).w,
                             child: Row(
                               children: [
                                 SvgPicture.asset(
-                                  'assets/svg/password_edit_icon.svg',
+                                  height: 14.h,
                                   width: 24.w,
-                                  height: 18.h,
+                                  'assets/svg/password_edit_icon.svg',
                                 ),
                                 SizedBox(width: 16.w),
                                 Text(
@@ -286,7 +329,7 @@ class UserInfoAppBar extends StatelessWidget implements PreferredSizeWidget {
                   )
                 : null,
           ),
-          SizedBox(width: 12.w,),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               spacing: 10.h,

@@ -132,7 +132,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Ошибка регистрации',
+                'Ошибка регистрации\n${state.message}',
                 style: TextStyle(
                   fontFamily: 'Unbounded',
                   fontSize: 14.sp,
@@ -154,6 +154,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             SnackBar(
               content: Text(
                 state.message,
+                style: TextStyle(
+                  fontFamily: 'Unbounded',
+                  fontSize: 14.sp,
+                  color: ColorsConstants.primaryBrownColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor:
+                  ColorsConstants.primaryTextFormFieldBackgorundColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
+            ),
+          );
+        } else if (state is NoInternetConnection) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Ошибка регистрации\nПроверьте подключение к интернету',
                 style: TextStyle(
                   fontFamily: 'Unbounded',
                   fontSize: 14.sp,

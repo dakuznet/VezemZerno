@@ -21,23 +21,25 @@ class CustomBottomNavigationBar extends StatelessWidget {
       ),
       child: Material(
         type: MaterialType.canvas,
-        elevation: 0.0,
+        elevation: 0.0.sp,
         color: ColorsConstants.primaryTextFormFieldBackgorundColor,
         shape: ContinuousRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
         ),
         child: BottomNavigationBar(
-          elevation: 0,
+          elevation: 0.sp,
           backgroundColor: Colors.transparent,
           unselectedLabelStyle: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 12,
+            fontSize: 10.sp,
             fontWeight: FontWeight.w500,
             color: ColorsConstants.primaryBrownColorWithOpacity,
           ),
+          selectedIconTheme: IconThemeData(size: 26.sp),
+          unselectedIconTheme: IconThemeData(size: 24.sp),
           selectedLabelStyle: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
             color: ColorsConstants.primaryBrownColor,
           ),
@@ -47,15 +49,15 @@ class CustomBottomNavigationBar extends StatelessWidget {
           onTap: onTap,
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.my_library_books_outlined, size: 24.sp),
+              icon: Icon(Icons.my_library_books_outlined),
               label: 'Мои заявки',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.map_outlined, size: 24.sp),
+              icon: Icon(Icons.assignment_outlined),
               label: 'Все заявки',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outlined, size: 24.sp),
+              icon: Icon(Icons.person_outlined),
               label: 'Профиль',
             ),
           ],

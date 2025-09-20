@@ -52,7 +52,28 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Ошибка регистрации',
+                    'Ошибка регистрации\n${state.message}',
+                    style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontSize: 14.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0.r).r,
+                    side: BorderSide(color: Colors.red, width: 2.0.w),
+                  ),
+                ),
+              );
+            } else if (state is NoInternetConnection) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Ошибка...\nПроверьте подключение к интернету',
                     style: TextStyle(
                       fontFamily: 'Unbounded',
                       fontSize: 14.sp,
@@ -92,24 +113,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                 ),
               );
               AutoRouter.of(context).replaceAll([const LoginRoute()]);
-              // } else if (state is VerificationCodeResent) {
-              //   ScaffoldMessenger.of(context).showSnackBar(
-              //     SnackBar(
-              //       content: Text(
-              //         'Код отправлен повторно',
-              //         style: TextStyle(
-              //           fontFamily: 'Unbounded',
-              //           fontSize: 14.sp,
-              //           color: ColorsConstants.primaryBrownColor,
-              //           fontWeight: FontWeight.w500,
-              //         ),
-              //       ),
-              //       backgroundColor:
-              //           ColorsConstants.primaryTextFormFieldBackgorundColor,
-              //       behavior: SnackBarBehavior.floating,
-              //     ),
-              //   );
-              // }
             }
           },
           builder: (context, state) {
@@ -222,29 +225,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                         );
                       },
                     ),
-
-                  // SizedBox(height: 16.h),
-                  // TextButton(
-                  //   onPressed: state is AuthLoading
-                  //       ? null
-                  //       : () {
-                  //           context.read<AuthBloc>().add(
-                  //             ResendCodeEvent(
-                  //               phone: widget.phone,
-                  //               password: widget.password,
-                  //             ),
-                  //           );
-                  //         },
-                  //   child: Text(
-                  //     "Отправить код повторно",
-                  //     style: TextStyle(
-                  //       fontFamily: 'Unbounded',
-                  //       fontSize: 14.sp,
-                  //       fontWeight: FontWeight.w500,
-                  //       color: ColorsConstants.primaryBrownColor,
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             );

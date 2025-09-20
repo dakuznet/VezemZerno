@@ -12,6 +12,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<LoadProfileEvent>(_onLoadProfile);
     on<SaveProfileEvent>(_onSaveProfile);
     on<DeleteAccountEvent>(_onDeleteAccount);
+    on<UpdatePasswordEvent>(_onUpdatePassword);
+  }
+
+  Future<void> _onUpdatePassword(
+    UpdatePasswordEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(PasswordUpdating());
+    try {
+      await appwriteService.changePassword(
+        event.oldPassword,
+        event.newPassword,
+      );
+      emit(PasswordUpdated());
+    } catch (e) {
+      emit(PasswordUpdateError('Ошибка изменения пароля: $e'));
+    }
   }
 
   Future<void> _onLoadProfile(

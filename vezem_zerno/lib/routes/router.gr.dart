@@ -11,6 +11,22 @@
 part of 'router.dart';
 
 /// generated route for
+/// [ChangePasswordScreen]
+class ChangePasswordRoute extends PageRouteInfo<void> {
+  const ChangePasswordRoute({List<PageRouteInfo>? children})
+    : super(ChangePasswordRoute.name, initialChildren: children);
+
+  static const String name = 'ChangePasswordRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ChangePasswordScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [CustomsListScreen]
 class CustomsListRoute extends PageRouteInfo<void> {
   const CustomsListRoute({List<PageRouteInfo>? children})
@@ -70,22 +86,6 @@ class MapRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const MapScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [PasswordRecoveryScreen]
-class PasswordRecoveryRoute extends PageRouteInfo<void> {
-  const PasswordRecoveryRoute({List<PageRouteInfo>? children})
-    : super(PasswordRecoveryRoute.name, initialChildren: children);
-
-  static const String name = 'PasswordRecoveryRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const PasswordRecoveryScreen();
     },
   );
 }

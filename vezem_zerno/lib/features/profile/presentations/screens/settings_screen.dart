@@ -19,133 +19,13 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-  bool _isDeleting = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        centerTitle: true,
-        title: Text(
-          'Настройки',
-          style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        leading: IconButton(
-          onPressed: () {
-            AutoRouter.of(context).replace(const ProfileRoute());
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
-      ),
-      backgroundColor: ColorsConstants.backgroundColor,
-      body: SafeArea(
-        child: BlocListener<ProfileBloc, ProfileState>(
-          listener: (context, state) {
-            if (state is AccountDeleting) {
-              setState(() {
-                _isDeleting = true;
-              });
-            } else if (state is AccountDeleted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  duration: Duration(seconds: 5),
-                  content: Text(
-                    'Аккаунт был успешно удален',
-                    style: TextStyle(
-                      fontFamily: 'Unbounded',
-                      fontSize: 14.sp,
-                      color: ColorsConstants.primaryBrownColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  backgroundColor:
-                      ColorsConstants.primaryTextFormFieldBackgorundColor,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      8.0.r,
-                    ).r, // Радиус скругления
-                    side: BorderSide(
-                      color: Colors.green, // Зеленая граница
-                      width: 2.0.w, // Толщина границы
-                    ),
-                  ),
-                ),
-              );
-              context.read<AuthBloc>().add(LogoutEvent());
-              AutoRouter.of(context).replace(const WelcomeRoute());
-            } else if (state is AccountDeleteError) {
-              setState(() {
-                _isDeleting = false;
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  duration: Duration(seconds: 5),
-                  content: Text(
-                    'Ошибка удаления профиля',
-                    style: TextStyle(
-                      fontFamily: 'Unbounded',
-                      fontSize: 14.sp,
-                      color: ColorsConstants.primaryBrownColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  backgroundColor:
-                      ColorsConstants.primaryTextFormFieldBackgorundColor,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0.r).r,
-                    side: BorderSide(color: Colors.red, width: 2.0.w),
-                  ),
-                ),
-              );
-            }
-          },
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  vertical: 50.h,
-                  horizontal: 16.w,
-                ).w,
-                child: Center(
-                  child: PrimaryButton(
-                    text: 'Удалить профиль',
-                    onPressed: () {
-                      _showDeleteConfirmationDialog(context);
-                    },
-                  ),
-                ),
-              ),
-              if (_isDeleting)
-                Container(
-                  color: const Color.fromARGB(55, 0, 0, 0),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        ColorsConstants.primaryBrownColor,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showDeleteConfirmationDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, state) {
+            final isDeleting = state is AccountDeleting;
             return AlertDialog(
               scrollable: false,
               actionsAlignment: MainAxisAlignment.spaceBetween,
@@ -169,7 +49,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
               ),
               actions: <Widget>[
-                if (state is! AccountDeleting)
+                if (!isDeleting)
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -198,7 +78,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                   ),
                 ElevatedButton(
-                  onPressed: (state is AccountDeleting)
+                  onPressed: isDeleting
                       ? null
                       : () {
                           context.read<ProfileBloc>().add(DeleteAccountEvent());
@@ -211,7 +91,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       borderRadius: BorderRadius.circular(32.r),
                     ),
                   ),
-                  child: (state is AccountDeleting)
+                  child: isDeleting
                       ? SizedBox(
                           width: 20.w,
                           height: 20.h,
@@ -237,6 +117,120 @@ class _SettingScreenState extends State<SettingScreen> {
           },
         );
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
+        centerTitle: true,
+        title: Text(
+          'Настройки',
+          style: TextStyle(
+            fontFamily: 'Unbounded',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            color: ColorsConstants.primaryBrownColor,
+          ),
+        ),
+        leading: IconButton(
+          onPressed: () {
+            AutoRouter.of(context).replace(const ProfileRoute());
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
+      ),
+      backgroundColor: ColorsConstants.backgroundColor,
+      body: SafeArea(
+        child: BlocConsumer<ProfileBloc, ProfileState>(
+          listener: (context, state) {
+            if (state is AccountDeleted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: const Duration(seconds: 5),
+                  content: Text(
+                    'Аккаунт был успешно удален',
+                    style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontSize: 14.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0.r),
+                    side: BorderSide(color: Colors.green, width: 2.0.w),
+                  ),
+                ),
+              );
+              context.read<AuthBloc>().add(LogoutEvent());
+              AutoRouter.of(context).replace(const WelcomeRoute());
+            } else if (state is AccountDeleteError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: const Duration(seconds: 5),
+                  content: Text(
+                    'Ошибка удаления аккаунта\n${state.message}',
+                    style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontSize: 14.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0.r),
+                    side: BorderSide(color: Colors.red, width: 2.0.w),
+                  ),
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            final isDeleting = state is AccountDeleting;
+
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 50.h,
+                    horizontal: 16.w,
+                  ).w,
+                  child: Center(
+                    child: PrimaryButton(
+                      text: 'Удалить аккаунт',
+                      onPressed: isDeleting
+                          ? null
+                          : () {
+                              _showDeleteConfirmationDialog(context);
+                            },
+                    ),
+                  ),
+                ),
+                if (isDeleting)
+                  Container(
+                    color: const Color.fromARGB(55, 0, 0, 0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          ColorsConstants.primaryBrownColor,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 }

@@ -49,3 +49,13 @@ class UploadProfileImageEvent extends ProfileEvent {
 }
 
 class DeleteAccountEvent extends ProfileEvent {}
+
+class UpdatePasswordEvent extends ProfileEvent {
+  final String oldPassword;
+  final String newPassword;
+
+  UpdatePasswordEvent({required this.oldPassword, required this.newPassword});
+
+  @override
+  List<Object?> get props => [oldPassword, newPassword];
+}

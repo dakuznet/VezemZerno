@@ -90,7 +90,9 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              AutoRouter.of(context).push(const PrivacyPolicyRoute());
+                              AutoRouter.of(
+                                context,
+                              ).push(const PrivacyPolicyRoute());
                             },
                         ),
                       ],
