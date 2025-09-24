@@ -6,6 +6,8 @@ abstract class ProfileState extends Equatable {
   List<Object?> get props => [];
 }
 
+
+// PROFILE
 class ProfileInitial extends ProfileState {}
 
 class ProfileLoading extends ProfileState {}
@@ -32,6 +34,8 @@ class ProfileError extends ProfileState {
   List<Object?> get props => [message];
 }
 
+
+// CHANGE PROFILE IMAGE
 class ProfileImageUploading extends ProfileState {
   @override
   List<Object> get props => [];
@@ -53,4 +57,31 @@ class ProfileImageError extends ProfileState {
   
   @override
   List<Object> get props => [message];
+}
+
+
+// DELETE PROFILE
+class AccountDeleting extends ProfileState {}
+
+class AccountDeleted extends ProfileState {}
+
+class AccountDeleteError extends ProfileState {
+  final String message;
+
+  AccountDeleteError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+// CHANGE PASSWORD
+class PasswordUpdating extends ProfileState {}
+class PasswordUpdated extends ProfileState {}
+class PasswordUpdateError extends ProfileState {
+  final String message;
+
+  PasswordUpdateError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

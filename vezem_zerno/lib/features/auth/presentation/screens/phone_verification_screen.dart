@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
-import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
@@ -29,7 +29,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
   @override
   void dispose() {
-    _codeController.dispose();
     super.dispose();
   }
 
@@ -53,7 +52,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Ошибка регистрации...',
+                    'Ошибка регистрации\n${state.message}',
                     style: TextStyle(
                       fontFamily: 'Unbounded',
                       fontSize: 14.sp,
@@ -64,28 +63,56 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                   backgroundColor:
                       ColorsConstants.primaryTextFormFieldBackgorundColor,
                   behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0.r).r,
+                    side: BorderSide(color: Colors.red, width: 2.0.w),
+                  ),
+                ),
+              );
+            } else if (state is NoInternetConnection) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Ошибка...\nПроверьте подключение к интернету',
+                    style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontSize: 14.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0.r).r,
+                    side: BorderSide(color: Colors.red, width: 2.0.w),
+                  ),
                 ),
               );
             } else if (state is VerificationCodeSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: Duration(seconds: 10),
+                  content: Text(
+                    'Регистрация выполнена успешно!\nЧтобы продолжить войдите в аккаунт',
+                    style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontSize: 14.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0.r),
+                    side: BorderSide(color: Colors.green, width: 2.0.w),
+                  ),
+                ),
+              );
               AutoRouter.of(context).replaceAll([const LoginRoute()]);
-              // } else if (state is VerificationCodeResent) {
-              //   ScaffoldMessenger.of(context).showSnackBar(
-              //     SnackBar(
-              //       content: Text(
-              //         'Код отправлен повторно',
-              //         style: TextStyle(
-              //           fontFamily: 'Unbounded',
-              //           fontSize: 14.sp,
-              //           color: ColorsConstants.primaryBrownColor,
-              //           fontWeight: FontWeight.w500,
-              //         ),
-              //       ),
-              //       backgroundColor:
-              //           ColorsConstants.primaryTextFormFieldBackgorundColor,
-              //       behavior: SnackBarBehavior.floating,
-              //     ),
-              //   );
-              // }
             }
           },
           builder: (context, state) {
@@ -94,30 +121,59 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Подтверждение номера',
+                    'Мы отправили SMS с кодом подтверждения на номер:\n',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Unbounded',
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16.sp,
                       color: ColorsConstants.primaryBrownColor,
                     ),
                   ),
-                  SizedBox(height: 24.h),
                   Text(
-                    'Мы отправили SMS с кодом подтверждения на номер\n${widget.phone}',
+                    widget.phone,
                     textAlign: TextAlign.center,
                     style: TextStyle(
+                      fontFamily: 'Unbounded',
+                      fontWeight: FontWeight.w600,
                       fontSize: 16.sp,
                       color: ColorsConstants.primaryBrownColor,
                     ),
                   ),
                   SizedBox(height: 32.h),
-                  PrimaryTextFormField(
-                    readOnly: false,
-                    labelBehavior: FloatingLabelBehavior.auto,
-                    controller: _codeController,
-                    labelText: 'Код из SMS',
+                  PinCodeTextField(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    appContext: context,
+                    length: 6,
+                    obscureText: false,
+                    animationType: AnimationType.fade,
                     keyboardType: TextInputType.number,
+                    cursorColor: ColorsConstants.primaryBrownColor,
+                    pinTheme: PinTheme(
+                      shape: PinCodeFieldShape.box,
+                      borderRadius: BorderRadius.circular(5.r).r,
+                      fieldHeight: 50.h,
+                      fieldWidth: 40.w,
+                      selectedFillColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      selectedColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      inactiveFillColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      inactiveColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      activeFillColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      activeColor: ColorsConstants.primaryBrownColor,
+                    ),
+                    animationDuration: Duration(milliseconds: 300),
+                    enableActiveFill: true,
+                    controller: _codeController,
+                    onChanged: (value) {
+                      setState(() {
+                        _codeController.text = value;
+                      });
+                    },
                   ),
 
                   if (state is AuthFailure && _codeController.text.isNotEmpty)
@@ -131,8 +187,8 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
                   SizedBox(height: 24.h),
                   if (state is AuthLoading)
-                    const CircularProgressIndicator(
-                      strokeWidth: 5,
+                    CircularProgressIndicator(
+                      strokeWidth: 5.w,
                       backgroundColor:
                           ColorsConstants.primaryTextFormFieldBackgorundColor,
                       color: ColorsConstants.primaryBrownColor,
@@ -169,29 +225,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                         );
                       },
                     ),
-
-                  // SizedBox(height: 16.h),
-                  // TextButton(
-                  //   onPressed: state is AuthLoading
-                  //       ? null
-                  //       : () {
-                  //           context.read<AuthBloc>().add(
-                  //             ResendCodeEvent(
-                  //               phone: widget.phone,
-                  //               password: widget.password,
-                  //             ),
-                  //           );
-                  //         },
-                  //   child: Text(
-                  //     "Отправить код повторно",
-                  //     style: TextStyle(
-                  //       fontFamily: 'Unbounded',
-                  //       fontSize: 14.sp,
-                  //       fontWeight: FontWeight.w500,
-                  //       color: ColorsConstants.primaryBrownColor,
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             );

@@ -63,8 +63,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (value == null || value.isEmpty) {
       return 'Введите пароль';
     }
-    if (value.length < 6) {
-      return 'Пароль должен быть не менее 6 символов';
+    if (value.length < 8) {
+      return 'Пароль должен быть не менее 8 символов';
     }
     return null;
   }
@@ -132,7 +132,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Ошибка регистрации...',
+                'Ошибка регистрации\n${state.message}',
                 style: TextStyle(
                   fontFamily: 'Unbounded',
                   fontSize: 14.sp,
@@ -143,6 +143,52 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               backgroundColor:
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
+            ),
+          );
+        } else if (state is AuthUserAlreadyExists) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.message,
+                style: TextStyle(
+                  fontFamily: 'Unbounded',
+                  fontSize: 14.sp,
+                  color: ColorsConstants.primaryBrownColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor:
+                  ColorsConstants.primaryTextFormFieldBackgorundColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
+            ),
+          );
+        } else if (state is NoInternetConnection) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Ошибка регистрации\nПроверьте подключение к интернету',
+                style: TextStyle(
+                  fontFamily: 'Unbounded',
+                  fontSize: 14.sp,
+                  color: ColorsConstants.primaryBrownColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor:
+                  ColorsConstants.primaryTextFormFieldBackgorundColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
             ),
           );
         } else if (state is VerificationCodeSent) {

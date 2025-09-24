@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Ошибка входа....\n${state.message}',
+                'Ошибка входа в аккаунт\n${state.message}',
                 style: TextStyle(
                   fontFamily: 'Unbounded',
                   fontSize: 14.sp,
@@ -65,10 +65,35 @@ class _LoginScreenState extends State<LoginScreen> {
               backgroundColor:
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
             ),
           );
         } else if (state is LoginSuccess) {
           AutoRouter.of(context).replaceAll([const MapRoute()]);
+        } else if (state is NoInternetConnection) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Ошибка входа в аккаунт\nПроверьте подключение к интернету',
+                style: TextStyle(
+                  fontFamily: 'Unbounded',
+                  fontSize: 14.sp,
+                  color: ColorsConstants.primaryBrownColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor:
+                  ColorsConstants.primaryTextFormFieldBackgorundColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0.r).r,
+                side: BorderSide(color: Colors.red, width: 2.0.w),
+              ),
+            ),
+          );
         }
       },
       child: Scaffold(
@@ -175,32 +200,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     },
                   ),
-                  SizedBox(height: 24.h),
-                  // Align(
-                  //   alignment: Alignment.centerRight,
-                  //   child: TextButton(
-                  //     style: ButtonStyle(
-                  //       splashFactory: NoSplash.splashFactory,
-                  //       overlayColor: WidgetStateProperty.all(
-                  //         Colors.transparent,
-                  //       ),
-                  //     ),
-                  //     onPressed: () {
-                  //       AutoRouter.of(
-                  //         context,
-                  //       ).push(const PasswordRecoveryRoute());
-                  //     },
-                  //     child: Text(
-                  //       "Забыли пароль?",
-                  //       style: TextStyle(
-                  //         fontFamily: 'Unbounded',
-                  //         fontSize: 14.sp,
-                  //         fontWeight: FontWeight.w500,
-                  //         color: ColorsConstants.primaryBrownColor,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
                   SizedBox(height: 48.h),
                   PrimaryButton(
                     text: 'Войти',

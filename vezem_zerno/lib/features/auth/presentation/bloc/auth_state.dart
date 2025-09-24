@@ -8,14 +8,20 @@ final class AuthLoading extends AuthState {}
 
 final class VerificationCodeSent extends AuthState {}
 
-//final class VerificationCodeResent extends AuthState {}
-
 final class VerificationCodeSuccess extends AuthState {}
 
 final class LoginSuccess extends AuthState {
   final UserEntity user;
 
   LoginSuccess(this.user);
+}
+
+class AuthUserAlreadyExists extends AuthState {
+  final String message;
+
+  AuthUserAlreadyExists(this.message);
+
+  List<Object> get props => [message];
 }
 
 final class SessionRestored extends AuthState {
@@ -37,3 +43,9 @@ final class AuthFailure extends AuthState {
 }
 
 final class Unauthenticated extends AuthState {}
+
+final class NoInternetConnection extends AuthState {
+  final String message;
+
+  NoInternetConnection(this.message);
+}

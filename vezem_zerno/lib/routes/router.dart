@@ -4,11 +4,11 @@ import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/splash_screen.dart';
 import 'package:vezem_zerno/features/customs_map/presentations/screens/map_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/login_screen.dart';
-import 'package:vezem_zerno/features/auth/presentation/screens/password_recovery_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/phone_verification_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/privacy_policy_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/registration_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:vezem_zerno/features/profile/presentations/screens/change_password_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_settings_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/settings_screen.dart';
@@ -84,7 +84,6 @@ class AppRouter extends RootStackRouter {
       },
       duration: const Duration(milliseconds: 300),
     ),
-    AutoRoute(page: PasswordRecoveryRoute.page, path: '/passwordRecovery'),
     CustomRoute(
       page: PhoneVerificationRoute.page,
       path: '/phoneVerification',
@@ -138,6 +137,24 @@ class AppRouter extends RootStackRouter {
     CustomRoute(
       page: ProfileSettingRoute.page,
       path: '/profileSettings',
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeInOut;
+
+        var tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
+        var offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(position: offsetAnimation, child: child);
+      },
+      duration: const Duration(milliseconds: 300),
+    ),
+    CustomRoute(
+      page: ChangePasswordRoute.page,
+      path: '/setting',
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
