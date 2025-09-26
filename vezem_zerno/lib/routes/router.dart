@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/splash_screen.dart';
-import 'package:vezem_zerno/features/customs_map/presentations/screens/map_screen.dart';
+import 'package:vezem_zerno/features/application_screen/presentations/screens/application_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/login_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/phone_verification_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/privacy_policy_screen.dart';
@@ -112,7 +112,7 @@ class AppRouter extends RootStackRouter {
           path: 'customsList',
           initial: true,
         ),
-        AutoRoute(page: MapRoute.page, path: 'map'),
+        AutoRoute(page: ApplicationRoute.page, path: 'aplication'),
         AutoRoute(page: ProfileRoute.page, path: 'profile'),
       ],
     ),

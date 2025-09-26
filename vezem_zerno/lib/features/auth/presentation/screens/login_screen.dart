@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         } else if (state is LoginSuccess) {
-          AutoRouter.of(context).replaceAll([const MapRoute()]);
+          AutoRouter.of(context).replaceAll([const ApplicationRoute()]);
         } else if (state is NoInternetConnection) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

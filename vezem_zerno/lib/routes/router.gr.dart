@@ -11,6 +11,22 @@
 part of 'router.dart';
 
 /// generated route for
+/// [ApplicationScreen]
+class ApplicationRoute extends PageRouteInfo<void> {
+  const ApplicationRoute({List<PageRouteInfo>? children})
+    : super(ApplicationRoute.name, initialChildren: children);
+
+  static const String name = 'ApplicationRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ApplicationScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [ChangePasswordScreen]
 class ChangePasswordRoute extends PageRouteInfo<void> {
   const ChangePasswordRoute({List<PageRouteInfo>? children})
@@ -70,22 +86,6 @@ class MainRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const MainScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [MapScreen]
-class MapRoute extends PageRouteInfo<void> {
-  const MapRoute({List<PageRouteInfo>? children})
-    : super(MapRoute.name, initialChildren: children);
-
-  static const String name = 'MapRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const MapScreen();
     },
   );
 }
