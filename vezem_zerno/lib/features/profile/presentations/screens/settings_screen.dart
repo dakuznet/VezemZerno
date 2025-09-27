@@ -40,7 +40,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
               ),
               content: Text(
-                'Вы уверены, что хотите удалить свой аккаунт? Это действие невозможно отменить. Все ваши данные будут безвозвратно удалены.',
+                'Вы уверены, что хотите удалить свой аккаунт? Все ваши данные будут безвозвратно удалены.',
                 style: TextStyle(
                   fontFamily: 'Unbounded',
                   fontSize: 12.sp,
@@ -50,21 +50,13 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               actions: <Widget>[
                 if (!isDeleting)
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      splashFactory: NoSplash.splashFactory,
-                      elevation: 4.r,
-                      backgroundColor:
-                          ColorsConstants.primaryButtonBackgroundColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32.r),
-                        side: BorderSide(
-                          color: ColorsConstants.primaryButtonBorderColor,
-                          width: 3.w,
-                        ),
+                  TextButton(
+                    onPressed: () => AutoRouter.of(context).pop(),
+                    style: TextButton.styleFrom(
+                      foregroundColor: ColorsConstants.primaryBrownColor,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
                       ),
                     ),
                     child: Text(
@@ -137,7 +129,7 @@ class _SettingScreenState extends State<SettingScreen> {
         ),
         leading: IconButton(
           onPressed: () {
-            AutoRouter.of(context).replace(const ProfileRoute());
+            AutoRouter.of(context).pop();
           },
           icon: const Icon(Icons.arrow_back),
         ),
@@ -168,7 +160,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                 ),
               );
-              context.read<AuthBloc>().add(LogoutEvent());
+              context.read<AuthBloc>().add(AuthLogoutEvent());
               AutoRouter.of(context).replace(const WelcomeRoute());
             } else if (state is AccountDeleteError) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -205,24 +197,24 @@ class _SettingScreenState extends State<SettingScreen> {
                     horizontal: 16.w,
                   ).w,
                   child: Center(
-                    child: PrimaryButton(
-                      text: 'Удалить аккаунт',
-                      onPressed: isDeleting
-                          ? null
-                          : () {
-                              _showDeleteConfirmationDialog(context);
-                            },
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: PrimaryButton(
+                        text: 'Удалить аккаунт',
+                        onPressed: isDeleting
+                            ? null
+                            : () {
+                                _showDeleteConfirmationDialog(context);
+                              },
+                      ),
                     ),
                   ),
                 ),
                 if (isDeleting)
-                  Container(
-                    color: const Color.fromARGB(55, 0, 0, 0),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          ColorsConstants.primaryBrownColor,
-                        ),
+                  Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        ColorsConstants.primaryBrownColor,
                       ),
                     ),
                   ),

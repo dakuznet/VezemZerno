@@ -7,7 +7,7 @@ import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
 import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:vezem_zerno/features/auth/presentation/widgets/privacy_check_box.dart';
+import 'package:vezem_zerno/features/auth/presentation/screens/widgets/privacy_check_box.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
 @RoutePage()

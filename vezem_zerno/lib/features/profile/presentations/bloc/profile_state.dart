@@ -1,11 +1,15 @@
 import 'package:equatable/equatable.dart';
-import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
 
 abstract class ProfileState extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
+// LOG OUT
+class LoggingOut extends ProfileState {}
+
+class LogoutSuccess extends ProfileState {}
 
 // PROFILE
 class ProfileInitial extends ProfileState {}
@@ -13,7 +17,7 @@ class ProfileInitial extends ProfileState {}
 class ProfileLoading extends ProfileState {}
 
 class ProfileLoaded extends ProfileState {
-  final UserModel user;
+  final UserEntity user;
 
   ProfileLoaded(this.user);
 
@@ -34,7 +38,6 @@ class ProfileError extends ProfileState {
   List<Object?> get props => [message];
 }
 
-
 // CHANGE PROFILE IMAGE
 class ProfileImageUploading extends ProfileState {
   @override
@@ -43,22 +46,21 @@ class ProfileImageUploading extends ProfileState {
 
 class ProfileImageUploaded extends ProfileState {
   final String imageUrl;
-  
+
   ProfileImageUploaded(this.imageUrl);
-  
+
   @override
   List<Object> get props => [imageUrl];
 }
 
 class ProfileImageError extends ProfileState {
   final String message;
-  
+
   ProfileImageError(this.message);
-  
+
   @override
   List<Object> get props => [message];
 }
-
 
 // DELETE PROFILE
 class AccountDeleting extends ProfileState {}
@@ -76,7 +78,9 @@ class AccountDeleteError extends ProfileState {
 
 // CHANGE PASSWORD
 class PasswordUpdating extends ProfileState {}
+
 class PasswordUpdated extends ProfileState {}
+
 class PasswordUpdateError extends ProfileState {
   final String message;
 
@@ -84,4 +88,11 @@ class PasswordUpdateError extends ProfileState {
 
   @override
   List<Object?> get props => [message];
+}
+
+// INTERNET CONNECTION
+final class NoInternetConnection extends ProfileState {
+  final String message;
+
+  NoInternetConnection(this.message);
 }

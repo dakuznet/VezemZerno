@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0.r).r,
-                      side: BorderSide(color: Colors.green, width: 2.0.w),
+                      side: BorderSide(color: Colors.red, width: 2.0.w),
                     ),
                   ),
                 );

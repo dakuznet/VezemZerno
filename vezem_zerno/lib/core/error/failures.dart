@@ -1,10 +1,16 @@
-class Failure {
+abstract class Failure {
   final String message;
+
   Failure(this.message);
+
+  @override
+  String toString() => message;
 }
 
 class UserAlreadyExistsFailure extends Failure {
-  UserAlreadyExistsFailure([super.message = 'Пользователь с таким номером телефона уже зарегистрирован']);
+  UserAlreadyExistsFailure([
+    super.message = 'Пользователь с таким номером телефона уже зарегистрирован',
+  ]);
 }
 
 class ServerFailure extends Failure {
@@ -17,4 +23,8 @@ class CacheFailure extends Failure {
 
 class ValidationFailure extends Failure {
   ValidationFailure(super.message);
+}
+
+class NetworkFailure extends Failure {
+  NetworkFailure(super.message);
 }

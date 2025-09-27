@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
@@ -12,13 +14,10 @@ import 'package:vezem_zerno/features/profile/presentations/screens/change_passwo
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_settings_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/settings_screen.dart';
-import 'package:vezem_zerno/features/customs_list/presentations/screens/customs_list_screen.dart';
+import 'package:vezem_zerno/features/user_customs_list/presentations/screens/user_customs_list_screen.dart';
 import 'package:vezem_zerno/main_screen.dart';
 
 part 'router.gr.dart';
-
-// Ensure CustomsListRoute is imported from the generated file
-// If not generated, run the build_runner command below
 
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
@@ -30,146 +29,27 @@ class AppRouter extends RootStackRouter {
   List<AutoRoute> get routes => [
     AutoRoute(page: SplashRoute.page, initial: true),
     AutoRoute(page: WelcomeRoute.page),
-    CustomRoute(
-      page: LoginRoute.page,
-      path: '/login',
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(position: offsetAnimation, child: child);
-      },
-      duration: const Duration(milliseconds: 300),
-    ),
-    CustomRoute(
-      page: RegistrationRoute.page,
-      path: '/registration',
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(position: offsetAnimation, child: child);
-      },
-      duration: const Duration(milliseconds: 300),
-    ),
-    CustomRoute(
-      page: PrivacyPolicyRoute.page,
-      path: '/privacyPolicy',
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(position: offsetAnimation, child: child);
-      },
-      duration: const Duration(milliseconds: 300),
-    ),
-    CustomRoute(
-      page: PhoneVerificationRoute.page,
-      path: '/phoneVerification',
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(position: offsetAnimation, child: child);
-      },
-      duration: const Duration(milliseconds: 300),
-    ),
+    AutoRoute(page: LoginRoute.page, path: '/login'),
+    AutoRoute(page: RegistrationRoute.page, path: '/registration'),
+    AutoRoute(page: PrivacyPolicyRoute.page, path: '/privacyPolicy'),
+    AutoRoute(page: PhoneVerificationRoute.page, path: '/phoneVerification'),
     AutoRoute(
       page: MainRoute.page,
       path: '/home',
       guards: [AuthGuard(authBloc: authBloc)],
       children: [
         AutoRoute(
-          page: CustomsListRoute.page,
-          path: 'customsList',
+          page: UserCustomsListRoute.page,
+          path: 'userCustomsList',
           initial: true,
         ),
         AutoRoute(page: MapRoute.page, path: 'map'),
         AutoRoute(page: ProfileRoute.page, path: 'profile'),
       ],
     ),
-    CustomRoute(
-      page: SettingRoute.page,
-      path: '/setting',
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(position: offsetAnimation, child: child);
-      },
-      duration: const Duration(milliseconds: 300),
-    ),
-    CustomRoute(
-      page: ProfileSettingRoute.page,
-      path: '/profileSettings',
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(position: offsetAnimation, child: child);
-      },
-      duration: const Duration(milliseconds: 300),
-    ),
-    CustomRoute(
-      page: ChangePasswordRoute.page,
-      path: '/setting',
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(position: offsetAnimation, child: child);
-      },
-      duration: const Duration(milliseconds: 300),
-    ),
+    AutoRoute(page: SettingRoute.page, path: '/settings'),
+    AutoRoute(page: ProfileSettingRoute.page, path: '/profileSettings'),
+    AutoRoute(page: ChangePasswordRoute.page, path: '/changePassword'),
   ];
 }
 
@@ -180,7 +60,74 @@ class AuthGuard extends AutoRouteGuard {
 
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) async {
-    if (authBloc.state is SessionRestored || authBloc.state is LoginSuccess) {
+    // Даем время для инициализации состояния
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final currentState = authBloc.state;
+
+    if (currentState is SessionRestored || currentState is LoginSuccess) {
+      resolver.next(true);
+    } else if (currentState is NoInternetConnection) {
+      // При отсутствии интернета ждем восстановления соединения
+      await _waitForConnection(resolver, router);
+    } else if (currentState is AuthInitial) {
+      await _waitForAuthResolution(resolver, router);
+    } else {
+      resolver.next(false);
+      router.replace(const WelcomeRoute());
+    }
+  }
+
+  Future<void> _waitForConnection(
+    NavigationResolver resolver,
+    StackRouter router,
+  ) async {
+    final completer = Completer<bool>();
+    final subscription = authBloc.stream.listen((state) {
+      if (state is SessionRestored || state is LoginSuccess) {
+        completer.complete(true);
+      } else if (state is Unauthenticated || state is AuthFailure) {
+        completer.complete(false);
+      }
+    });
+
+    // Ждем не более 30 секунд
+    final result = await completer.future.timeout(
+      const Duration(seconds: 30),
+      onTimeout: () => false,
+    );
+
+    await subscription.cancel();
+
+    if (result) {
+      resolver.next(true);
+    } else {
+      resolver.next(false);
+      router.replace(const WelcomeRoute());
+    }
+  }
+
+  Future<void> _waitForAuthResolution(
+    NavigationResolver resolver,
+    StackRouter router,
+  ) async {
+    final completer = Completer<bool>();
+    final subscription = authBloc.stream.listen((state) {
+      if (state is SessionRestored || state is LoginSuccess) {
+        completer.complete(true);
+      } else if (state is Unauthenticated || state is AuthFailure) {
+        completer.complete(false);
+      }
+    });
+
+    final result = await completer.future.timeout(
+      const Duration(seconds: 10),
+      onTimeout: () => false,
+    );
+
+    await subscription.cancel();
+
+    if (result) {
       resolver.next(true);
     } else {
       resolver.next(false);
