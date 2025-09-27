@@ -3,15 +3,12 @@ import 'package:vezem_zerno/core/error/failures.dart';
 import 'package:vezem_zerno/core/entities/user_entity.dart';
 import 'package:vezem_zerno/features/auth/domain/repositories/auth_repository.dart';
 
-class LoginUseCase {
+class GetCurrentUserUsecase {
   final AuthRepository repository;
 
-  LoginUseCase(this.repository);
+  GetCurrentUserUsecase(this.repository);
 
-  Future<Either<Failure, UserEntity>> call({
-    required String phone,
-    required String password,
-  }) async {
-    return repository.login(phone: phone, password: password);
+    Future<Either<Failure, UserEntity>> call() async {
+    return repository.getCurrentUser();
   }
 }

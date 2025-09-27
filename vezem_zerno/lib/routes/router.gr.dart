@@ -27,22 +27,6 @@ class ChangePasswordRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [CustomsListScreen]
-class CustomsListRoute extends PageRouteInfo<void> {
-  const CustomsListRoute({List<PageRouteInfo>? children})
-    : super(CustomsListRoute.name, initialChildren: children);
-
-  static const String name = 'CustomsListRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const CustomsListScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [LoginScreen]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})
@@ -253,6 +237,22 @@ class SplashRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const SplashScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [UserCustomsListScreen]
+class UserCustomsListRoute extends PageRouteInfo<void> {
+  const UserCustomsListRoute({List<PageRouteInfo>? children})
+    : super(UserCustomsListRoute.name, initialChildren: children);
+
+  static const String name = 'UserCustomsListRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const UserCustomsListScreen();
     },
   );
 }

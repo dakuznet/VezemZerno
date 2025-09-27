@@ -201,17 +201,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   SizedBox(height: 48.h),
-                  PrimaryButton(
-                    text: 'Войти',
-                    onPressed: () {
-                      if (_loginFormKey.currentState?.validate() ?? false) {
-                        final phone = _normalizePhone(_phoneController.text);
-                        final password = _passwordController.text;
-                        context.read<AuthBloc>().add(
-                          LoginEvent(phone: phone, password: password),
-                        );
-                      }
-                    },
+                  SizedBox(
+                    width: double.infinity,
+                    child: PrimaryButton(
+                      text: 'Войти',
+                      onPressed: () {
+                        if (_loginFormKey.currentState?.validate() ?? false) {
+                          final phone = _normalizePhone(_phoneController.text);
+                          final password = _passwordController.text;
+                          context.read<AuthBloc>().add(
+                            LoginEvent(phone: phone, password: password),
+                          );
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),

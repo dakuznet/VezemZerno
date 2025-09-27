@@ -18,14 +18,14 @@ class PrimaryButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         splashFactory: NoSplash.splashFactory,
-        elevation: 4.r,
-        fixedSize: Size(320.w, 60.h),
+        elevation: 0,
+        fixedSize: Size(double.infinity.w, 50.h),
         backgroundColor: ColorsConstants.primaryButtonBackgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(32.r),
           side: BorderSide(
             color: ColorsConstants.primaryButtonBorderColor,
-            width: 3.w,
+            width: 2.w,
           ),
         ),
       ),
@@ -33,7 +33,7 @@ class PrimaryButton extends StatelessWidget {
         text,
         style: TextStyle(
           color: ColorsConstants.primaryBrownColor,
-          fontSize: 16.sp,
+          fontSize: 14.sp,
           fontFamily: 'Unbounded',
           fontWeight: FontWeight.w600,
         ),
