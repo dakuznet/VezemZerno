@@ -81,16 +81,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildAppBar(ProfileState state) {
     return PreferredSize(
       preferredSize: Size.fromHeight(150.h),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: state is ProfileLoading || state is ProfileInitial
-            ? const ProfileShimmerAppBar()
-            : state is ProfileLoaded
-            ? ProfileInfoAppBar(user: state.user)
-            : state is ProfileError || state is NoInternetConnection
-            ? ErrorAppBar(onRetry: _loadProfile)
-            : const ProfileInfoAppBar(user: null),
-      ),
+      child: state is ProfileLoading || state is ProfileInitial
+          ? const ProfileShimmerAppBar()
+          : state is ProfileLoaded
+          ? ProfileInfoAppBar(user: state.user)
+          : state is ProfileError || state is NoInternetConnection
+          ? ErrorAppBar(onRetry: _loadProfile)
+          : const ProfileInfoAppBar(user: null),
     );
   }
 
@@ -148,10 +145,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Container(
         width: double.infinity,
         margin: EdgeInsets.all(16.w),
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-          borderRadius: BorderRadius.circular(32.r),
+          borderRadius: BorderRadius.circular(16.r),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       absorbing: isBlocked,
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: PrimaryButton(
           text: isLoggingOut ? 'Выход...' : 'Выйти из аккаунта',
           onPressed: isBlocked ? null : _showLogoutConfirmationDialog,

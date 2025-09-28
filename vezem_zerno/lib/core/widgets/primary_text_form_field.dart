@@ -87,11 +87,11 @@ class PrimaryTextFormField extends StatelessWidget {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16).r,
-          borderSide: BorderSide(color: Colors.red, width: 2.0.w),
+          borderSide: BorderSide(color: Colors.red, width: 2.w),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16).r,
-          borderSide: BorderSide(color: Colors.red, width: 2.0.w),
+          borderSide: BorderSide(color: Colors.red, width: 2.w),
         ),
       ),
     );

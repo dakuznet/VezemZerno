@@ -431,7 +431,9 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
           child: Column(
             children: [
               RadioListTile<String?>(
-                fillColor: WidgetStateProperty.all(ColorsConstants.primaryBrownColor),
+                fillColor: WidgetStateProperty.all(
+                  ColorsConstants.primaryBrownColor,
+                ),
                 value: 'carrier',
                 title: Text(
                   'Перевозчик',
@@ -444,7 +446,9 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                 ),
               ),
               RadioListTile<String?>(
-                fillColor: WidgetStateProperty.all(ColorsConstants.primaryBrownColor),
+                fillColor: WidgetStateProperty.all(
+                  ColorsConstants.primaryBrownColor,
+                ),
                 value: 'customer',
                 title: Text(
                   'Заказчик',

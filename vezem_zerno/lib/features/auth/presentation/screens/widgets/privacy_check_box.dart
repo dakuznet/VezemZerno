@@ -61,7 +61,7 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
                       : Colors.transparent,
                 ),
                 child: _isChecked
-                    ? Icon(Icons.check, size: 18.r, color: Colors.white)
+                    ? Icon(Icons.check, size: 18.sp, color: Colors.white)
                     : null,
               ),
             ),
@@ -76,14 +76,14 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
                       style: TextStyle(
                         fontFamily: 'Unbounded',
                         fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w300,
                         color: ColorsConstants.primaryBrownColor,
                       ),
                       children: [
                         TextSpan(
                           text: 'политикой конфиденциальности',
                           style: TextStyle(
-                            fontSize: 16.sp,
+                            fontSize: 14.sp,
                             color: ColorsConstants.primaryBrownColor,
                             fontWeight: FontWeight.w600,
                             decoration: TextDecoration.underline,
@@ -103,18 +103,6 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
             ),
           ],
         ),
-        if (widget.errorText != null)
-          Padding(
-            padding: EdgeInsets.only(top: 8.h, left: 36.w),
-            child: Text(
-              widget.errorText!,
-              style: TextStyle(
-                fontFamily: 'Unbounded',
-                fontSize: 12.sp,
-                color: Colors.red,
-              ),
-            ),
-          ),
       ],
     );
   }

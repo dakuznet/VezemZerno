@@ -25,8 +25,8 @@ class ProfileShimmerAppBar extends StatelessWidget
         child: Row(
           children: [
             Container(
-              width: 100.r,
-              height: 100.r,
+              width: 80.r,
+              height: 80.r,
               decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,

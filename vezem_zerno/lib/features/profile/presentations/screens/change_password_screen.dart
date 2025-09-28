@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_event.dart';
@@ -40,10 +41,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         child: BlocConsumer<ProfileBloc, ProfileState>(
           listener: (context, state) {
             if (state is PasswordUpdated) {
-              _showPasswordUpdatedSuccess(context);
+              PrimarySnackBar.show(
+                context: context,
+                text: 'Пароль успешно изменён',
+                borderColor: Colors.green,
+              );
               _navigateBackToProfile(context);
             } else if (state is PasswordUpdateError) {
-              _showPasswordUpdateError(context, state.message);
+              PrimarySnackBar.show(
+                context: context,
+                text: 'Ошибка изменения пароля\n${state.message}',
+                borderColor: Colors.red,
+              );
             }
           },
           builder: (context, state) {
@@ -71,50 +80,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         icon: const Icon(Icons.arrow_back),
         color: ColorsConstants.primaryBrownColor,
         onPressed: () => AutoRouter.of(context).pop(),
-      ),
-    );
-  }
-
-  void _showPasswordUpdatedSuccess(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Пароль успешно изменён',
-          style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontSize: 14.sp,
-            color: ColorsConstants.primaryBrownColor,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          side: BorderSide(color: Colors.green, width: 2.w),
-        ),
-      ),
-    );
-  }
-
-  void _showPasswordUpdateError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Ошибка изменения пароля\n$message',
-          style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontSize: 14.sp,
-            color: ColorsConstants.primaryBrownColor,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          side: BorderSide(color: Colors.red, width: 2.w),
-        ),
       ),
     );
   }
@@ -155,7 +120,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             _buildOldPasswordField(),
             SizedBox(height: 32.h),
             _buildNewPasswordFields(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 32.h),
             _buildSaveButton(isLoading),
           ],
         ),
@@ -225,9 +190,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   Widget _buildSaveButton(bool isLoading) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 16.h),
       child: PrimaryButton(
         text: isLoading ? 'Изменение...' : 'Сохранить',
         onPressed: isLoading ? null : _handleUpdatePassword,

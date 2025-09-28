@@ -4,29 +4,19 @@ import 'package:vezem_zerno/core/constants/colors_constants.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
-  final VoidCallback? onPressed; // Разрешаем null
+  final VoidCallback? onPressed;
 
-  const PrimaryButton({
-    super.key,
-    required this.text,
-    required this.onPressed,
-  });
+  const PrimaryButton({super.key, required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        splashFactory: NoSplash.splashFactory,
-        elevation: 0,
-        fixedSize: Size(double.infinity.w, 50.h),
+        fixedSize: Size(double.infinity.w, 45.h),
         backgroundColor: ColorsConstants.primaryButtonBackgroundColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32.r),
-          side: BorderSide(
-            color: ColorsConstants.primaryButtonBorderColor,
-            width: 2.w,
-          ),
+          borderRadius: BorderRadius.circular(16.r),
         ),
       ),
       child: Text(

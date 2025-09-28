@@ -49,11 +49,9 @@ class RoleSelectionWidget extends StatelessWidget {
         foregroundColor: isSelected
             ? ColorsConstants.notSelectedTextButtonColor
             : ColorsConstants.primaryButtonBackgroundColor,
-        padding: EdgeInsets.symmetric(vertical: 16.h),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32.r),
+          borderRadius: BorderRadius.circular(16.r),
         ),
-        elevation: 0,
       ),
       child: Text(
         label,

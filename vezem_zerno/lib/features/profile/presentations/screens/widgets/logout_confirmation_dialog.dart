@@ -38,7 +38,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.wifi_off, size: 40.sp, color: Colors.orange),
+                    Icon(Icons.wifi_off, size: 40.sp, color: ColorsConstants.primaryBrownColor),
                     SizedBox(height: 12.h),
                     Text(
                       'Проверьте интернет-соединение перед выходом',

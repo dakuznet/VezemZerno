@@ -35,7 +35,7 @@ class ProfileInfoAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildAvatar() {
     return CircleAvatar(
-      radius: 50.r,
+      radius: 40.r,
       backgroundColor: ColorsConstants.backgroundColor,
       backgroundImage:
           user?.profileImage != null && user!.profileImage!.isNotEmpty
@@ -44,7 +44,7 @@ class ProfileInfoAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: user?.profileImage == null || user!.profileImage!.isEmpty
           ? Icon(
               Icons.person,
-              size: 50.sp,
+              size: 32.sp,
               color: ColorsConstants.primaryBrownColor,
             )
           : null,

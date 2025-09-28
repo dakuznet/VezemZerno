@@ -15,7 +15,7 @@ import 'package:vezem_zerno/features/profile/presentations/screens/profile_scree
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_settings_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/settings_screen.dart';
 import 'package:vezem_zerno/features/user_customs_list/presentations/screens/user_customs_list_screen.dart';
-import 'package:vezem_zerno/main_screen.dart';
+import 'package:vezem_zerno/core/main_screen.dart';
 
 part 'router.gr.dart';
 
@@ -38,12 +38,9 @@ class AppRouter extends RootStackRouter {
       path: '/home',
       guards: [AuthGuard(authBloc: authBloc)],
       children: [
-        AutoRoute(
-          page: UserCustomsListRoute.page,
-          path: 'userCustomsList',
-          initial: true,
-        ),
-        AutoRoute(page: MapRoute.page, path: 'map'),
+        AutoRoute(page: MapRoute.page, path: 'map', initial: true),
+        AutoRoute(page: UserCustomsListRoute.page, path: 'userCustomsList'),
+
         AutoRoute(page: ProfileRoute.page, path: 'profile'),
       ],
     ),
@@ -60,15 +57,11 @@ class AuthGuard extends AutoRouteGuard {
 
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) async {
-    // Даем время для инициализации состояния
-    await Future.delayed(const Duration(milliseconds: 100));
-
     final currentState = authBloc.state;
 
     if (currentState is SessionRestored || currentState is LoginSuccess) {
       resolver.next(true);
     } else if (currentState is NoInternetConnection) {
-      // При отсутствии интернета ждем восстановления соединения
       await _waitForConnection(resolver, router);
     } else if (currentState is AuthInitial) {
       await _waitForAuthResolution(resolver, router);
@@ -91,9 +84,8 @@ class AuthGuard extends AutoRouteGuard {
       }
     });
 
-    // Ждем не более 30 секунд
     final result = await completer.future.timeout(
-      const Duration(seconds: 30),
+      const Duration(seconds: 60),
       onTimeout: () => false,
     );
 
@@ -121,7 +113,7 @@ class AuthGuard extends AutoRouteGuard {
     });
 
     final result = await completer.future.timeout(
-      const Duration(seconds: 10),
+      const Duration(seconds: 20),
       onTimeout: () => false,
     );
 

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
-import 'package:vezem_zerno/core/widgets/primary_button.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
@@ -19,28 +18,36 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with WidgetsBindingObserver {
+  static const _minLoadingDuration = Duration(seconds: 1);
+  static const _retryDelay = Duration(seconds: 5);
+  static const _initialCheckDelay = Duration(seconds: 1);
+
   bool _hasNavigated = false;
-  StreamSubscription? _authSubscription;
+  bool _isMinimumLoadingTimePassed = false;
+  Timer? _retryTimer;
+  Timer? _minimumLoadingTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkSession();
+    _startMinimumLoadingTimer();
+    _scheduleInitialCheck();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && !_hasNavigated) {
-      _checkSession();
+      _startMinimumLoadingTimer();
+      _scheduleInitialCheck();
     }
   }
 
   @override
   void dispose() {
-    _authSubscription?.cancel();
+    _retryTimer?.cancel();
+    _minimumLoadingTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    _hasNavigated = false;
     super.dispose();
   }
 
@@ -49,19 +56,19 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: ColorsConstants.backgroundColor,
       body: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          _handleAuthState(context, state);
-        },
+        listener: _handleAuthStateChange,
         child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            return _buildBody(state);
-          },
+          builder: (context, state) => _buildBody(state),
         ),
       ),
     );
   }
 
   Widget _buildBody(AuthState state) {
+    if (!_isMinimumLoadingTimePassed) {
+      return _buildLoadingIndicator();
+    }
+
     if (state is NoInternetConnection) {
       return _buildNoInternetConnection();
     }
@@ -108,8 +115,8 @@ class _SplashScreenState extends State<SplashScreen>
           children: [
             Icon(
               Icons.wifi_off_rounded,
-              size: 50.sp,
-              color: ColorsConstants.primaryBrownColorWithOpacity,
+              size: 64.sp,
+              color: ColorsConstants.primaryBrownColor,
             ),
             SizedBox(height: 24.h),
             Text(
@@ -120,14 +127,6 @@ class _SplashScreenState extends State<SplashScreen>
                 fontWeight: FontWeight.w500,
                 fontSize: 16.sp,
                 color: ColorsConstants.primaryBrownColor,
-              ),
-            ),
-            SizedBox(height: 32.h),
-            Container(
-              padding: EdgeInsets.all(16).r,
-              child: PrimaryButton(
-                text: 'Повторить',
-                onPressed: _retryConnection,
               ),
             ),
           ],
@@ -193,43 +192,59 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  void _checkSession() {
-    if (_hasNavigated || !mounted) return;
+  void _startMinimumLoadingTimer() {
+    _isMinimumLoadingTimePassed = false;
+    _minimumLoadingTimer?.cancel();
 
-    _authSubscription?.cancel();
-
-    _authSubscription = context.read<AuthBloc>().stream.listen((state) {
+    _minimumLoadingTimer = Timer(_minLoadingDuration, () {
       if (mounted) {
-        _handleAuthState(context, state);
+        setState(() {
+          _isMinimumLoadingTimePassed = true;
+        });
       }
     });
-
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted) {
-        context.read<AuthBloc>().add(RestoreSessionEvent());
-      }
-    });
-
-    if (!_hasNavigated) {
-      Future.delayed(const Duration(seconds: 5), () {
-        if (mounted && !_hasNavigated) {
-          final currentState = context.read<AuthBloc>().state;
-          if (currentState is NoInternetConnection) {
-            _checkSession();
-          }
-        }
-      });
-    }
   }
 
-  void _handleAuthState(BuildContext context, AuthState state) {
+  void _scheduleInitialCheck() {
+    if (_hasNavigated || !mounted) return;
+
+    _retryTimer?.cancel();
+
+    Future.delayed(_initialCheckDelay, () {
+      if (mounted) {
+        context.read<AuthBloc>().add(RestoreSessionEvent());
+        _scheduleRetryCheck();
+      }
+    });
+  }
+
+  void _scheduleRetryCheck() {
+    if (_hasNavigated || !mounted) return;
+
+    _retryTimer = Timer(_retryDelay, () {
+      if (!mounted || _hasNavigated) return;
+
+      final currentState = context.read<AuthBloc>().state;
+      if (currentState is NoInternetConnection) {
+        _startMinimumLoadingTimer();
+        context.read<AuthBloc>().add(RestoreSessionEvent());
+        _scheduleRetryCheck();
+      }
+    });
+  }
+
+  void _handleAuthStateChange(BuildContext context, AuthState state) {
     if (_hasNavigated || !mounted) return;
 
     if (state is SessionRestored || state is LoginSuccess) {
       _hasNavigated = true;
+      _retryTimer?.cancel();
+      _minimumLoadingTimer?.cancel();
       _navigateToMap();
     } else if (state is Unauthenticated || state is AuthFailure) {
       _hasNavigated = true;
+      _retryTimer?.cancel();
+      _minimumLoadingTimer?.cancel();
       if (state is AuthFailure) {
         setState(() {});
       } else {
@@ -246,11 +261,5 @@ class _SplashScreenState extends State<SplashScreen>
   void _navigateToWelcome() {
     if (!mounted) return;
     context.router.replaceAll([const WelcomeRoute()]);
-  }
-
-  void _retryConnection() {
-    if (!mounted) return;
-    _hasNavigated = false;
-    _checkSession();
   }
 }

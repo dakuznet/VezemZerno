@@ -46,16 +46,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   Widget _buildContent() {
     return Padding(
-      padding: EdgeInsets.all(24.w),
+      padding: EdgeInsets.all(16.w),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(height: 96.h),
           _buildLogo(),
           SizedBox(height: 48.h),
           _buildRegistrationButton(),
-          SizedBox(height: 24.h),
+          SizedBox(height: 16.h),
           _buildLoginTextButton(),
         ],
       ),
@@ -99,9 +98,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         onPressed: _navigateToLogin,
         style: TextButton.styleFrom(
           foregroundColor: ColorsConstants.primaryBrownColor,
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
+            borderRadius: BorderRadius.circular(16.r),
           ),
         ),
         child: Text(

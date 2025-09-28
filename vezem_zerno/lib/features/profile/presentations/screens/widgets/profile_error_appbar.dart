@@ -18,27 +18,6 @@ class ErrorAppBar extends StatelessWidget implements PreferredSizeWidget {
       shape: ContinuousRectangleBorder(
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
       ),
-      centerTitle: true,
-      title: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 40.sp,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Ошибка загрузки',
-            style: TextStyle(
-              fontFamily: 'Unbounded',
-              fontWeight: FontWeight.w500,
-              fontSize: 16.sp,
-              color: ColorsConstants.primaryBrownColor,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

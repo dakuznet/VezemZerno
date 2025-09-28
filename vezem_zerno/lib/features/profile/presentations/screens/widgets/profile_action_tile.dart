@@ -22,10 +22,10 @@ class ProfileActionTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(32.r),
+        borderRadius: BorderRadius.circular(16.r),
         onTap: onTap,
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+          padding: EdgeInsets.all(8.w),
           child: Row(
             children: [
               SvgPicture.asset(
@@ -47,7 +47,7 @@ class ProfileActionTile extends StatelessWidget {
               ),
               Icon(
                 Icons.arrow_forward_ios,
-                size: 20.sp,
+                size: 24.sp,
                 color: ColorsConstants.primaryBrownColor,
               ),
             ],
