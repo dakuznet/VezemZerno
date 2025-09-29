@@ -38,8 +38,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       child: SvgPicture.asset(
         _wheatAssetPath,
         fit: BoxFit.cover,
-        placeholderBuilder: (context) =>
-            Container(color: ColorsConstants.backgroundColor),
+        placeholderBuilder: (context) => Container(
+          color: ColorsConstants.backgroundColor,
+          width: 275.w,
+          height: 275.h,
+        ),
       ),
     );
   }
@@ -67,20 +70,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         _logoAssetPath,
         width: 230.w,
         height: 230.h,
-        placeholderBuilder: (context) => Container(
-          width: 230.w,
-          height: 230.h,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: Icon(
-            Icons.shopping_cart_outlined,
-            size: 80.r,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        semanticsLabel: 'Логотип Vezem Zerno',
+        placeholderBuilder: (context) =>
+            Container(color: ColorsConstants.backgroundColor),
       ),
     );
   }
