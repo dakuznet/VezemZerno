@@ -4,7 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/splash_screen.dart';
-import 'package:vezem_zerno/features/application_screen/presentations/screens/application_screen.dart';
+import 'package:vezem_zerno/features/applications_list/presentations/screens/application_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/login_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/phone_verification_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/privacy_policy_screen.dart';
@@ -14,7 +14,7 @@ import 'package:vezem_zerno/features/profile/presentations/screens/change_passwo
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_settings_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/settings_screen.dart';
-import 'package:vezem_zerno/features/user_customs_list/presentations/screens/user_customs_list_screen.dart';
+import 'package:vezem_zerno/features/user_application_list/presentations/screens/user_applications_list_screen.dart';
 import 'package:vezem_zerno/core/main_screen.dart';
 
 part 'router.gr.dart';
@@ -31,26 +31,29 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: WelcomeRoute.page),
     AutoRoute(page: LoginRoute.page, path: '/login'),
     AutoRoute(page: RegistrationRoute.page, path: '/registration'),
-    AutoRoute(page: PrivacyPolicyRoute.page, path: '/privacyPolicy'),
-    AutoRoute(page: PhoneVerificationRoute.page, path: '/phoneVerification'),
+    AutoRoute(page: PrivacyPolicyRoute.page, path: '/privacy-policy'),
+    AutoRoute(page: PhoneVerificationRoute.page, path: '/phone-verification'),
     AutoRoute(
       page: MainRoute.page,
       path: '/home',
       guards: [AuthGuard(authBloc: authBloc)],
       children: [
         AutoRoute(
-          page: ApplicationRoute.page,
-          path: 'aplication',
+          page: ApplicationsListRoute.page,
+          path: 'application-list',
           initial: true,
         ),
-        AutoRoute(page: UserCustomsListRoute.page, path: 'userCustomsList'),
+        AutoRoute(
+          page: UserApplicationsListRoute.page,
+          path: 'user-applications-list',
+        ),
 
         AutoRoute(page: ProfileRoute.page, path: 'profile'),
       ],
     ),
     AutoRoute(page: SettingRoute.page, path: '/settings'),
-    AutoRoute(page: ProfileSettingRoute.page, path: '/profileSettings'),
-    AutoRoute(page: ChangePasswordRoute.page, path: '/changePassword'),
+    AutoRoute(page: ProfileSettingRoute.page, path: '/profile-settings'),
+    AutoRoute(page: ChangePasswordRoute.page, path: '/change-password'),
   ];
 }
 

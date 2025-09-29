@@ -11,17 +11,17 @@
 part of 'router.dart';
 
 /// generated route for
-/// [ApplicationScreen]
-class ApplicationRoute extends PageRouteInfo<void> {
-  const ApplicationRoute({List<PageRouteInfo>? children})
-    : super(ApplicationRoute.name, initialChildren: children);
+/// [ApplicationsListScreen]
+class ApplicationsListRoute extends PageRouteInfo<void> {
+  const ApplicationsListRoute({List<PageRouteInfo>? children})
+    : super(ApplicationsListRoute.name, initialChildren: children);
 
-  static const String name = 'ApplicationRoute';
+  static const String name = 'ApplicationsListRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const ApplicationScreen();
+      return const ApplicationsListScreen();
     },
   );
 }
@@ -242,17 +242,17 @@ class SplashRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [UserCustomsListScreen]
-class UserCustomsListRoute extends PageRouteInfo<void> {
-  const UserCustomsListRoute({List<PageRouteInfo>? children})
-    : super(UserCustomsListRoute.name, initialChildren: children);
+/// [UserApplicationsListScreen]
+class UserApplicationsListRoute extends PageRouteInfo<void> {
+  const UserApplicationsListRoute({List<PageRouteInfo>? children})
+    : super(UserApplicationsListRoute.name, initialChildren: children);
 
-  static const String name = 'UserCustomsListRoute';
+  static const String name = 'UserApplicationsListRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const UserCustomsListScreen();
+      return const UserApplicationsListScreen();
     },
   );
 }

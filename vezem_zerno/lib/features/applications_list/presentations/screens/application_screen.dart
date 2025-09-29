@@ -4,14 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 
 @RoutePage()
-class ApplicationScreen extends StatefulWidget {
-  const ApplicationScreen({super.key});
+class ApplicationsListScreen extends StatefulWidget {
+  const ApplicationsListScreen({super.key});
 
   @override
-  State<ApplicationScreen> createState() => _ApplicationScreenState();
+  State<ApplicationsListScreen> createState() => _ApplicationsListScreenState();
 }
 
-class _ApplicationScreenState extends State<ApplicationScreen>
+class _ApplicationsListScreenState extends State<ApplicationsListScreen>
     with SingleTickerProviderStateMixin {
   static const _tabCount = 2;
 
@@ -73,8 +73,19 @@ class _ApplicationScreenState extends State<ApplicationScreen>
   SliverPersistentHeader _buildSliverTabBar() {
     return SliverPersistentHeader(
       pinned: true,
-      delegate: _TabBarSliverDelegate(tabController: _tabController),
+      delegate: _TabBarSliverDelegate(
+        tabController: _tabController,
+        // Явно задаем высоту и округляем до целого пикселя
+        height: _calculateTabBarHeight(context),
+      ),
     );
+  }
+
+  double _calculateTabBarHeight(BuildContext context) {
+    // Вычисляем высоту TabBar и округляем до целого пикселя
+    final rawHeight = 48.h;
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    return (rawHeight * devicePixelRatio).round() / devicePixelRatio;
   }
 
   Widget _buildTabBarView() {
@@ -148,8 +159,9 @@ class _ApplicationScreenState extends State<ApplicationScreen>
 
 class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
   final TabController tabController;
+  final double height;
 
-  _TabBarSliverDelegate({required this.tabController});
+  _TabBarSliverDelegate({required this.tabController, required this.height});
 
   @override
   Widget build(
@@ -159,6 +171,8 @@ class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
   ) {
     return Container(
       color: ColorsConstants.primaryTextFormFieldBackgorundColor,
+      // Используем явно заданную высоту
+      height: height,
       child: TabBar(
         controller: tabController,
         tabs: const [
@@ -181,19 +195,22 @@ class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
         indicatorSize: TabBarIndicatorSize.tab,
         indicatorWeight: 2.0,
         splashBorderRadius: BorderRadius.zero,
+        labelPadding: EdgeInsets.symmetric(horizontal: 8.w),
       ),
     );
   }
 
   @override
-  double get maxExtent => 48.h;
+  double get maxExtent => height;
 
   @override
-  double get minExtent => 48.h;
+  double get minExtent => height;
 
   @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
-      true;
+  bool shouldRebuild(covariant _TabBarSliverDelegate oldDelegate) {
+    return tabController != oldDelegate.tabController ||
+        height != oldDelegate.height;
+  }
 }
 
 class Application {

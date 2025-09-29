@@ -11,7 +11,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
-      routes: const [UserCustomsListRoute(), ApplicationRoute(), ProfileRoute()],
+      routes: const [UserApplicationsListRoute(), ApplicationsListRoute(), ProfileRoute()],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(

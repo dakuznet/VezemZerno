@@ -255,6 +255,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateToMap(BuildContext context) {
-    context.router.replaceAll([const ApplicationRoute()]);
+    context.router.replaceAll([const ApplicationsListRoute()]);
   }
 }
