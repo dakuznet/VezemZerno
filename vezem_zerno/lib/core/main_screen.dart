@@ -11,18 +11,12 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
-      routes: const [CustomsListRoute(), ApplicationRoute(), ProfileRoute()],
+      routes: const [UserCustomsListRoute(), ApplicationRoute(), ProfileRoute()],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
           backgroundColor: ColorsConstants.backgroundColor,
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            child: child,
-          ),
+          body: child,
           bottomNavigationBar: CustomBottomNavigationBar(
             currentIndex: tabsRouter.activeIndex,
             onTap: tabsRouter.setActiveIndex,

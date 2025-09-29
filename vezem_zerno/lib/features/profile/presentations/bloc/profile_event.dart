@@ -59,3 +59,7 @@ class UpdatePasswordEvent extends ProfileEvent {
   @override
   List<Object?> get props => [oldPassword, newPassword];
 }
+
+class CheckInternetConnection extends ProfileEvent {}
+
+class ProfileLogoutEvent extends ProfileEvent {}

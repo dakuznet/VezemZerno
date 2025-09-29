@@ -17,6 +17,7 @@ class PrimaryTextFormField extends StatelessWidget {
   final FloatingLabelBehavior? labelBehavior;
   final Function()? onTap;
   final AutovalidateMode? autoValidateMode;
+  final List<String>? autofillHints;
 
   const PrimaryTextFormField({
     super.key,
@@ -33,6 +34,7 @@ class PrimaryTextFormField extends StatelessWidget {
     this.inputFormatters,
     this.validator,
     this.maxLines = 1,
+    this.autofillHints,
   });
 
   @override
@@ -44,6 +46,7 @@ class PrimaryTextFormField extends StatelessWidget {
         fontSize: 14.sp,
         color: ColorsConstants.primaryBrownColor,
       ),
+      autofillHints: autofillHints,
       readOnly: readOnly,
       textCapitalization: TextCapitalization.words,
       autovalidateMode: autoValidateMode,
@@ -72,23 +75,23 @@ class PrimaryTextFormField extends StatelessWidget {
         suffixIcon: suffixIcon,
         suffixIconColor: ColorsConstants.primaryBrownColor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r).r,
+          borderRadius: BorderRadius.circular(16).r,
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r).r,
+          borderRadius: BorderRadius.circular(16).r,
           borderSide: BorderSide(
             color: ColorsConstants.primaryBrownColor,
             width: 2.0.w,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r).r,
-          borderSide: BorderSide(color: Colors.red, width: 2.0.w),
+          borderRadius: BorderRadius.circular(16).r,
+          borderSide: BorderSide(color: Colors.red, width: 2.w),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r).r,
-          borderSide: BorderSide(color: Colors.red, width: 2.0.w),
+          borderRadius: BorderRadius.circular(16).r,
+          borderSide: BorderSide(color: Colors.red, width: 2.w),
         ),
       ),
     );

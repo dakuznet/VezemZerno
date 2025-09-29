@@ -1,4 +1,4 @@
-import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
   UserModel({
@@ -21,7 +21,19 @@ class UserModel extends UserEntity {
       organization: json['organization'],
       role: json['role'],
       sessionId: json['sessionId'],
-      profileImage: json['profileImage']
+      profileImage: json['profileImage'],
+    );
+  }
+
+  UserEntity toEntity() {
+    return UserEntity(
+      id: id,
+      phone: phone,
+      name: name,
+      surname: surname,
+      organization: organization,
+      role: role,
+      profileImage: profileImage,
     );
   }
 }

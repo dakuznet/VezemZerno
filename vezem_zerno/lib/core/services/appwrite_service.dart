@@ -77,12 +77,8 @@ class AppwriteService {
 
   Future<void> deleteUser() async {
     try {
-      final user = await _account.get();
-      final userId = user.$id;
-
       final response = await _functions.createExecution(
         functionId: StringConstants.funcDeleteUserId,
-        body: jsonEncode({'userId': userId}),
       );
 
       final result = jsonDecode(response.responseBody);
@@ -90,7 +86,7 @@ class AppwriteService {
         throw Exception(result['message'] ?? 'Не удалось удалить пользователя');
       }
 
-      await logout();
+      await forceLogout();
     } on AppwriteException catch (e) {
       throw Exception('Ошибка при удалении пользователя: ${e.message}');
     } catch (e) {
@@ -172,8 +168,7 @@ class AppwriteService {
     }
   }
 
-  // SESSION
-
+  // AUTH
   Future<void> saveSession(String sessionId) async {
     await _storage.write(key: _sessionKey, value: sessionId);
   }
@@ -189,34 +184,58 @@ class AppwriteService {
   }
 
   Future<bool> restoreSession() async {
-    final sessionId = await _storage.read(key: _sessionKey);
-    if (sessionId != null) {
-      try {
-        _client.setSession(sessionId);
-        await _account.get();
-        return true;
-      } catch (e) {
-        await _storage.delete(key: _sessionKey);
-        return false;
-      }
-    }
-    return false;
-  }
-
-  // AUTH
-
-  Future<void> logout() async {
     try {
       final sessionId = await _storage.read(key: _sessionKey);
+
+      if (sessionId == null || sessionId.isEmpty) {
+        return false;
+      }
+
+      _client.setSession(sessionId);
+
+      try {
+        await _account.getSession(sessionId: sessionId);
+        return true;
+      } on AppwriteException catch (e) {
+        if (_isSessionInvalid(e)) {
+          await forceLogout();
+          return false;
+        }
+        rethrow;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool _isSessionInvalid(AppwriteException e) {
+    return e.code == 401 ||
+        e.code == 404 ||
+        e.message?.contains('session') == true &&
+            e.message?.contains('invalid') == true;
+  }
+
+  Future<void> logout() async {
+    String? sessionId;
+    try {
+      sessionId = await _storage.read(key: _sessionKey);
       if (sessionId != null) {
         await _account.deleteSession(sessionId: sessionId);
       }
-    } on AppwriteException catch (e) {
-      if (e.code != 401) {
-        rethrow;
-      }
     } finally {
+      if (sessionId != null) {
+        await _storage.delete(key: _sessionKey);
+      }
+      _client.setSession('');
+    }
+  }
+
+  Future<void> forceLogout() async {
+    try {
       await _storage.delete(key: _sessionKey);
+      _client.setSession('');
+    } catch (e) {
+      return;
     }
   }
 

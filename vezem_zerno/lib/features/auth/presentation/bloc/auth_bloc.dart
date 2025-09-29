@@ -1,12 +1,14 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vezem_zerno/core/error/failures.dart';
-import 'package:vezem_zerno/core/services/appwrite_service.dart';
-import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
+import 'package:vezem_zerno/features/auth/domain/usecases/force_logout_usecase.dart';
+import 'package:vezem_zerno/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/login_usecase.dart';
+import 'package:vezem_zerno/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/register_usecase.dart';
+import 'package:vezem_zerno/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/verify_code_usecase.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -18,16 +20,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterUseCase registerUseCase;
   final VerifyCodeUseCase verifyCodeUseCase;
   final LoginUseCase loginUseCase;
-  final AppwriteService appwriteService;
+  final LogoutUseCase logoutUseCase;
+  final ForceLogoutUseCase forceLogoutUseCase;
+  final RestoreSessionUseCase restoreSessionUseCase;
+  final GetCurrentUserUsecase getCurrentUserUseCase;
   final Connectivity _connectivity;
   final InternetConnection _connectionChecker;
   StreamSubscription? _connectivitySubscription;
+  bool _hasAttemptedRestore = false;
 
   AuthBloc({
     required this.registerUseCase,
     required this.verifyCodeUseCase,
     required this.loginUseCase,
-    required this.appwriteService,
+    required this.forceLogoutUseCase,
+    required this.getCurrentUserUseCase,
+    required this.logoutUseCase,
+    required this.restoreSessionUseCase,
     required Connectivity connectivity,
     required InternetConnection connectionChecker,
   }) : _connectivity = connectivity,
@@ -37,8 +46,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<VerifyCodeEvent>(_onVerifyCode);
     on<LoginEvent>(_onLogin);
     on<RestoreSessionEvent>(_onRestoreSession);
-    on<LogoutEvent>(_onLogout);
+    on<AuthLogoutEvent>(_onLogout);
     on<CheckInternetConnection>(_onCheckInternetConnection);
+    on<ForceLogoutEvent>(_onForceLogout);
 
     _startMonitoring();
   }
@@ -63,7 +73,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       result,
     ) async {
       final hasConnection = await _checkInternetAccess();
-      if (!hasConnection) {
+
+      if (hasConnection &&
+          _hasAttemptedRestore &&
+          state is NoInternetConnection) {
+        add(RestoreSessionEvent());
+      } else if (!hasConnection) {
         add(CheckInternetConnection());
       }
     });
@@ -83,50 +98,94 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     RestoreSessionEvent event,
     Emitter<AuthState> emit,
   ) async {
+    _hasAttemptedRestore = true;
+    emit(AuthLoading());
+
     final hasConnection = await _checkInternetAccess();
     if (!hasConnection) {
       emit(NoInternetConnection('Нет интернет-соединения'));
       return;
     }
 
-    emit(AuthLoading());
     try {
-      final isValid = await appwriteService.restoreSession();
-      if (isValid) {
-        try {
-          final user = await appwriteService.account.get();
-          final phone = user.email.split('@')[0];
-          final userData = await appwriteService.getUserByPhone(phone);
-          emit(
-            SessionRestored(
-              UserEntity(
-                id: user.$id,
-                phone: phone,
-                name: userData['name'],
-                surname: userData['surname'],
-                organization: userData['organization'],
-                role: userData['role'],
-              ),
-            ),
+      final restoreResult = await restoreSessionUseCase.call();
+
+      await restoreResult.fold(
+        (failure) async {
+          if (_isNetworkRelatedError(failure)) {
+            emit(NoInternetConnection('Ошибка сети: ${failure.message}'));
+          } else {
+            emit(Unauthenticated());
+          }
+        },
+        (isValid) async {
+          if (!isValid) {
+            emit(Unauthenticated());
+            return;
+          }
+
+          final userResult = await getCurrentUserUseCase.call();
+
+          userResult.fold(
+            (failure) => emit(Unauthenticated()),
+            (userEntity) => emit(SessionRestored(userEntity)),
           );
-        } catch (e) {
-          emit(Unauthenticated());
-        }
+        },
+      );
+    } catch (e) {
+      if (_isNetworkException(e)) {
+        emit(NoInternetConnection('Ошибка соединения: $e'));
       } else {
         emit(Unauthenticated());
       }
-    } catch (e) {
-      emit(Unauthenticated());
     }
   }
 
-  Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
+  bool _isNetworkRelatedError(Failure failure) {
+    final message = failure.message.toLowerCase();
+    return message.contains('network') ||
+        message.contains('connection') ||
+        message.contains('интернет') ||
+        message.contains('сеть') ||
+        message.contains('timeout') ||
+        message.contains('connect');
+  }
+
+  bool _isNetworkException(dynamic e) {
+    final message = e.toString().toLowerCase();
+    return message.contains('socket') ||
+        message.contains('network') ||
+        message.contains('connection') ||
+        message.contains('connect') ||
+        message.contains('timed out') ||
+        message.contains('интернет') ||
+        message.contains('сеть');
+  }
+
+  Future<void> _onLogout(AuthLogoutEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    final hasConnection = await _checkInternetAccess();
+
+    final result = hasConnection
+        ? await logoutUseCase.call()
+        : await forceLogoutUseCase.call();
+    result.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (_) => emit(Unauthenticated()),
+    );
+  }
+
+  Future<void> _onForceLogout(
+    ForceLogoutEvent event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
     try {
-      await appwriteService.logout();
+      await forceLogoutUseCase.call();
       emit(Unauthenticated());
     } catch (e) {
-      emit(AuthFailure('Ошибка выхода: $e'));
+      emit(Unauthenticated());
     }
   }
 
@@ -139,6 +198,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(NoInternetConnection('Нет интернет-соединения'));
       return;
     }
+
     emit(AuthLoading());
     final result = await registerUseCase.call(
       phone: event.phone,
@@ -167,6 +227,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(NoInternetConnection('Нет интернет-соединения'));
       return;
     }
+
     emit(AuthLoading());
     final result = await verifyCodeUseCase.call(
       phone: event.phone,
@@ -185,6 +246,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(NoInternetConnection('Нет интернет-соединения'));
       return;
     }
+
     emit(AuthLoading());
     final result = await loginUseCase.call(
       phone: event.phone,
@@ -199,6 +261,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   @override
   Future<void> close() {
+    _hasAttemptedRestore = false;
     _connectivitySubscription?.cancel();
     return super.close();
   }

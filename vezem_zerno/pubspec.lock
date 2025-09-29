@@ -29,10 +29,10 @@ packages:
     dependency: "direct main"
     description:
       name: appwrite
-      sha256: a30f0c571c44d7290eb1e56c5b4f5610cea97201b096407b5b75b4ae224e5a9e
+      sha256: fc00f36c5302942250935857f1b5075180c4dec6672aab039b262d1db1bdc3b0
       url: "https://pub.dev"
     source: hosted
-    version: "19.0.0"
+    version: "19.1.0"
   archive:
     dependency: transitive
     description:
@@ -77,10 +77,10 @@ packages:
     dependency: transitive
     description:
       name: bloc
-      sha256: "52c10575f4445c61dd9e0cafcc6356fdd827c4c64dd7945ef3c4105f6b6ac189"
+      sha256: e18b8e7825e9921d67a6d256dba0b6015ece8a577eb0a411845c46a352994d78
       url: "https://pub.dev"
     source: hosted
-    version: "9.0.0"
+    version: "9.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -633,10 +633,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker_android
-      sha256: a45bef33deb24839a51fb85a4d9e504ead2b1ad1c4779d02d09bf6a8857cdd52
+      sha256: "8dfe08ea7fcf7467dbaf6889e72eebd5e0d6711caae201fdac780eb45232cd02"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.13+2"
+    version: "0.8.13+3"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -689,10 +689,10 @@ packages:
     dependency: "direct main"
     description:
       name: internet_connection_checker_plus
-      sha256: f0a1a9f336e9fb093f30e6cfd8915ad98243f171be5863824a19e658b13c1a9d
+      sha256: c05c34d3b9fac404c56139864545b11a643cfc16c88874878392a699cbbdb5c5
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.0"
+    version: "2.9.0"
   intl:
     dependency: transitive
     description:
@@ -961,10 +961,10 @@ packages:
     dependency: transitive
     description:
       name: pool
-      sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"
+      sha256: "978783255c543aa3586a1b3c21f6e9d720eb315376a915872c61ef8b5c20177d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.1"
+    version: "1.5.2"
   posix:
     dependency: transitive
     description:
@@ -1174,10 +1174,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_android
-      sha256: "07cffecb7d68cbc6437cd803d5f11a86fe06736735c3dfe46ff73bcb0f958eed"
+      sha256: "199bc33e746088546a39cc5f36bac5a278c5e53b40cb3196f99e7345fdcfae6b"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.21"
+    version: "6.3.22"
   url_launcher_ios:
     dependency: transitive
     description:

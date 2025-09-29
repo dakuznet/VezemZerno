@@ -10,7 +10,6 @@ import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_event.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_state.dart';
-import 'package:vezem_zerno/routes/router.dart';
 
 @RoutePage()
 class ProfileSettingScreen extends StatefulWidget {
@@ -30,6 +29,22 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
   String? _currentImageUrl;
   String? _selectedRole;
   bool _isImageLoading = false;
+  bool _isDataInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProfileBloc>().add(LoadProfileEvent());
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
+    _organizationController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage() async {
     try {
@@ -39,15 +54,14 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
 
       final pickedFile = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        maxWidth: 800,
-        maxHeight: 800,
+        maxWidth: 600.w,
+        maxHeight: 600.h,
         imageQuality: 100,
       );
 
       if (pickedFile != null && mounted) {
         setState(() {
           _profileImage = io.File(pickedFile.path);
-          _isImageLoading = false;
         });
       }
     } catch (e) {
@@ -67,14 +81,14 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                 ColorsConstants.primaryTextFormFieldBackgorundColor,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0.r).r,
-              side: BorderSide(color: Colors.red, width: 2.0.w),
+              borderRadius: BorderRadius.circular(8.r),
+              side: BorderSide(color: Colors.red, width: 2.w),
             ),
           ),
         );
       }
     } finally {
-      if (mounted && _profileImage == null) {
+      if (mounted) {
         setState(() {
           _isImageLoading = false;
         });
@@ -82,29 +96,66 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    context.read<ProfileBloc>().add(LoadProfileEvent());
-  }
-
   void _saveProfile() {
+    if (_selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Выберите род деятельности',
+            style: TextStyle(
+              fontFamily: 'Unbounded',
+              fontSize: 14.sp,
+              color: ColorsConstants.primaryBrownColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+            side: BorderSide(color: Colors.red, width: 2.w),
+          ),
+        ),
+      );
+      return;
+    }
+
     context.read<ProfileBloc>().add(
       SaveProfileEvent(
-        name: _nameController.text,
-        surname: _surnameController.text,
-        organization: _organizationController.text,
+        name: _nameController.text.trim(),
+        surname: _surnameController.text.trim(),
+        organization: _organizationController.text.trim(),
         role: _selectedRole!,
-        phone: _phoneController.text,
+        phone: _phoneController.text.trim(),
         imageFile: _profileImage,
       ),
     );
+  }
+
+  void _handleBackPressed() {
+    AutoRouter.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
+        if (state is ProfileLoaded && !_isDataInitialized) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _nameController.text = state.user.name ?? '';
+                _surnameController.text = state.user.surname ?? '';
+                _organizationController.text = state.user.organization ?? '';
+                _selectedRole = state.user.role;
+                _phoneController.text = state.user.phone;
+                _currentImageUrl = state.user.profileImage;
+                _isDataInitialized = true;
+              });
+            }
+          });
+        }
+
         if (state is ProfileSaved) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -121,12 +172,13 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0.r).r,
-                side: BorderSide(color: Colors.green, width: 2.0.w),
+                borderRadius: BorderRadius.circular(8.r),
+                side: BorderSide(color: Colors.green, width: 2.w),
               ),
             ),
           );
         }
+
         if (state is ProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -143,22 +195,14 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0.r).r,
-                side: BorderSide(color: Colors.red, width: 2.0.w),
+                borderRadius: BorderRadius.circular(8.r),
+                side: BorderSide(color: Colors.red, width: 2.w),
               ),
             ),
           );
         }
       },
       builder: (context, state) {
-        if (state is ProfileLoaded) {
-          _nameController.text = state.user.name ?? '';
-          _surnameController.text = state.user.surname ?? '';
-          _organizationController.text = state.user.organization ?? '';
-          _selectedRole ??= state.user.role;
-          _phoneController.text = state.user.phone;
-          _currentImageUrl = state.user.profileImage;
-        }
         return Scaffold(
           appBar: AppBar(
             backgroundColor:
@@ -175,19 +219,17 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
               ),
             ),
             leading: IconButton(
-              onPressed: () {
-                AutoRouter.of(context).replace(const ProfileRoute());
-              },
-              icon: Icon(Icons.arrow_back),
+              onPressed: _handleBackPressed,
+              icon: const Icon(Icons.arrow_back),
+              color: ColorsConstants.primaryBrownColor,
             ),
           ),
           backgroundColor: ColorsConstants.backgroundColor,
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(16.w).w,
+              padding: EdgeInsets.all(16.w),
               child: Column(
                 children: [
-                  //Виджет изменения фотографии профиля
                   GestureDetector(
                     onTap: _pickImage,
                     child: Container(
@@ -196,11 +238,11 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                         color:
                             ColorsConstants.primaryTextFormFieldBackgorundColor,
                       ),
-                      padding: EdgeInsets.all(8.w).w,
+                      padding: EdgeInsets.all(8.w),
                       width: 360.w,
                       height: 120.h,
                       child: _isImageLoading
-                          ? Center(child: CircularProgressIndicator())
+                          ? const Center(child: CircularProgressIndicator())
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -237,195 +279,191 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  //Поля изменения данных профиля
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Имя:',
-                        style: TextStyle(
-                          fontFamily: 'Unbounded',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: ColorsConstants.primaryBrownColor,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      PrimaryTextFormField(
-                        readOnly: false,
-                        labelBehavior: FloatingLabelBehavior.never,
-                        labelText: 'Имя',
-                        controller: _nameController,
-                        suffixIcon: Icon(
-                          Icons.drive_file_rename_outline,
-                          size: 20.sp,
-                        ),
-                      ),
-                    ],
-                  ),
+
+                  _buildNameField(),
                   SizedBox(height: 16.h),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Фамилия:',
-                        style: TextStyle(
-                          fontFamily: 'Unbounded',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: ColorsConstants.primaryBrownColor,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      PrimaryTextFormField(
-                        readOnly: false,
-                        labelBehavior: FloatingLabelBehavior.never,
-                        labelText: 'Фамилия',
-                        controller: _surnameController,
-                        suffixIcon: Icon(
-                          Icons.drive_file_rename_outline,
-                          size: 20.sp,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildSurnameField(),
                   SizedBox(height: 16.h),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Название организации:',
-                        style: TextStyle(
-                          fontFamily: 'Unbounded',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: ColorsConstants.primaryBrownColor,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      PrimaryTextFormField(
-                        readOnly: false,
-                        labelBehavior: FloatingLabelBehavior.never,
-                        labelText: 'Название организации',
-                        controller: _organizationController,
-                        suffixIcon: Icon(
-                          Icons.drive_file_rename_outline,
-                          size: 20.sp,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildOrganizationField(),
                   SizedBox(height: 16.h),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Телефон:',
-                        style: TextStyle(
-                          fontFamily: 'Unbounded',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: ColorsConstants.primaryBrownColor,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      PrimaryTextFormField(
-                        readOnly: true,
-                        labelBehavior: FloatingLabelBehavior.never,
-                        labelText: 'Телефон',
-                        controller: _phoneController,
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0.h).h,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Род деятельности:',
-                          style: TextStyle(
-                            fontFamily: 'Unbounded',
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w500,
-                            color: ColorsConstants.primaryBrownColor,
-                          ),
-                        ),
-                        RadioGroup<String>(
-                          groupValue: _selectedRole,
-                          onChanged: (String? value) {
-                            setState(() {
-                              _selectedRole = value;
-                            });
-                          },
-                          child: Column(
-                            children: [
-                              RadioListTile<String>(
-                                fillColor:
-                                    WidgetStateProperty.resolveWith<Color?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.selected,
-                                      )) {
-                                        return ColorsConstants
-                                            .primaryBrownColor;
-                                      }
-                                      return null;
-                                    }),
-                                selected: _selectedRole == 'carrier',
-                                title: Text(
-                                  'Перевозчик',
-                                  style: TextStyle(
-                                    fontFamily: 'Unbounded',
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: ColorsConstants.primaryBrownColor,
-                                  ),
-                                ),
-                                value: 'carrier',
-                              ),
-                              RadioListTile<String>(
-                                fillColor:
-                                    WidgetStateProperty.resolveWith<Color?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.selected,
-                                      )) {
-                                        return ColorsConstants
-                                            .primaryBrownColor;
-                                      }
-                                      return null;
-                                    }),
-                                selected: _selectedRole == 'customer',
-                                title: Text(
-                                  'Заказчик',
-                                  style: TextStyle(
-                                    fontFamily: 'Unbounded',
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: ColorsConstants.primaryBrownColor,
-                                  ),
-                                ),
-                                value: 'customer',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                  _buildPhoneField(),
+                  SizedBox(height: 16.h),
+                  _buildRoleSelection(),
+                  SizedBox(height: 16.h),
+
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    child: PrimaryButton(
+                      text: 'Сохранить',
+                      onPressed: _saveProfile,
                     ),
                   ),
-
-                  //Кнопка сохранить изменения
-                  SizedBox(height: 16.h),
-                  PrimaryButton(text: 'Сохранить', onPressed: _saveProfile),
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNameField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Имя:',
+          style: TextStyle(
+            fontFamily: 'Unbounded',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            color: ColorsConstants.primaryBrownColor,
+          ),
+        ),
+        SizedBox(height: 4.h),
+        PrimaryTextFormField(
+          readOnly: false,
+          controller: _nameController,
+          labelBehavior: FloatingLabelBehavior.never,
+          labelText: 'Имя',
+          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 20.sp),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSurnameField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Фамилия:',
+          style: TextStyle(
+            fontFamily: 'Unbounded',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            color: ColorsConstants.primaryBrownColor,
+          ),
+        ),
+        SizedBox(height: 4.h),
+        PrimaryTextFormField(
+          readOnly: false,
+          controller: _surnameController,
+          labelBehavior: FloatingLabelBehavior.never,
+          labelText: 'Фамилия',
+          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 20.sp),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOrganizationField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Название организации:',
+          style: TextStyle(
+            fontFamily: 'Unbounded',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            color: ColorsConstants.primaryBrownColor,
+          ),
+        ),
+        SizedBox(height: 4.h),
+        PrimaryTextFormField(
+          readOnly: false,
+          controller: _organizationController,
+          labelBehavior: FloatingLabelBehavior.never,
+          labelText: 'Название организации',
+          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 20.sp),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhoneField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Телефон:',
+          style: TextStyle(
+            fontFamily: 'Unbounded',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            color: ColorsConstants.primaryBrownColor,
+          ),
+        ),
+        SizedBox(height: 4.h),
+        PrimaryTextFormField(
+          controller: _phoneController,
+          readOnly: true,
+          labelBehavior: FloatingLabelBehavior.never,
+          labelText: 'Телефон',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRoleSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Род деятельности:',
+          style: TextStyle(
+            fontFamily: 'Unbounded',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            color: ColorsConstants.primaryBrownColor,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        RadioGroup<String?>(
+          groupValue: _selectedRole,
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedRole = newValue;
+            });
+          },
+          child: Column(
+            children: [
+              RadioListTile<String?>(
+                fillColor: WidgetStateProperty.all(
+                  ColorsConstants.primaryBrownColor,
+                ),
+                value: 'carrier',
+                title: Text(
+                  'Перевозчик',
+                  style: TextStyle(
+                    fontFamily: 'Unbounded',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: ColorsConstants.primaryBrownColor,
+                  ),
+                ),
+              ),
+              RadioListTile<String?>(
+                fillColor: WidgetStateProperty.all(
+                  ColorsConstants.primaryBrownColor,
+                ),
+                value: 'customer',
+                title: Text(
+                  'Заказчик',
+                  style: TextStyle(
+                    fontFamily: 'Unbounded',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: ColorsConstants.primaryBrownColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

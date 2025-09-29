@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/injection_container.dart';
+import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
@@ -47,25 +47,10 @@ class MyApp extends StatelessWidget {
           child: BlocListener<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state is NoInternetConnection) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      state.message,
-                      style: TextStyle(
-                        fontFamily: 'Unbounded',
-                        fontSize: 14.sp,
-                        color: ColorsConstants.primaryBrownColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    backgroundColor:
-                        ColorsConstants.primaryTextFormFieldBackgorundColor,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0.r).r,
-                      side: BorderSide(color: Colors.green, width: 2.0.w),
-                    ),
-                  ),
+                PrimarySnackBar.show(
+                  context: context,
+                  text: state.message,
+                  borderColor: Colors.red,
                 );
               }
             },
@@ -82,6 +67,8 @@ class MyApp extends StatelessWidget {
           ),
         );
       },
+      useInheritedMediaQuery: true,
+      ensureScreenSize: true,
     );
   }
 }

@@ -32,21 +32,13 @@ final class LoginEvent extends AuthEvent {
   final String phone;
   final String password;
 
-  LoginEvent({
-    required this.phone,
-    required this.password,
-  });
-}
-
-final class ResendCodeEvent extends AuthEvent {
-  final String phone;
-  final String password;
-
-  ResendCodeEvent({required this.phone, required this.password});
+  LoginEvent({required this.phone, required this.password});
 }
 
 final class RestoreSessionEvent extends AuthEvent {}
 
-final class LogoutEvent extends AuthEvent {}
+final class AuthLogoutEvent extends AuthEvent {}
 
 final class CheckInternetConnection extends AuthEvent {}
+
+final class ForceLogoutEvent extends AuthEvent {}

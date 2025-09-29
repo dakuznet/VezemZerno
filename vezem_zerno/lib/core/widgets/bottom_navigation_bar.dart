@@ -24,7 +24,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         elevation: 0.0.sp,
         color: ColorsConstants.primaryTextFormFieldBackgorundColor,
         shape: ContinuousRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32).r),
         ),
         child: BottomNavigationBar(
           elevation: 0.sp,
