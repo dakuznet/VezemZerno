@@ -29,8 +29,8 @@ class LogoutConfirmationDialog extends StatelessWidget {
             'Выйти из аккаунта',
             style: TextStyle(
               fontFamily: 'Unbounded',
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w500,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),
@@ -38,7 +38,11 @@ class LogoutConfirmationDialog extends StatelessWidget {
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.wifi_off, size: 40.sp, color: ColorsConstants.primaryBrownColor),
+                    Icon(
+                      Icons.wifi_off,
+                      size: 40.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                    ),
                     SizedBox(height: 12.h),
                     Text(
                       'Проверьте интернет-соединение перед выходом',
@@ -64,19 +68,19 @@ class LogoutConfirmationDialog extends StatelessWidget {
           actions: hasConnectionError
               ? [
                   Center(
-                    child: ElevatedButton(
+                    child: FilledButton(
                       onPressed: () {
                         AutoRouter.of(context).pop();
                         context.read<ProfileBloc>().add(LoadProfileEvent());
                       },
-                      style: ElevatedButton.styleFrom(
+                      style: FilledButton.styleFrom(
                         backgroundColor: ColorsConstants.primaryBrownColor,
                         padding: EdgeInsets.symmetric(
                           horizontal: 24.w,
                           vertical: 12.h,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(32.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                       ),
                       child: Text(
@@ -85,7 +89,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
                           color: Colors.white,
                           fontSize: 14.sp,
                           fontFamily: 'Unbounded',
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
@@ -112,14 +116,14 @@ class LogoutConfirmationDialog extends StatelessWidget {
                               color: ColorsConstants.primaryBrownColor,
                               fontSize: 14.sp,
                               fontFamily: 'Unbounded',
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                             ),
                           ),
                         ),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
-                        child: ElevatedButton(
+                        child: FilledButton(
                           onPressed: isLoggingOut
                               ? null
                               : () {
@@ -127,24 +131,26 @@ class LogoutConfirmationDialog extends StatelessWidget {
                                     AuthLogoutEvent(),
                                   );
                                   context.read<ProfileBloc>().add(
-                                    ProfileLogoutEvent() as ProfileEvent,
+                                    ProfileLogoutEvent(),
                                   );
                                   AutoRouter.of(context).pop();
                                 },
-                          style: ElevatedButton.styleFrom(
+                          style: FilledButton.styleFrom(
                             backgroundColor: Colors.red,
                             padding: EdgeInsets.symmetric(vertical: 12.h),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(32.r),
+                              borderRadius: BorderRadius.circular(12.r),
                             ),
                           ),
                           child: isLoggingOut
                               ? SizedBox(
-                                  width: 20.w,
-                                  height: 20.h,
+                                  width: 24.w,
+                                  height: 24.h,
                                   child: CircularProgressIndicator(
-                                    strokeWidth: 2.w,
-                                    color: Colors.white,
+                                    strokeWidth: 4.w,
+                                    backgroundColor: ColorsConstants
+                                        .primaryTextFormFieldBackgorundColor,
+                                    color: ColorsConstants.primaryBrownColor,
                                   ),
                                 )
                               : Text(
@@ -153,7 +159,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
                                     color: Colors.white,
                                     fontSize: 14.sp,
                                     fontFamily: 'Unbounded',
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w400,
                                   ),
                                 ),
                         ),

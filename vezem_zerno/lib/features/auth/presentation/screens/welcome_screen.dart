@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
 import 'package:vezem_zerno/routes/router.dart';
@@ -15,39 +14,30 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  static const _wheatAssetPath = 'assets/svg/wheat.svg';
-  static const _logoAssetPath = 'assets/svg/logo.svg';
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: ColorsConstants.backgroundColor,
-      body: SafeArea(child: _buildBody()),
+      body: SafeArea(
+        child: Stack(children: [_buildBackground(), _buildContent(context)]),
+      ),
     );
-  }
-
-  Widget _buildBody() {
-    return Stack(children: [_buildBackground(), _buildContent()]);
   }
 
   Widget _buildBackground() {
     return Positioned(
       left: 0.w,
       bottom: 0.h,
-      child: SvgPicture.asset(
-        _wheatAssetPath,
+      child: Image.asset(
+        'assets/png/wheat.png',
         fit: BoxFit.cover,
-        placeholderBuilder: (context) => Container(
-          color: ColorsConstants.backgroundColor,
-          width: 275.w,
-          height: 275.h,
-        ),
+        filterQuality: FilterQuality.high,
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(16.w),
       child: Column(
@@ -58,7 +48,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           SizedBox(height: 48.h),
           _buildRegistrationButton(),
           SizedBox(height: 16.h),
-          _buildLoginTextButton(),
+          _buildLoginButton(),
         ],
       ),
     );
@@ -66,12 +56,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   Widget _buildLogo() {
     return Center(
-      child: SvgPicture.asset(
-        _logoAssetPath,
+      child: Image.asset(
+        'assets/png/logo.png',
+        cacheHeight: 230,
+        cacheWidth: 230,
         width: 230.w,
         height: 230.h,
-        placeholderBuilder: (context) =>
-            Container(color: ColorsConstants.backgroundColor),
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
       ),
     );
   }
@@ -79,14 +71,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildRegistrationButton() {
     return PrimaryButton(
       text: "Регистрация",
-      onPressed: _navigateToRegistration,
+      onPressed: () => AutoRouter.of(context).push(const RegistrationRoute()),
     );
   }
 
-  Widget _buildLoginTextButton() {
+  Widget _buildLoginButton() {
     return Center(
       child: TextButton(
-        onPressed: _navigateToLogin,
+        onPressed: () => AutoRouter.of(context).push(const LoginRoute()),
         style: TextButton.styleFrom(
           foregroundColor: ColorsConstants.primaryBrownColor,
           shape: RoundedRectangleBorder(
@@ -98,23 +90,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           style: TextStyle(
             fontFamily: 'Unbounded',
             fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
       ),
     );
-  }
-
-  void _navigateToRegistration() {
-    if (mounted) {
-      context.pushRoute(const RegistrationRoute());
-    }
-  }
-
-  void _navigateToLogin() {
-    if (mounted) {
-      context.pushRoute(const LoginRoute());
-    }
   }
 }

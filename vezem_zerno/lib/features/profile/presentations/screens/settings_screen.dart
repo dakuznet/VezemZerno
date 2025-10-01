@@ -59,25 +59,23 @@ class _SettingScreenState extends State<SettingScreen> {
                 SingleChildScrollView(
                   padding: EdgeInsets.all(16.w),
                   child: Center(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: PrimaryButton(
-                        text: 'Удалить аккаунт',
-                        onPressed: isDeleting
-                            ? null
-                            : () {
-                                _showDeleteAccountConfirmationDialog(context);
-                              },
-                      ),
+                    child: PrimaryButton(
+                      text: 'Удалить аккаунт',
+                      onPressed: isDeleting
+                          ? null
+                          : () {
+                              _showDeleteAccountConfirmationDialog(context);
+                            },
                     ),
                   ),
                 ),
                 if (isDeleting)
                   Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        ColorsConstants.primaryBrownColor,
-                      ),
+                      strokeWidth: 4.w,
+                      backgroundColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      color: ColorsConstants.primaryBrownColor,
                     ),
                   ),
               ],
@@ -103,9 +101,7 @@ PreferredSizeWidget _buildAppBar(BuildContext context) {
       ),
     ),
     leading: IconButton(
-      onPressed: () {
-        AutoRouter.of(context).pop();
-      },
+      onPressed: () => AutoRouter.of(context).back(),
       icon: const Icon(Icons.arrow_back),
     ),
   );

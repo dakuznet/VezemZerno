@@ -40,9 +40,9 @@ class RoleSelectionWidget extends StatelessWidget {
     required String label,
     required bool isSelected,
   }) {
-    return ElevatedButton(
+    return FilledButton(
       onPressed: () => onRoleChanged(role),
-      style: ElevatedButton.styleFrom(
+      style: FilledButton.styleFrom(
         backgroundColor: isSelected
             ? ColorsConstants.primaryButtonBackgroundColor
             : ColorsConstants.notSelectedTextButtonColor,
@@ -50,18 +50,18 @@ class RoleSelectionWidget extends StatelessWidget {
             ? ColorsConstants.notSelectedTextButtonColor
             : ColorsConstants.primaryButtonBackgroundColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(12.r),
         ),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontFamily: 'Unbounded',
-          fontSize: 14.sp,
+          fontSize: 12.sp,
           color: isSelected
               ? ColorsConstants.primaryBrownColor
               : ColorsConstants.primaryBrownColorWithOpacity,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
         ),
       ),
     );

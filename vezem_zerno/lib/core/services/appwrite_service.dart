@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:appwrite/models.dart' as appwrite_models;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vezem_zerno/core/constants/string_constants.dart';
 import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
 import 'package:path/path.dart' as path;
@@ -14,9 +13,6 @@ class AppwriteService {
   late final Functions _functions;
   late final Storage _imageStorage;
   late final TablesDB _tablesDB;
-
-  final _storage = const FlutterSecureStorage();
-  static const _sessionKey = 'session_id';
 
   Account get account => _account;
 
@@ -94,7 +90,7 @@ class AppwriteService {
     }
   }
 
-  //PROFILE
+  // PROFILE
 
   Future<String> uploadProfileImage(io.File imageFile) async {
     try {
@@ -168,16 +164,14 @@ class AppwriteService {
     }
   }
 
-  // AUTH
-  Future<void> saveSession(String sessionId) async {
-    await _storage.write(key: _sessionKey, value: sessionId);
-  }
+  // AUTH - УПРОЩЕННАЯ ЛОГИКА СЕССИЙ
 
-  Future<Session> createSession(String phone, String password) {
+  Future<Session> createSession(String phone, String password) async {
     final normalizedPhone = _normalizePhone(phone);
     final email = _buildEmailFromPhone(normalizedPhone);
 
-    return _account.createEmailPasswordSession(
+    // Appwrite автоматически сохранит сессию
+    return await _account.createEmailPasswordSession(
       email: email,
       password: password,
     );
@@ -185,56 +179,36 @@ class AppwriteService {
 
   Future<bool> restoreSession() async {
     try {
-      final sessionId = await _storage.read(key: _sessionKey);
-
-      if (sessionId == null || sessionId.isEmpty) {
-        return false;
-      }
-
-      _client.setSession(sessionId);
-
-      try {
-        await _account.getSession(sessionId: sessionId);
-        return true;
-      } on AppwriteException catch (e) {
-        if (_isSessionInvalid(e)) {
-          await forceLogout();
-          return false;
-        }
-        rethrow;
-      }
+      // Просто пытаемся получить данные пользователя
+      // Если сессия валидна - получим пользователя
+      await _account.get();
+      return true;
+    } on AppwriteException catch (e) {
+      // Сессия невалидна или истекла
+      print('Нет валидной сессии: ${e.message}');
+      return false;
     } catch (e) {
+      // Любая другая ошибка
+      print('Ошибка при восстановлении сессии: $e');
       return false;
     }
   }
 
-  bool _isSessionInvalid(AppwriteException e) {
-    return e.code == 401 ||
-        e.code == 404 ||
-        e.message?.contains('session') == true &&
-            e.message?.contains('invalid') == true;
-  }
-
   Future<void> logout() async {
-    String? sessionId;
     try {
-      sessionId = await _storage.read(key: _sessionKey);
-      if (sessionId != null) {
-        await _account.deleteSession(sessionId: sessionId);
-      }
-    } finally {
-      if (sessionId != null) {
-        await _storage.delete(key: _sessionKey);
-      }
-      _client.setSession('');
+      // Удаляем текущую сессию через Appwrite
+      await _account.deleteSession(sessionId: 'current');
+    } catch (e) {
+      // Игнорируем ошибки при выходе
+      print('Ошибка при выходе: $e');
     }
   }
 
   Future<void> forceLogout() async {
     try {
-      await _storage.delete(key: _sessionKey);
-      _client.setSession('');
+      await logout();
     } catch (e) {
+      // Гарантированный выход даже с ошибками
       return;
     }
   }

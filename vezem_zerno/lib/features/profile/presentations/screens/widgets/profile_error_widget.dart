@@ -18,7 +18,7 @@ class ProfileErrorWidget extends StatelessWidget {
             Icon(
               Icons.error_outline,
               size: 64.sp,
-              color: ColorsConstants.primaryBrownColorWithOpacity,
+              color: ColorsConstants.primaryBrownColor,
             ),
             SizedBox(height: 16.h),
             Text(
@@ -26,8 +26,8 @@ class ProfileErrorWidget extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'Unbounded',
                 fontWeight: FontWeight.w400,
-                fontSize: 14.sp,
-                color: ColorsConstants.primaryBrownColorWithOpacity,
+                fontSize: 12.sp,
+                color: ColorsConstants.primaryBrownColor,
               ),
               textAlign: TextAlign.center,
             ),
@@ -43,7 +43,7 @@ class ProfileErrorWidget extends StatelessWidget {
                   color: ColorsConstants.primaryBrownColor,
                   fontSize: 14.sp,
                   fontFamily: 'Unbounded',
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),

@@ -77,7 +77,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   ) async {
     try {
       final session = await _appwriteService.createSession(phone, password);
-      await _appwriteService.saveSession(session.$id);
 
       final userData = await _appwriteService.getUserByPhone(phone);
 

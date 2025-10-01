@@ -92,7 +92,7 @@ class AuthGuard extends AutoRouteGuard {
     });
 
     final result = await completer.future.timeout(
-      const Duration(seconds: 60),
+      const Duration(seconds: 30),
       onTimeout: () => false,
     );
 
@@ -120,7 +120,7 @@ class AuthGuard extends AutoRouteGuard {
     });
 
     final result = await completer.future.timeout(
-      const Duration(seconds: 20),
+      const Duration(seconds: 10),
       onTimeout: () => false,
     );
 

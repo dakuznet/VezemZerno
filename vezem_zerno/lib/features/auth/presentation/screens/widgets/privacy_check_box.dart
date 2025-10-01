@@ -85,7 +85,7 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: ColorsConstants.primaryBrownColor,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                             decoration: TextDecoration.underline,
                           ),
                           recognizer: TapGestureRecognizer()

@@ -23,8 +23,8 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
             'Удалить аккаунт',
             style: TextStyle(
               fontFamily: 'Unbounded',
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w500,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),

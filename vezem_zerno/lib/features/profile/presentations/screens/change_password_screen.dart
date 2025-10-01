@@ -34,36 +34,41 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      backgroundColor: ColorsConstants.backgroundColor,
-      body: SafeArea(
-        child: BlocConsumer<ProfileBloc, ProfileState>(
-          listener: (context, state) {
-            if (state is PasswordUpdated) {
-              PrimarySnackBar.show(
-                context: context,
-                text: 'Пароль успешно изменён',
-                borderColor: Colors.green,
-              );
-              _navigateBackToProfile(context);
-            } else if (state is PasswordUpdateError) {
-              PrimarySnackBar.show(
-                context: context,
-                text: 'Ошибка изменения пароля\n${state.message}',
-                borderColor: Colors.red,
-              );
-            }
-          },
-          builder: (context, state) {
-            return _buildContent(state);
-          },
-        ),
-      ),
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state is PasswordUpdated) {
+          if (mounted) {
+            PrimarySnackBar.show(
+              context: context,
+              text: 'Пароль успешно изменён',
+              borderColor: Colors.green,
+            );
+
+            context.read<ProfileBloc>().add(LoadProfileEvent());
+
+            AutoRouter.of(context).back();
+          }
+        } else if (state is PasswordUpdateError) {
+          if (mounted) {
+            PrimarySnackBar.show(
+              context: context,
+              text: 'Ошибка изменения пароля\n${state.message}',
+              borderColor: Colors.red,
+            );
+          }
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: _buildAppBar(state),
+          backgroundColor: ColorsConstants.backgroundColor,
+          body: SafeArea(child: _buildContent(state)),
+        );
+      },
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(ProfileState state) {
     return AppBar(
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
       centerTitle: true,
@@ -72,44 +77,22 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         style: TextStyle(
           fontFamily: 'Unbounded',
           fontSize: 16.sp,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
           color: ColorsConstants.primaryBrownColor,
         ),
       ),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         color: ColorsConstants.primaryBrownColor,
-        onPressed: () => AutoRouter.of(context).pop(),
+        onPressed: () =>
+            state is ProfileSaving ? null : AutoRouter.of(context).pop(),
       ),
     );
-  }
-
-  void _navigateBackToProfile(BuildContext context) {
-    AutoRouter.of(context).pop();
   }
 
   Widget _buildContent(ProfileState state) {
     final isLoading = state is PasswordUpdating;
 
-    return Stack(
-      children: [
-        _buildForm(isLoading),
-        if (isLoading)
-          Container(
-            color: Colors.black54,
-            child: Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  ColorsConstants.primaryBrownColor,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildForm(bool isLoading) {
     return Padding(
       padding: EdgeInsets.all(16.w),
       child: Form(
@@ -136,8 +119,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           'Старый пароль:',
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -162,8 +145,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           'Новый пароль:',
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -190,12 +173,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   Widget _buildSaveButton(bool isLoading) {
-    return SizedBox(
-      width: double.infinity,
-      child: PrimaryButton(
-        text: isLoading ? 'Изменение...' : 'Сохранить',
-        onPressed: isLoading ? null : _handleUpdatePassword,
-      ),
+    return PrimaryButton(
+      text: 'Сохранить',
+      onPressed: isLoading ? null : _handleUpdatePassword,
+      isLoading: isLoading,
     );
   }
 

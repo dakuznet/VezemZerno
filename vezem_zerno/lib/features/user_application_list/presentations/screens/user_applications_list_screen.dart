@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/widgets/primary_button.dart';
 
 @RoutePage()
 class UserApplicationsListScreen extends StatefulWidget {
@@ -23,7 +24,6 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabCount, vsync: this);
-    ;
   }
 
   @override
@@ -38,6 +38,19 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
       resizeToAvoidBottomInset: false,
       backgroundColor: ColorsConstants.backgroundColor,
       body: _buildNestedScrollView(),
+      bottomNavigationBar: _buildCreateApplicationButton(),
+    );
+  }
+
+  Widget _buildCreateApplicationButton() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.0.w, vertical: 16.h),
+      child: PrimaryButton(
+        text: 'Создать заявку',
+        onPressed: () {
+          // TODO: Добавьте обработчик нажатия для создания заявки
+        },
+      ),
     );
   }
 
@@ -55,7 +68,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
     return SliverAppBar(
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
       title: Text(
-        'Заявки',
+        'Мои заявки',
         style: TextStyle(
           fontSize: 16.sp,
           color: ColorsConstants.primaryBrownColor,
@@ -186,7 +199,7 @@ class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
         labelStyle: TextStyle(
           fontSize: 14.sp,
           fontFamily: 'Unbounded',
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
         ),
         unselectedLabelColor: ColorsConstants.primaryBrownColorWithOpacity,
         unselectedLabelStyle: TextStyle(

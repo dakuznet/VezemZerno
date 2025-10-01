@@ -5,28 +5,55 @@ import 'package:vezem_zerno/core/constants/colors_constants.dart';
 class PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
+  final bool enabled;
+  final bool isLoading;
+  final IconData? icon;
 
-  const PrimaryButton({super.key, required this.text, required this.onPressed});
+  const PrimaryButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.enabled = true,
+    this.isLoading = false,
+    this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        fixedSize: Size(double.infinity.w, 45.h),
-        backgroundColor: ColorsConstants.primaryButtonBackgroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
+    final bool canPress = enabled && !isLoading && onPressed != null;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 45.h,
+      child: FilledButton(
+        onPressed: canPress ? onPressed : null,
+        style: FilledButton.styleFrom(
+          backgroundColor: ColorsConstants.primaryButtonBackgroundColor,
+          foregroundColor: ColorsConstants.primaryBrownColor,
+          disabledBackgroundColor: ColorsConstants.primaryButtonBackgroundColor,
+          disabledForegroundColor: ColorsConstants.primaryBrownColorWithOpacity,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          textStyle: TextStyle(
+            fontFamily: 'Unbounded',
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+          ),
         ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: ColorsConstants.primaryBrownColor,
-          fontSize: 14.sp,
-          fontFamily: 'Unbounded',
-          fontWeight: FontWeight.w600,
-        ),
+        child: isLoading
+            ? SizedBox(
+                width: 22.r,
+                height: 22.r,
+                child: CircularProgressIndicator(
+                  strokeWidth: 4.w,
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  color: ColorsConstants.primaryBrownColor,
+                ),
+              )
+            : Text(text, textAlign: TextAlign.center),
       ),
     );
   }

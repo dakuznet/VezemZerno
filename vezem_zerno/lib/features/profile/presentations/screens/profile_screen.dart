@@ -50,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         BlocListener<AuthBloc, AuthState>(
           listener: (context, authState) {
             if (authState is Unauthenticated) {
-              _handleLogoutSuccess(context);
+              AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
             }
           },
         ),
@@ -87,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? ProfileInfoAppBar(user: state.user)
           : state is ProfileError || state is NoInternetConnection
           ? ErrorAppBar(onRetry: _loadProfile)
-          : const ProfileInfoAppBar(user: null),
+          : const ProfileShimmerAppBar(),
     );
   }
 
@@ -124,12 +124,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: Colors.white,
                   ),
                   SizedBox(height: 16.h),
-                  PrimaryButton(text: 'Повторить', onPressed: _loadProfile),
-                ] else ...[
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      ColorsConstants.primaryBrownColor,
-                    ),
+                  PrimaryButton(
+                    text: 'Повторить',
+                    onPressed: state is AuthLoading ? null : _loadProfile,
+                    isLoading: state is ProfileLoading,
                   ),
                 ],
               ],
@@ -156,11 +154,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ProfileActionTile(
               iconPath: 'assets/svg/user_edit_icon.svg',
               title: 'Управление профилем',
-              onTap: () {
-                if (!shouldBlockInteractions) {
-                  AutoRouter.of(context).push(const ProfileSettingRoute());
-                }
-              },
+              onTap: () => shouldBlockInteractions
+                  ? null
+                  : AutoRouter.of(context).push(const ProfileSettingRoute()),
             ),
             Divider(
               thickness: 1.0.sp,
@@ -170,11 +166,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               iconPath: 'assets/svg/password_edit_icon.svg',
               title: 'Изменение пароля',
               iconSize: Size(24.w, 14.h),
-              onTap: () {
-                if (!shouldBlockInteractions) {
-                  AutoRouter.of(context).push(const ChangePasswordRoute());
-                }
-              },
+              onTap: () => shouldBlockInteractions
+                  ? null
+                  : AutoRouter.of(context).push(const ChangePasswordRoute()),
             ),
           ],
         ),
@@ -192,8 +186,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: PrimaryButton(
-          text: isLoggingOut ? 'Выход...' : 'Выйти из аккаунта',
-          onPressed: isBlocked ? null : _showLogoutConfirmationDialog,
+          text: 'Выйти из аккаунта',
+          onPressed: isLoggingOut ? null : _showLogoutConfirmationDialog,
+          isLoading: isLoggingOut,
         ),
       ),
     );
@@ -203,7 +198,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final state = context.read<ProfileBloc>().state;
 
     if (_shouldBlockInteractions(state)) {
-      if (state is ProfileError || state is NoInternetConnection) {
+      if (state is ProfileError ||
+          state is NoInternetConnection ||
+          state is ProfileLoading) {
         _loadProfile();
       }
       return;
@@ -213,15 +210,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => LogoutConfirmationDialog(),
     );
-  }
-
-  void _handleLogoutSuccess(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        AutoRouter.of(
-          context,
-        ).pushAndPopUntil(const WelcomeRoute(), predicate: (route) => false);
-      }
-    });
   }
 }

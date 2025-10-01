@@ -2,6 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/entities/application_entiry.dart';
+import 'package:vezem_zerno/features/applications_list/presentations/screens/widgets/application_card_widget.dart';
 
 @RoutePage()
 class ApplicationsListScreen extends StatefulWidget {
@@ -16,7 +18,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
   static const _tabCount = 2;
 
   late final TabController _tabController;
-  final List<Application> _applications = _generateSampleApplications();
+  final List<ApplicationEntity> _applications = _generateSampleApplications();
 
   @override
   void initState() {
@@ -121,9 +123,9 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
     );
   }
 
-  static List<Application> _generateSampleApplications() {
+  static List<ApplicationEntity> _generateSampleApplications() {
     return [
-      Application(
+      ApplicationEntity(
         customer: "ООО Порт Транзит Экспедирование",
         date: '24.09.2025',
         from: 'с. Труновское, Ставропольский край',
@@ -133,7 +135,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
         distance: '1130 км',
         tariff: "5 ₽/кг",
       ),
-      Application(
+      ApplicationEntity(
         customer: "ООО ГТЭ-Транспорт",
         date: '24.09.2025',
         from: 'с. Подсосёнки, Саратовская область',
@@ -143,7 +145,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
         distance: '1170 км',
         tariff: "2.15 ₽/кг",
       ),
-      Application(
+      ApplicationEntity(
         customer: "ООО Порт Транзит Экспедирование",
         date: '28.09.2025',
         from: 'п. Комсомолец, Ставропольский край',
@@ -210,217 +212,5 @@ class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _TabBarSliverDelegate oldDelegate) {
     return tabController != oldDelegate.tabController ||
         height != oldDelegate.height;
-  }
-}
-
-class Application {
-  final String date;
-  final String from;
-  final String to;
-  final String cargo;
-  final String weight;
-  final String distance;
-  final String customer;
-  final String tariff;
-
-  const Application({
-    required this.customer,
-    required this.date,
-    required this.from,
-    required this.to,
-    required this.cargo,
-    required this.weight,
-    required this.distance,
-    required this.tariff,
-  });
-}
-
-class ApplicationCard extends StatelessWidget {
-  final Application application;
-
-  const ApplicationCard({super.key, required this.application});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 8.sp,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-      color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      margin: EdgeInsets.all(16.w),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeaderRow(),
-            _buildDivider(),
-            _buildLocationWithTariff(),
-            SizedBox(height: 16.h),
-            _buildCargoInfo(),
-            _buildDivider(),
-            _buildCustomerInfo(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "Опубликовано ${application.date}",
-          style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w600,
-            fontSize: 12.sp,
-            color: const Color.fromARGB(172, 66, 44, 26),
-          ),
-        ),
-        Icon(
-          Icons.arrow_circle_right_outlined,
-          size: 24.sp,
-          color: ColorsConstants.primaryBrownColor,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      child: Divider(
-        height: 2.h,
-        color: ColorsConstants.primaryBrownColorWithOpacity,
-      ),
-    );
-  }
-
-  Widget _buildLocationWithTariff() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: _buildLocationInfo()),
-        SizedBox(width: 16.w),
-        _buildTariffChip(),
-      ],
-    );
-  }
-
-  Widget _buildLocationInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLocationRow(label: 'Откуда:', value: application.from),
-        if (application.to.isNotEmpty) ...[
-          SizedBox(height: 16.h),
-          _buildLocationRow(label: 'Куда:', value: application.to),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildLocationRow({required String label, required String value}) {
-    return Text.rich(
-      TextSpan(
-        text: '$label ',
-        style: TextStyle(
-          fontFamily: 'Unbounded',
-          fontWeight: FontWeight.w600,
-          fontSize: 12.sp,
-          color: const Color.fromARGB(172, 66, 44, 26),
-        ),
-        children: [
-          TextSpan(
-            text: value,
-            style: TextStyle(
-              fontFamily: 'Unbounded',
-              fontWeight: FontWeight.w600,
-              fontSize: 14.sp,
-              color: ColorsConstants.primaryBrownColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTariffChip() {
-    return Text(
-      application.tariff,
-      style: TextStyle(
-        fontSize: 14.sp,
-        fontFamily: 'Unbounded',
-        fontWeight: FontWeight.w600,
-        color: ColorsConstants.primaryBrownColor,
-      ),
-    );
-  }
-
-  Widget _buildCargoInfo() {
-    final List<Widget> cargoChips = [];
-
-    if (application.cargo.isNotEmpty) {
-      cargoChips.add(_buildCargoChip(application.cargo));
-    }
-
-    if (application.weight.isNotEmpty) {
-      cargoChips.add(_buildCargoChip(application.weight));
-    }
-
-    if (application.distance.isNotEmpty) {
-      cargoChips.add(_buildCargoChip(application.distance));
-    }
-
-    return Wrap(spacing: 8.w, runSpacing: 8.h, children: cargoChips);
-  }
-
-  Widget _buildCargoChip(String text) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: ColorsConstants.primaryBrownColor,
-          width: 2.w,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12.sp,
-          fontFamily: 'Unbounded',
-          fontWeight: FontWeight.w700,
-          color: ColorsConstants.primaryBrownColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomerInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Заказчик",
-          style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w600,
-            fontSize: 12.sp,
-            color: const Color.fromARGB(172, 66, 44, 26),
-          ),
-        ),
-        Text(
-          application.customer,
-          style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w700,
-            fontSize: 12.sp,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-        ),
-      ],
-    );
   }
 }
