@@ -40,7 +40,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<SaveProfileEvent>(_onSaveProfile);
     on<DeleteAccountEvent>(_onDeleteAccount);
     on<UpdatePasswordEvent>(_onUpdatePassword);
-    on<ProfileLogoutEvent>(_onLogout);
     on<CheckInternetConnection>(_onCheckInternetConnection);
 
     _startMonitoring();
@@ -80,11 +79,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     if (!hasConnection) {
       emit(NoInternetConnection('Нет интернет-соединения'));
     }
-  }
-
-  Future<void> _onLogout(ProfileLogoutEvent event, Emitter<ProfileState> emit) async {
-    emit(LoggingOut());
-    authBloc.add(AuthLogoutEvent());
   }
 
   Future<void> _onUpdatePassword(

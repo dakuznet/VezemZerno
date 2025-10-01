@@ -69,7 +69,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             body: Column(
               children: [
                 _buildAppBar(state),
-                Expanded(child: _buildContent(state, shouldBlockInteractions)),
+                Expanded(
+                  child: _buildContent(context, state, shouldBlockInteractions),
+                ),
               ],
             ),
           );
@@ -91,7 +93,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildContent(ProfileState state, bool shouldBlockInteractions) {
+  Widget _buildContent(
+    BuildContext context,
+    ProfileState state,
+    bool shouldBlockInteractions,
+  ) {
     if (state is ProfileError || state is NoInternetConnection) {
       return ProfileErrorWidget(onRetry: _loadProfile);
     }
@@ -103,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SliverList(
               delegate: SliverChildListDelegate([
                 _buildProfileManagementSection(shouldBlockInteractions),
-                _buildLogoutButton(state, shouldBlockInteractions),
+                _buildLogoutButton(context, state, shouldBlockInteractions),
                 SizedBox(height: 16.h),
               ]),
             ),
@@ -176,9 +182,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLogoutButton(ProfileState state, bool shouldBlockInteractions) {
-    final isLoggingOut = state is LoggingOut;
-    final isBlocked = shouldBlockInteractions || isLoggingOut;
+  Widget _buildLogoutButton(
+    BuildContext context,
+    ProfileState state,
+    bool shouldBlockInteractions,
+  ) {
+    final isBlocked = shouldBlockInteractions;
 
     return AbsorbPointer(
       absorbing: isBlocked,
@@ -187,14 +196,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: PrimaryButton(
           text: 'Выйти из аккаунта',
-          onPressed: isLoggingOut ? null : _showLogoutConfirmationDialog,
-          isLoading: isLoggingOut,
+          onPressed: () => _showLogoutConfirmationDialog(context),
+          isLoading: state is AuthLoading,
         ),
       ),
     );
   }
 
-  void _showLogoutConfirmationDialog() {
+  void _showLogoutConfirmationDialog(BuildContext context) {
     final state = context.read<ProfileBloc>().state;
 
     if (_shouldBlockInteractions(state)) {

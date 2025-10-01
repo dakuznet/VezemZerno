@@ -6,11 +6,6 @@ abstract class ProfileState extends Equatable {
   List<Object?> get props => [];
 }
 
-// LOG OUT
-class LoggingOut extends ProfileState {}
-
-class LogoutSuccess extends ProfileState {}
-
 // PROFILE
 class ProfileInitial extends ProfileState {}
 

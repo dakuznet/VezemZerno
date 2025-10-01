@@ -80,7 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
         icon: const Icon(Icons.arrow_back),
         color: ColorsConstants.primaryBrownColor,
         iconSize: 24.sp,
-        onPressed: () => state is AuthLoading ? null : AutoRouter.of(context).back(),
+        onPressed: () => state is AuthLoading
+            ? null
+            : AutoRouter.of(context).replaceAll([const WelcomeRoute()]),
       ),
     );
   }

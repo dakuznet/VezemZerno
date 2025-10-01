@@ -3,22 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
-import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart'
-    hide NoInternetConnection;
-import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
-import 'package:vezem_zerno/features/profile/presentations/bloc/profile_event.dart';
-import 'package:vezem_zerno/features/profile/presentations/bloc/profile_state.dart';
+import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 
 class LogoutConfirmationDialog extends StatelessWidget {
   const LogoutConfirmationDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileBloc, ProfileState>(
+    return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        final isLoggingOut = state is LoggingOut;
-        final hasConnectionError =
-            state is ProfileError || state is NoInternetConnection;
+        final isLoggingOut = state is AuthLoading;
+        final hasConnectionError = state is NoInternetConnection;
 
         return AlertDialog(
           backgroundColor: ColorsConstants.backgroundColor,
@@ -60,7 +55,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
                   'Вы уверены что хотите выйти из аккаунта?',
                   style: TextStyle(
                     fontFamily: 'Unbounded',
-                    fontSize: 14.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color.fromARGB(195, 66, 44, 26),
                   ),
@@ -68,25 +63,15 @@ class LogoutConfirmationDialog extends StatelessWidget {
           actions: hasConnectionError
               ? [
                   Center(
-                    child: FilledButton(
-                      onPressed: () {
-                        AutoRouter.of(context).pop();
-                        context.read<ProfileBloc>().add(LoadProfileEvent());
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: ColorsConstants.primaryBrownColor,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24.w,
-                          vertical: 12.h,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
+                    child: TextButton(
+                      onPressed: () => AutoRouter.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        foregroundColor: ColorsConstants.primaryBrownColor,
                       ),
                       child: Text(
-                        'Повторить попытку',
+                        'Повторить',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: ColorsConstants.primaryBrownColor,
                           fontSize: 14.sp,
                           fontFamily: 'Unbounded',
                           fontWeight: FontWeight.w400,
@@ -100,9 +85,9 @@ class LogoutConfirmationDialog extends StatelessWidget {
                     children: [
                       Expanded(
                         child: TextButton(
-                          onPressed: isLoggingOut
+                          onPressed: () => isLoggingOut
                               ? null
-                              : () => AutoRouter.of(context).pop(),
+                              : AutoRouter.of(context).pop(),
                           style: TextButton.styleFrom(
                             foregroundColor: ColorsConstants.primaryBrownColor,
                             padding: EdgeInsets.symmetric(
@@ -130,9 +115,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
                                   context.read<AuthBloc>().add(
                                     AuthLogoutEvent(),
                                   );
-                                  context.read<ProfileBloc>().add(
-                                    ProfileLogoutEvent(),
-                                  );
+
                                   AutoRouter.of(context).pop();
                                 },
                           style: FilledButton.styleFrom(
@@ -142,26 +125,15 @@ class LogoutConfirmationDialog extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                           ),
-                          child: isLoggingOut
-                              ? SizedBox(
-                                  width: 24.w,
-                                  height: 24.h,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 4.w,
-                                    backgroundColor: ColorsConstants
-                                        .primaryTextFormFieldBackgorundColor,
-                                    color: ColorsConstants.primaryBrownColor,
-                                  ),
-                                )
-                              : Text(
-                                  'Выйти',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14.sp,
-                                    fontFamily: 'Unbounded',
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
+                          child: Text(
+                            'Выйти',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                              fontFamily: 'Unbounded',
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                         ),
                       ),
                     ],
