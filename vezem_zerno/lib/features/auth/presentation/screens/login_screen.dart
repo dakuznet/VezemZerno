@@ -56,36 +56,38 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: _handleAuthStateChanges,
-      builder: (context, state) => _buildScaffold(context),
+      builder: (context, state) => _buildScaffold(context, state),
     );
   }
 
-  Widget _buildScaffold(BuildContext context) {
+  Widget _buildScaffold(BuildContext context, AuthState state) {
     return Scaffold(
-      appBar: _buildAppBar(context),
+      appBar: _buildAppBar(context, state),
       backgroundColor: ColorsConstants.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16.w),
-          child: _buildLoginForm(context),
+          child: _buildLoginForm(context, state),
         ),
       ),
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
+  AppBar _buildAppBar(BuildContext context, AuthState state) {
     return AppBar(
       backgroundColor: ColorsConstants.backgroundColor,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         color: ColorsConstants.primaryBrownColor,
         iconSize: 24.sp,
-        onPressed: () => _navigateToWelcome(context),
+        onPressed: () => state is AuthLoading
+            ? null
+            : AutoRouter.of(context).replaceAll([const WelcomeRoute()]),
       ),
     );
   }
 
-  Widget _buildLoginForm(BuildContext context) {
+  Widget _buildLoginForm(BuildContext context, AuthState state) {
     return Form(
       key: _loginFormKey,
       child: Column(
@@ -96,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
           SizedBox(height: 16.h),
           _buildPasswordField(),
           SizedBox(height: 32.h),
-          _buildLoginButton(context),
+          _buildLoginButton(context, state),
         ],
       ),
     );
@@ -156,12 +158,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginButton(BuildContext context) {
+  Widget _buildLoginButton(BuildContext context, AuthState state) {
     return SizedBox(
       width: double.infinity,
       child: PrimaryButton(
         text: 'Войти',
-        onPressed: () => _handleLogin(context),
+        isLoading: state is AuthLoading,
+        onPressed: () => state is AuthLoading ? null : _handleLogin(context),
       ),
     );
   }
@@ -170,15 +173,15 @@ class _LoginScreenState extends State<LoginScreen> {
     if (state is AuthFailure) {
       PrimarySnackBar.show(
         context: context,
-        text: 'Ошибка входа в аккаунт\n${state.message}',
+        text: state.message,
         borderColor: Colors.red,
       );
     } else if (state is LoginSuccess) {
-      _navigateToMap(context);
+      AutoRouter.of(context).replaceAll([const MainRoute()]);
     } else if (state is NoInternetConnection) {
       PrimarySnackBar.show(
         context: context,
-        text: 'Ошибка входа в аккаунт\nПроверьте подключение к интернету',
+        text: 'Проверьте подключение к интернету',
         borderColor: Colors.red,
       );
     }
@@ -248,13 +251,5 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       return '7$digits';
     }
-  }
-
-  void _navigateToWelcome(BuildContext context) {
-    context.router.replaceAll([const WelcomeRoute()]);
-  }
-
-  void _navigateToMap(BuildContext context) {
-    context.router.replaceAll([const MapRoute()]);
   }
 }

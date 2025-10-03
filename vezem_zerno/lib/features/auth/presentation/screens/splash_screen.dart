@@ -26,11 +26,13 @@ class _SplashScreenState extends State<SplashScreen>
   bool _isMinimumLoadingTimePassed = false;
   Timer? _retryTimer;
   Timer? _minimumLoadingTimer;
+  bool _didCacheImages = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
     _startMinimumLoadingTimer();
     _scheduleInitialCheck();
   }
@@ -40,6 +42,20 @@ class _SplashScreenState extends State<SplashScreen>
     if (state == AppLifecycleState.resumed && !_hasNavigated) {
       _startMinimumLoadingTimer();
       _scheduleInitialCheck();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didCacheImages) {
+      precacheImage(
+        const AssetImage('assets/png/logo.png'),
+        context,
+        size: Size(230.w, 230.h),
+      );
+      precacheImage(const AssetImage('assets/png/wheat.png'), context);
+      _didCacheImages = true;
     }
   }
 
@@ -73,9 +89,7 @@ class _SplashScreenState extends State<SplashScreen>
       return _buildNoInternetConnection();
     }
 
-    if (state is AuthFailure && !_hasNavigated) {
-      return _buildAuthError(state);
-    }
+    if (state is AuthFailure && !_hasNavigated) {}
 
     return _buildLoadingIndicator();
   }
@@ -96,8 +110,8 @@ class _SplashScreenState extends State<SplashScreen>
             'Загрузка...',
             style: TextStyle(
               fontFamily: 'Unbounded',
-              fontWeight: FontWeight.w500,
-              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
+              fontSize: 14.sp,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),
@@ -109,12 +123,12 @@ class _SplashScreenState extends State<SplashScreen>
   Widget _buildNoInternetConnection() {
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(32.w),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.wifi_off_rounded,
+              Icons.wifi_off_outlined,
               size: 64.sp,
               color: ColorsConstants.primaryBrownColor,
             ),
@@ -124,66 +138,9 @@ class _SplashScreenState extends State<SplashScreen>
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Unbounded',
-                fontWeight: FontWeight.w500,
-                fontSize: 16.sp,
-                color: ColorsConstants.primaryBrownColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAuthError(AuthFailure state) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(32.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline_rounded, size: 80.sp, color: Colors.red),
-            SizedBox(height: 24.h),
-            Text(
-              'Ошибка авторизации',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Unbounded',
-                fontWeight: FontWeight.w500,
-                fontSize: 18.sp,
-                color: ColorsConstants.primaryBrownColor,
-              ),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              state.message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Unbounded',
                 fontWeight: FontWeight.w400,
                 fontSize: 14.sp,
-                color: ColorsConstants.primaryBrownColorWithOpacity,
-              ),
-            ),
-            SizedBox(height: 32.h),
-            ElevatedButton(
-              onPressed: _navigateToWelcome,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorsConstants.primaryBrownColor,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                elevation: 2,
-              ),
-              child: Text(
-                'Войти заново',
-                style: TextStyle(
-                  fontFamily: 'Unbounded',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16.sp,
-                ),
+                color: ColorsConstants.primaryBrownColor,
               ),
             ),
           ],
@@ -240,7 +197,7 @@ class _SplashScreenState extends State<SplashScreen>
       _hasNavigated = true;
       _retryTimer?.cancel();
       _minimumLoadingTimer?.cancel();
-      _navigateToMap();
+      AutoRouter.of(context).replaceAll([const MainRoute()]);
     } else if (state is Unauthenticated || state is AuthFailure) {
       _hasNavigated = true;
       _retryTimer?.cancel();
@@ -248,18 +205,8 @@ class _SplashScreenState extends State<SplashScreen>
       if (state is AuthFailure) {
         setState(() {});
       } else {
-        _navigateToWelcome();
+        AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
       }
     }
-  }
-
-  void _navigateToMap() {
-    if (!mounted) return;
-    context.router.replaceAll([const MainRoute()]);
-  }
-
-  void _navigateToWelcome() {
-    if (!mounted) return;
-    context.router.replaceAll([const WelcomeRoute()]);
   }
 }

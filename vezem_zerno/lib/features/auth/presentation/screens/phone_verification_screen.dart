@@ -58,7 +58,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
         icon: const Icon(Icons.arrow_back),
         color: ColorsConstants.primaryBrownColor,
         iconSize: 24.r,
-        onPressed: () => _navigateBack(context),
+        onPressed: () => AutoRouter.of(context).back(),
       ),
     );
   }
@@ -90,7 +90,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
           style: TextStyle(
             fontFamily: 'Unbounded',
             fontWeight: FontWeight.w400,
-            fontSize: 16.sp,
+            fontSize: 14.sp,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -100,7 +100,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
             fontSize: 16.sp,
             color: ColorsConstants.primaryBrownColor,
           ),
@@ -164,24 +164,11 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   }
 
   Widget _buildConfirmButton(AuthState state) {
-    if (state is AuthLoading) {
-      return _buildLoadingIndicator();
-    }
-
-    return SizedBox(
-      width: double.infinity,
-      child: PrimaryButton(
-        text: 'Подтвердить',
-        onPressed: () => _handleVerification(context),
-      ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return CircularProgressIndicator(
-      strokeWidth: 5.w,
-      backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      color: ColorsConstants.primaryBrownColor,
+    return PrimaryButton(
+      text: 'Подтвердить',
+      onPressed: () =>
+          state is AuthLoading ? null : _handleVerification(context),
+      isLoading: state is AuthLoading,
     );
   }
 
@@ -211,7 +198,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
       borderColor: Colors.green,
     );
 
-    _navigateToLogin(context);
+    AutoRouter.of(context).replaceAll([const LoginRoute()]);
   }
 
   String? _validateCode(String? value) {
@@ -229,7 +216,11 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
   void _handleVerification(BuildContext context) {
     if (_codeController.text.length != _codeLength) {
-      PrimarySnackBar.show(context: context, text: 'Введите 6-значный код');
+      PrimarySnackBar.show(
+        context: context,
+        text: 'Введите 6-значный код',
+        borderColor: Colors.red,
+      );
       return;
     }
 
@@ -238,13 +229,5 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
         VerifyCodeEvent(phone: widget.phone, code: _codeController.text),
       );
     }
-  }
-
-  void _navigateBack(BuildContext context) {
-    context.router.back();
-  }
-
-  void _navigateToLogin(BuildContext context) {
-    context.router.replaceAll([const LoginRoute()]);
   }
 }

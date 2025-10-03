@@ -23,8 +23,8 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
             'Удалить аккаунт',
             style: TextStyle(
               fontFamily: 'Unbounded',
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w500,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),
@@ -38,60 +38,62 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
             ),
           ),
           actions: <Widget>[
-            if (!isDeleting)
-              TextButton(
-                onPressed: () => AutoRouter.of(context).pop(),
-                style: TextButton.styleFrom(
-                  foregroundColor: ColorsConstants.primaryBrownColor,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 12.h,
-                  ),
-                ),
-                child: Text(
-                  'Отменить',
-                  style: TextStyle(
-                    color: ColorsConstants.primaryBrownColor,
-                    fontSize: 14.sp,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ElevatedButton(
-              onPressed: isDeleting
-                  ? null
-                  : () {
-                      context.read<ProfileBloc>().add(DeleteAccountEvent());
-                    },
-              style: ElevatedButton.styleFrom(
-                splashFactory: NoSplash.splashFactory,
-                elevation: 4.r,
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(32.r),
-                ),
-              ),
-              child: isDeleting
-                  ? SizedBox(
-                      width: 20.w,
-                      height: 20.h,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 5,
-                        backgroundColor:
-                            ColorsConstants.primaryTextFormFieldBackgorundColor,
-                        color: ColorsConstants.primaryBrownColor,
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () =>
+                        isDeleting ? null : AutoRouter.of(context).pop(),
+                    style: TextButton.styleFrom(
+                      foregroundColor: ColorsConstants.primaryBrownColor,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
                       ),
-                    )
-                  : Text(
+                    ),
+                    child: Text(
+                      'Отменить',
+                      style: TextStyle(
+                        color: ColorsConstants.primaryBrownColor,
+                        fontSize: 14.sp,
+                        fontFamily: 'Unbounded',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => isDeleting
+                        ? null
+                        : {
+                            context.read<ProfileBloc>().add(
+                              DeleteAccountEvent(),
+                            ),
+                            AutoRouter.of(context).pop(),
+                          },
+                    style: FilledButton.styleFrom(
+                      splashFactory: NoSplash.splashFactory,
+                      elevation: 4.r,
+                      backgroundColor: Colors.red,
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    child: Text(
                       'Удалить',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14.sp,
                         fontFamily: 'Unbounded',
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
+                  ),
+                ),
+              ],
             ),
           ],
         );

@@ -17,7 +17,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: ColorsConstants.primaryBrownColor,
-          iconSize: 30.r,
+          iconSize: 24.r,
           onPressed: () => AutoRouter.of(context).back(),
         ),
       ),

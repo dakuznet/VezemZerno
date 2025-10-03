@@ -29,67 +29,64 @@ class _SettingScreenState extends State<SettingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(context),
-      backgroundColor: ColorsConstants.backgroundColor,
-      body: SafeArea(
-        child: BlocConsumer<ProfileBloc, ProfileState>(
-          listener: (context, state) {
-            if (state is AccountDeleted) {
-              PrimarySnackBar.show(
-                context: context,
-                text: 'Аккаунт был успешно удалён',
-                borderColor: Colors.green,
-              );
-              context.read<AuthBloc>().add(AuthLogoutEvent());
-              AutoRouter.of(context).replace(const WelcomeRoute());
-            } else if (state is AccountDeleteError) {
-              PrimarySnackBar.show(
-                context: context,
-                text: 'Ошибка удаления аккаунта\n${state.message}',
-                borderColor: Colors.red,
-              );
-            }
-          },
-          builder: (context, state) {
-            final isDeleting = state is AccountDeleting;
-
-            return Stack(
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state is AccountDeleted) {
+          PrimarySnackBar.show(
+            context: context,
+            text: 'Аккаунт успешно удалён',
+            borderColor: Colors.green,
+          );
+          context.read<AuthBloc>().add(AuthLogoutEvent());
+          AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
+        } else if (state is AccountDeleteError) {
+          PrimarySnackBar.show(
+            context: context,
+            text: 'Ошибка удаления аккаунта\n${state.message}',
+            borderColor: Colors.red,
+          );
+        }
+      },
+      builder: (context, state) {
+        final isDeleting = state is AccountDeleting;
+        return Scaffold(
+          appBar: _buildAppBar(context, state),
+          backgroundColor: ColorsConstants.backgroundColor,
+          body: SafeArea(
+            child: Stack(
               children: [
                 SingleChildScrollView(
                   padding: EdgeInsets.all(16.w),
                   child: Center(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: PrimaryButton(
-                        text: 'Удалить аккаунт',
-                        onPressed: isDeleting
-                            ? null
-                            : () {
-                                _showDeleteAccountConfirmationDialog(context);
-                              },
-                      ),
+                    child: PrimaryButton(
+                      text: 'Удалить аккаунт',
+                      onPressed: isDeleting
+                          ? null
+                          : () async {
+                              _showDeleteAccountConfirmationDialog(context);
+                            },
                     ),
                   ),
                 ),
                 if (isDeleting)
                   Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        ColorsConstants.primaryBrownColor,
-                      ),
+                      strokeWidth: 4.w,
+                      backgroundColor:
+                          ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      color: ColorsConstants.primaryBrownColor,
                     ),
                   ),
               ],
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
-PreferredSizeWidget _buildAppBar(BuildContext context) {
+PreferredSizeWidget _buildAppBar(BuildContext context, ProfileState state) {
   return AppBar(
     backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
     centerTitle: true,
@@ -98,14 +95,13 @@ PreferredSizeWidget _buildAppBar(BuildContext context) {
       style: TextStyle(
         fontFamily: 'Unbounded',
         fontSize: 16.sp,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         color: ColorsConstants.primaryBrownColor,
       ),
     ),
     leading: IconButton(
-      onPressed: () {
-        AutoRouter.of(context).pop();
-      },
+      onPressed: () =>
+          state is AccountDeleting ? null : AutoRouter.of(context).back(),
       icon: const Icon(Icons.arrow_back),
     ),
   );

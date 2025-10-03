@@ -42,7 +42,7 @@ class PrimaryTextFormField extends StatelessWidget {
     return TextFormField(
       style: TextStyle(
         fontFamily: 'Unbounded',
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 14.sp,
         color: ColorsConstants.primaryBrownColor,
       ),
@@ -67,7 +67,7 @@ class PrimaryTextFormField extends StatelessWidget {
         labelStyle: TextStyle(
           fontFamily: 'Unbounded',
           fontWeight: FontWeight.w400,
-          fontSize: 14.sp,
+          fontSize: 12.sp,
           color: ColorsConstants.primaryBrownColorWithOpacity,
         ),
         prefixIcon: prefixIcon,

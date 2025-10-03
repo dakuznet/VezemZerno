@@ -61,5 +61,3 @@ class UpdatePasswordEvent extends ProfileEvent {
 }
 
 class CheckInternetConnection extends ProfileEvent {}
-
-class ProfileLogoutEvent extends ProfileEvent {}

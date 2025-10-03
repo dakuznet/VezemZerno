@@ -9,20 +9,22 @@ class PrimarySnackBar {
     Color? borderColor,
   }) {
     final snackBar = SnackBar(
-      duration: const Duration(seconds: 5),
+      elevation: 0.sp,
+      duration: const Duration(seconds: 3),
+      margin: EdgeInsets.all(16.w),
       content: Text(
         text,
         style: TextStyle(
           fontFamily: 'Unbounded',
           fontSize: 14.sp,
           color: ColorsConstants.primaryBrownColor,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
         ),
       ),
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0.r),
+        borderRadius: BorderRadius.circular(12.0.r),
         side: BorderSide(
           color: borderColor ?? Colors.transparent,
           width: 2.0.w,

@@ -78,7 +78,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   Widget _buildScaffold(BuildContext context, AuthState state) {
     return Scaffold(
-      appBar: _buildAppBar(context),
+      appBar: _buildAppBar(context, state),
       backgroundColor: ColorsConstants.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -91,7 +91,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
+  AppBar _buildAppBar(BuildContext context, AuthState state) {
     return AppBar(
       surfaceTintColor: Colors.transparent,
       backgroundColor: ColorsConstants.backgroundColor,
@@ -99,7 +99,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         icon: const Icon(Icons.arrow_back),
         color: ColorsConstants.primaryBrownColor,
         iconSize: 24.r,
-        onPressed: () => _navigateToWelcome(context),
+        onPressed: () =>
+            state is AuthLoading ? null : AutoRouter.of(context).back(),
       ),
     );
   }
@@ -307,34 +308,41 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   Widget _buildRegisterButton(BuildContext context, AuthState state) {
     return PrimaryButton(
-      text: state is AuthLoading ? 'Загрузка...' : 'Зарегистрироваться',
+      text: 'Зарегистрироваться',
       onPressed: state is AuthLoading
           ? null
           : () => _handleRegistration(context),
+      isLoading: state is AuthLoading,
     );
   }
 
   void _handleAuthStateChanges(BuildContext context, AuthState state) {
     if (state is AuthFailure) {
-      _showErrorSnackBar(context, 'Ошибка регистрации\n${state.message}');
+      PrimarySnackBar.show(
+        context: context,
+        text: "Ошибка регистрации\n${state.message}",
+        borderColor: Colors.red,
+      );
     } else if (state is AuthUserAlreadyExists) {
-      _showErrorSnackBar(context, state.message);
+      PrimarySnackBar.show(
+        context: context,
+        text: state.message,
+        borderColor: Colors.red,
+      );
     } else if (state is NoInternetConnection) {
-      _showErrorSnackBar(
-        context,
-        'Ошибка регистрации\nПроверьте подключение к интернету',
+      PrimarySnackBar.show(
+        context: context,
+        text: "Проверьте подключение к интернету",
+        borderColor: Colors.red,
       );
     } else if (state is VerificationCodeSent) {
-      _navigateToPhoneVerification(context);
+      AutoRouter.of(context).push(
+        PhoneVerificationRoute(
+          phone: _phoneController.text,
+          password: _passwordController.text,
+        ),
+      );
     }
-  }
-
-  void _showErrorSnackBar(BuildContext context, String message) {
-    PrimarySnackBar.show(
-      context: context,
-      text: message,
-      borderColor: Colors.red,
-    );
   }
 
   String? _validateName(String? value) {
@@ -442,7 +450,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (_selectedRole == null) {
       PrimarySnackBar.show(
         context: context,
-        text: 'Выберите роль: заказчик или перевозчик',
+        text: 'Необходимо выбрать род деятельности: заказчик или перевозчик',
         borderColor: Colors.red,
       );
       return false;
@@ -451,7 +459,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (!_isPrivacyAccepted) {
       PrimarySnackBar.show(
         context: context,
-        text: 'Примите политику конфиденциальности',
+        text: 'Необходимо принять политику конфиденциальности',
         borderColor: Colors.red,
       );
       return false;
@@ -470,18 +478,5 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     } else {
       return '7$digits';
     }
-  }
-
-  void _navigateToWelcome(BuildContext context) {
-    context.router.replaceAll([const WelcomeRoute()]);
-  }
-
-  void _navigateToPhoneVerification(BuildContext context) {
-    context.router.push(
-      PhoneVerificationRoute(
-        phone: _phoneController.text,
-        password: _passwordController.text,
-      ),
-    );
   }
 }

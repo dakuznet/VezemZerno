@@ -93,9 +93,7 @@ class ProfileInfoAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget _buildSettingsButton(BuildContext context) {
     return IconButton(
       icon: SvgPicture.asset('assets/svg/settings_icon.svg'),
-      onPressed: () {
-        AutoRouter.of(context).push(const SettingRoute());
-      },
+      onPressed: () => AutoRouter.of(context).push(const SettingRoute()),
     );
   }
 }

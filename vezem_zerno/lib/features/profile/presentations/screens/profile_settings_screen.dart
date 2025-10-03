@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_event.dart';
@@ -66,25 +67,10 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Ошибка при выборе изображения',
-              style: TextStyle(
-                fontFamily: 'Unbounded',
-                fontSize: 14.sp,
-                color: ColorsConstants.primaryBrownColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            backgroundColor:
-                ColorsConstants.primaryTextFormFieldBackgorundColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              side: BorderSide(color: Colors.red, width: 2.w),
-            ),
-          ),
+        PrimarySnackBar.show(
+          context: context,
+          text: 'Ошибка при выборе изображения',
+          borderColor: Colors.red,
         );
       }
     } finally {
@@ -97,29 +83,6 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
   }
 
   void _saveProfile() {
-    if (_selectedRole == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Выберите род деятельности',
-            style: TextStyle(
-              fontFamily: 'Unbounded',
-              fontSize: 14.sp,
-              color: ColorsConstants.primaryBrownColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-            side: BorderSide(color: Colors.red, width: 2.w),
-          ),
-        ),
-      );
-      return;
-    }
-
     context.read<ProfileBloc>().add(
       SaveProfileEvent(
         name: _nameController.text.trim(),
@@ -130,10 +93,6 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
         imageFile: _profileImage,
       ),
     );
-  }
-
-  void _handleBackPressed() {
-    AutoRouter.of(context).pop();
   }
 
   @override
@@ -157,48 +116,18 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
         }
 
         if (state is ProfileSaved) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Изменения сохранены',
-                style: TextStyle(
-                  fontFamily: 'Unbounded',
-                  fontSize: 14.sp,
-                  color: ColorsConstants.primaryBrownColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              backgroundColor:
-                  ColorsConstants.primaryTextFormFieldBackgorundColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                side: BorderSide(color: Colors.green, width: 2.w),
-              ),
-            ),
+          PrimarySnackBar.show(
+            context: context,
+            text: 'Изменения сохранены',
+            borderColor: Colors.green,
           );
         }
 
         if (state is ProfileError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Ошибка сохранения профиля\n${state.message}',
-                style: TextStyle(
-                  fontFamily: 'Unbounded',
-                  fontSize: 14.sp,
-                  color: ColorsConstants.primaryBrownColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              backgroundColor:
-                  ColorsConstants.primaryTextFormFieldBackgorundColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                side: BorderSide(color: Colors.red, width: 2.w),
-              ),
-            ),
+          PrimarySnackBar.show(
+            context: context,
+            text: 'Ошибка сохранения профиля\n${state.message}',
+            borderColor: Colors.red,
           );
         }
       },
@@ -214,12 +143,12 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
               style: TextStyle(
                 fontFamily: 'Unbounded',
                 fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
                 color: ColorsConstants.primaryBrownColor,
               ),
             ),
             leading: IconButton(
-              onPressed: _handleBackPressed,
+              onPressed: () => state is ProfileSaving ? null : AutoRouter.of(context).back(),
               icon: const Icon(Icons.arrow_back),
               color: ColorsConstants.primaryBrownColor,
             ),
@@ -234,7 +163,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                     onTap: _pickImage,
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32.r),
+                        borderRadius: BorderRadius.circular(12.r),
                         color:
                             ColorsConstants.primaryTextFormFieldBackgorundColor,
                       ),
@@ -242,7 +171,14 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                       width: 360.w,
                       height: 120.h,
                       child: _isImageLoading
-                          ? const Center(child: CircularProgressIndicator())
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 4.w,
+                                backgroundColor: ColorsConstants
+                                    .primaryTextFormFieldBackgorundColor,
+                                color: ColorsConstants.primaryBrownColor,
+                              ),
+                            )
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -262,15 +198,15 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                                       _profileImage == null &&
                                           (_currentImageUrl == null ||
                                               _currentImageUrl!.isEmpty)
-                                      ? Icon(Icons.camera_alt, size: 30.w)
+                                      ? Icon(Icons.camera_alt, size: 24.w)
                                       : null,
                                 ),
                                 Text(
                                   'Изменить фото',
                                   style: TextStyle(
                                     fontFamily: 'Unbounded',
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w400,
                                     color: ColorsConstants.primaryBrownColor,
                                   ),
                                 ),
@@ -291,13 +227,10 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                   _buildRoleSelection(),
                   SizedBox(height: 16.h),
 
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
-                    child: PrimaryButton(
-                      text: 'Сохранить',
-                      onPressed: _saveProfile,
-                    ),
+                  PrimaryButton(
+                    text: 'Сохранить',
+                    onPressed: state is ProfileSaving ? null : _saveProfile,
+                    isLoading: state is ProfileSaving,
                   ),
                 ],
               ),
@@ -313,11 +246,11 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Имя:',
+          'Имя',
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -327,7 +260,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
           controller: _nameController,
           labelBehavior: FloatingLabelBehavior.never,
           labelText: 'Имя',
-          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 20.sp),
+          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 24.sp),
         ),
       ],
     );
@@ -338,11 +271,11 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Фамилия:',
+          'Фамилия',
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -352,7 +285,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
           controller: _surnameController,
           labelBehavior: FloatingLabelBehavior.never,
           labelText: 'Фамилия',
-          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 20.sp),
+          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 24.sp),
         ),
       ],
     );
@@ -363,11 +296,11 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Название организации:',
+          'Название организации',
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -377,7 +310,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
           controller: _organizationController,
           labelBehavior: FloatingLabelBehavior.never,
           labelText: 'Название организации',
-          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 20.sp),
+          suffixIcon: Icon(Icons.drive_file_rename_outline, size: 24.sp),
         ),
       ],
     );
@@ -388,11 +321,11 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Телефон:',
+          'Телефон',
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -412,11 +345,11 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Род деятельности:',
+          'Род деятельности',
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -439,8 +372,8 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                   'Перевозчик',
                   style: TextStyle(
                     fontFamily: 'Unbounded',
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
                     color: ColorsConstants.primaryBrownColor,
                   ),
                 ),
@@ -454,8 +387,8 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                   'Заказчик',
                   style: TextStyle(
                     fontFamily: 'Unbounded',
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
                     color: ColorsConstants.primaryBrownColor,
                   ),
                 ),

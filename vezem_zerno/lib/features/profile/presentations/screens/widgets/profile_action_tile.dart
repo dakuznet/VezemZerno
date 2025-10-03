@@ -22,7 +22,7 @@ class ProfileActionTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         onTap: onTap,
         child: Padding(
           padding: EdgeInsets.all(8.w),
@@ -39,8 +39,8 @@ class ProfileActionTile extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12.sp,
                     color: ColorsConstants.primaryBrownColor,
                   ),
                 ),
