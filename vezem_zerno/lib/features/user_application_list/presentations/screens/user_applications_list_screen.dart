@@ -147,7 +147,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isActiveTab ? Icons.list_alt_outlined : Icons.history_outlined,
+              Icons.list_alt_outlined,
               size: 40.sp,
               color: ColorsConstants.primaryBrownColorWithOpacity,
             ),
@@ -156,7 +156,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
           Text(
             isActiveTab
                 ? 'У вас нет ни одной активной заявки'
-                : 'История заявок пуста',
+                : 'У вас нет ни одной архивной заявки',
             style: TextStyle(
               fontSize: 16.sp,
               color: ColorsConstants.primaryBrownColorWithOpacity,
@@ -193,7 +193,7 @@ class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
         controller: tabController,
         tabs: const [
           Tab(text: 'Активные'),
-          Tab(text: 'История'),
+          Tab(text: 'Архив'),
         ],
         labelColor: ColorsConstants.primaryBrownColor,
         labelStyle: TextStyle(
