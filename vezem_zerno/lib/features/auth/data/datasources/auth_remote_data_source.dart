@@ -4,18 +4,16 @@ import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
 import 'package:vezem_zerno/core/entities/user_entity.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<Either<Failure, void>> sendVerificationCode({
+  Future<Either<Failure, void>> sendVerificationCode({required String phone});
+
+  Future<Either<Failure, void>> verifyCode({
     required String phone,
+    required String code,
     required String name,
     required String surname,
     required String organization,
     required String role,
     required String password,
-  });
-
-  Future<Either<Failure, void>> verifyCode({
-    required String phone,
-    required String code,
   });
 
   Future<Either<Failure, UserModel>> login(String phone, String password);

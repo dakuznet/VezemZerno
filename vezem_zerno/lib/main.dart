@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:vezem_zerno/core/constants/globals.dart';
 import 'package:vezem_zerno/core/injection_container.dart';
 import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
@@ -48,13 +49,13 @@ class MyApp extends StatelessWidget {
             listener: (context, state) {
               if (state is NoInternetConnection) {
                 PrimarySnackBar.show(
-                  context: context,
                   text: state.message,
                   borderColor: Colors.red,
                 );
               }
             },
             child: MaterialApp.router(
+              scaffoldMessengerKey: AppGlobals.scaffoldMessengerKey,
               localizationsDelegates: const [
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,

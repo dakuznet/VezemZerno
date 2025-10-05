@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/constants/globals.dart';
 
 class PrimarySnackBar {
-  static void show({
-    required BuildContext context,
-    required String text,
-    Color? borderColor,
-  }) {
+  static void show({required String text, Color? borderColor}) {
     final snackBar = SnackBar(
       elevation: 0.sp,
-      duration: const Duration(seconds: 3),
-      margin: EdgeInsets.all(16.w),
+      margin: EdgeInsets.all(12.w),
       content: Text(
         text,
         style: TextStyle(
@@ -21,6 +17,7 @@ class PrimarySnackBar {
           fontWeight: FontWeight.w400,
         ),
       ),
+      dismissDirection: DismissDirection.up,
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
@@ -32,6 +29,8 @@ class PrimarySnackBar {
       ),
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    AppGlobals.scaffoldMessengerKey.currentState
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
   }
 }

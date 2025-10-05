@@ -33,7 +33,6 @@ class _SettingScreenState extends State<SettingScreen> {
       listener: (context, state) {
         if (state is AccountDeleted) {
           PrimarySnackBar.show(
-            context: context,
             text: 'Аккаунт успешно удалён',
             borderColor: Colors.green,
           );
@@ -41,7 +40,6 @@ class _SettingScreenState extends State<SettingScreen> {
           AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
         } else if (state is AccountDeleteError) {
           PrimarySnackBar.show(
-            context: context,
             text: 'Ошибка удаления аккаунта\n${state.message}',
             borderColor: Colors.red,
           );

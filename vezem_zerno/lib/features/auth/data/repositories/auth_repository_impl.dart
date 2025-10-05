@@ -12,28 +12,29 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> sendVerificationCode({
     required String phone,
-    required String name,
-    required String surname,
-    required String organization,
-    required String role,
-    required String password,
   }) async {
-    return remoteDataSource.sendVerificationCode(
-      phone: phone,
-      name: name,
-      surname: surname,
-      organization: organization,
-      role: role,
-      password: password,
-    );
+    return remoteDataSource.sendVerificationCode(phone: phone);
   }
 
   @override
   Future<Either<Failure, void>> verifyCode({
     required String phone,
     required String code,
+    required String name,
+    required String surname,
+    required String organization,
+    required String role,
+    required String password,
   }) async {
-    return remoteDataSource.verifyCode(phone: phone, code: code);
+    return remoteDataSource.verifyCode(
+      phone: phone,
+      code: code,
+      name: name,
+      surname: surname,
+      organization: organization,
+      role: role,
+      password: password,
+    );
   }
 
   @override

@@ -13,11 +13,19 @@ import 'package:vezem_zerno/routes/router.dart';
 class PhoneVerificationScreen extends StatefulWidget {
   final String phone;
   final String password;
+  final String name;
+  final String surname;
+  final String organization;
+  final String role;
 
   const PhoneVerificationScreen({
     super.key,
     @PathParam('phone') required this.phone,
     @PathParam('password') required this.password,
+    @PathParam('name') required this.name,
+    @PathParam('surname') required this.surname,
+    @PathParam('organization') required this.organization,
+    @PathParam('role') required this.role,
   });
 
   @override
@@ -33,7 +41,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
   @override
   void dispose() {
-    _codeController.dispose();
     super.dispose();
   }
 
@@ -175,13 +182,11 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   void _handleAuthStateChanges(BuildContext context, AuthState state) {
     if (state is AuthFailure) {
       PrimarySnackBar.show(
-        context: context,
         text: 'Ошибка регистрации\n${state.message}',
         borderColor: Colors.red,
       );
     } else if (state is NoInternetConnection) {
       PrimarySnackBar.show(
-        context: context,
         text: 'Ошибка...\nПроверьте подключение к интернету',
         borderColor: Colors.red,
       );
@@ -192,7 +197,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
   void _handleVerificationSuccess(BuildContext context) {
     PrimarySnackBar.show(
-      context: context,
       text:
           'Регистрация выполнена успешно!\nЧтобы продолжить войдите в аккаунт',
       borderColor: Colors.green,
@@ -217,7 +221,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   void _handleVerification(BuildContext context) {
     if (_codeController.text.length != _codeLength) {
       PrimarySnackBar.show(
-        context: context,
         text: 'Введите 6-значный код',
         borderColor: Colors.red,
       );
@@ -226,7 +229,15 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
-        VerifyCodeEvent(phone: widget.phone, code: _codeController.text),
+        VerifyCodeEvent(
+          phone: widget.phone,
+          code: _codeController.text,
+          name: widget.name,
+          surname: widget.surname,
+          organization: widget.organization,
+          password: widget.password,
+          role: widget.role,
+        ),
       );
     }
   }

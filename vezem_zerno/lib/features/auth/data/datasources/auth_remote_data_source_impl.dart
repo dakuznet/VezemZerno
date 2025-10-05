@@ -14,21 +14,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Either<Failure, void>> sendVerificationCode({
     required String phone,
-    required String name,
-    required String surname,
-    required String organization,
-    required String role,
-    required String password,
   }) async {
     try {
-      final data = await _appwriteService.sendVerificationCode(
-        phone: phone,
-        name: name,
-        surname: surname,
-        organization: organization,
-        role: role,
-        password: password,
-      );
+      final data = await _appwriteService.sendVerificationCode(phone: phone);
 
       if (data['success'] == true) {
         return const Right(null);
@@ -56,9 +44,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<Either<Failure, void>> verifyCode({
     required String phone,
     required String code,
+    required String name,
+    required String surname,
+    required String organization,
+    required String role,
+    required String password,
   }) async {
     try {
-      final data = await _appwriteService.verifyCode(phone: phone, code: code);
+      final data = await _appwriteService.verifyCode(
+        phone: phone,
+        code: code,
+        name: name,
+        surname: surname,
+        organization: organization,
+        role: role,
+        password: password,
+      );
 
       if (data['success'] == true) {
         return Right(null);

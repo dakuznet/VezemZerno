@@ -319,19 +319,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void _handleAuthStateChanges(BuildContext context, AuthState state) {
     if (state is AuthFailure) {
       PrimarySnackBar.show(
-        context: context,
         text: "Ошибка регистрации\n${state.message}",
         borderColor: Colors.red,
       );
     } else if (state is AuthUserAlreadyExists) {
-      PrimarySnackBar.show(
-        context: context,
-        text: state.message,
-        borderColor: Colors.red,
-      );
+      PrimarySnackBar.show(text: state.message, borderColor: Colors.red);
     } else if (state is NoInternetConnection) {
       PrimarySnackBar.show(
-        context: context,
         text: "Проверьте подключение к интернету",
         borderColor: Colors.red,
       );
@@ -340,6 +334,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         PhoneVerificationRoute(
           phone: _phoneController.text,
           password: _passwordController.text,
+          name: _nameController.text,
+          surname: _surnameController.text,
+          organization: _organizationController.text,
+          role: _selectedRole!,
         ),
       );
     }
@@ -436,11 +434,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       context.read<AuthBloc>().add(
         SendVerificationCodeEvent(
           phone: _normalizePhone(_phoneController.text),
-          name: _nameController.text,
-          surname: _surnameController.text,
-          organization: _organizationController.text,
-          role: _selectedRole!,
-          password: _passwordController.text,
         ),
       );
     }
@@ -449,7 +442,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _validateForm(BuildContext context) {
     if (_selectedRole == null) {
       PrimarySnackBar.show(
-        context: context,
         text: 'Необходимо выбрать род деятельности: заказчик или перевозчик',
         borderColor: Colors.red,
       );
@@ -458,7 +450,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     if (!_isPrivacyAccepted) {
       PrimarySnackBar.show(
-        context: context,
         text: 'Необходимо принять политику конфиденциальности',
         borderColor: Colors.red,
       );

@@ -81,6 +81,10 @@ class PhoneVerificationRoute extends PageRouteInfo<PhoneVerificationRouteArgs> {
     Key? key,
     required String phone,
     required String password,
+    required String name,
+    required String surname,
+    required String organization,
+    required String role,
     List<PageRouteInfo>? children,
   }) : super(
          PhoneVerificationRoute.name,
@@ -88,8 +92,19 @@ class PhoneVerificationRoute extends PageRouteInfo<PhoneVerificationRouteArgs> {
            key: key,
            phone: phone,
            password: password,
+           name: name,
+           surname: surname,
+           organization: organization,
+           role: role,
          ),
-         rawPathParams: {'phone': phone, 'password': password},
+         rawPathParams: {
+           'phone': phone,
+           'password': password,
+           'name': name,
+           'surname': surname,
+           'organization': organization,
+           'role': role,
+         },
          initialChildren: children,
        );
 
@@ -103,12 +118,20 @@ class PhoneVerificationRoute extends PageRouteInfo<PhoneVerificationRouteArgs> {
         orElse: () => PhoneVerificationRouteArgs(
           phone: pathParams.getString('phone'),
           password: pathParams.getString('password'),
+          name: pathParams.getString('name'),
+          surname: pathParams.getString('surname'),
+          organization: pathParams.getString('organization'),
+          role: pathParams.getString('role'),
         ),
       );
       return PhoneVerificationScreen(
         key: args.key,
         phone: args.phone,
         password: args.password,
+        name: args.name,
+        surname: args.surname,
+        organization: args.organization,
+        role: args.role,
       );
     },
   );
@@ -119,6 +142,10 @@ class PhoneVerificationRouteArgs {
     this.key,
     required this.phone,
     required this.password,
+    required this.name,
+    required this.surname,
+    required this.organization,
+    required this.role,
   });
 
   final Key? key;
@@ -127,9 +154,17 @@ class PhoneVerificationRouteArgs {
 
   final String password;
 
+  final String name;
+
+  final String surname;
+
+  final String organization;
+
+  final String role;
+
   @override
   String toString() {
-    return 'PhoneVerificationRouteArgs{key: $key, phone: $phone, password: $password}';
+    return 'PhoneVerificationRouteArgs{key: $key, phone: $phone, password: $password, name: $name, surname: $surname, organization: $organization, role: $role}';
   }
 
   @override
@@ -138,11 +173,22 @@ class PhoneVerificationRouteArgs {
     if (other is! PhoneVerificationRouteArgs) return false;
     return key == other.key &&
         phone == other.phone &&
-        password == other.password;
+        password == other.password &&
+        name == other.name &&
+        surname == other.surname &&
+        organization == other.organization &&
+        role == other.role;
   }
 
   @override
-  int get hashCode => key.hashCode ^ phone.hashCode ^ password.hashCode;
+  int get hashCode =>
+      key.hashCode ^
+      phone.hashCode ^
+      password.hashCode ^
+      name.hashCode ^
+      surname.hashCode ^
+      organization.hashCode ^
+      role.hashCode;
 }
 
 /// generated route for
