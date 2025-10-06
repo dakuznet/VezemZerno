@@ -37,25 +37,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is PasswordUpdated) {
-          if (mounted) {
-            PrimarySnackBar.show(
-              context: context,
-              text: 'Пароль успешно изменён',
-              borderColor: Colors.green,
-            );
+          PrimarySnackBar.show(
+            text: 'Пароль успешно изменён',
+            borderColor: Colors.green,
+          );
 
-            context.read<ProfileBloc>().add(LoadProfileEvent());
+          context.read<ProfileBloc>().add(LoadProfileEvent());
 
-            AutoRouter.of(context).back();
-          }
+          AutoRouter.of(context).back();
         } else if (state is PasswordUpdateError) {
-          if (mounted) {
-            PrimarySnackBar.show(
-              context: context,
-              text: 'Ошибка изменения пароля\n${state.message}',
-              borderColor: Colors.red,
-            );
-          }
+          PrimarySnackBar.show(
+            text: 'Ошибка изменения пароля\n${state.message}',
+            borderColor: Colors.red,
+          );
         }
       },
       builder: (context, state) {

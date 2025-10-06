@@ -5,27 +5,28 @@ sealed class AuthEvent {}
 
 final class SendVerificationCodeEvent extends AuthEvent {
   final String phone;
+
+  SendVerificationCodeEvent({required this.phone});
+}
+
+final class VerifyCodeEvent extends AuthEvent {
+  final String phone;
+  final String code;
   final String name;
   final String surname;
   final String organization;
   final String role;
   final String password;
 
-  SendVerificationCodeEvent({
-    required this.phone,
+  VerifyCodeEvent({
     required this.name,
     required this.surname,
     required this.organization,
     required this.role,
     required this.password,
+    required this.phone,
+    required this.code,
   });
-}
-
-final class VerifyCodeEvent extends AuthEvent {
-  final String phone;
-  final String code;
-
-  VerifyCodeEvent({required this.phone, required this.code});
 }
 
 final class LoginEvent extends AuthEvent {

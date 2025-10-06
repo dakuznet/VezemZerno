@@ -10,7 +10,20 @@ class VerifyCodeUseCase {
   Future<Either<Failure, void>> call({
     required String phone,
     required String code,
+    required String name,
+    required String surname,
+    required String organization,
+    required String role,
+    required String password,
   }) async {
-    return repository.verifyCode(phone: phone, code: code);
+    return repository.verifyCode(
+      phone: phone,
+      code: code,
+      name: name,
+      surname: surname,
+      organization: organization,
+      role: role,
+      password: password,
+    );
   }
 }

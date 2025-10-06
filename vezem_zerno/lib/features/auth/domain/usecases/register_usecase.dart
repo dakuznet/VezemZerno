@@ -7,21 +7,7 @@ class RegisterUseCase {
 
   RegisterUseCase(this.repository);
 
-  Future<Either<Failure, void>> call({
-    required String phone,
-    required String name,
-    required String surname,
-    required String organization,
-    required String role,
-    required String password,
-  }) async {
-    return repository.sendVerificationCode(
-      phone: phone,
-      name: name,
-      surname: surname,
-      organization: organization,
-      role: role,
-      password: password,
-    );
+  Future<Either<Failure, void>> call({required String phone}) async {
+    return repository.sendVerificationCode(phone: phone);
   }
 }

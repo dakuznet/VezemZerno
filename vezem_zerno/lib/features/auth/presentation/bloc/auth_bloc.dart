@@ -200,14 +200,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
 
     emit(AuthLoading());
-    final result = await registerUseCase.call(
-      phone: event.phone,
-      name: event.name,
-      surname: event.surname,
-      organization: event.organization,
-      role: event.role,
-      password: event.password,
-    );
+    final result = await registerUseCase.call(phone: event.phone);
 
     result.fold((failure) {
       if (failure is UserAlreadyExistsFailure) {
@@ -229,9 +222,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
 
     emit(AuthLoading());
+    
     final result = await verifyCodeUseCase.call(
       phone: event.phone,
       code: event.code,
+      name: event.name,
+      surname: event.surname,
+      organization: event.organization,
+      role: event.role,
+      password: event.password,
     );
 
     result.fold(

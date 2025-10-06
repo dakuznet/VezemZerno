@@ -68,7 +68,6 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
     } catch (e) {
       if (mounted) {
         PrimarySnackBar.show(
-          context: context,
           text: 'Ошибка при выборе изображения',
           borderColor: Colors.red,
         );
@@ -115,17 +114,8 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
           });
         }
 
-        if (state is ProfileSaved) {
-          PrimarySnackBar.show(
-            context: context,
-            text: 'Изменения сохранены',
-            borderColor: Colors.green,
-          );
-        }
-
         if (state is ProfileError) {
           PrimarySnackBar.show(
-            context: context,
             text: 'Ошибка сохранения профиля\n${state.message}',
             borderColor: Colors.red,
           );
@@ -148,7 +138,8 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
               ),
             ),
             leading: IconButton(
-              onPressed: () => state is ProfileSaving ? null : AutoRouter.of(context).back(),
+              onPressed: () =>
+                  state is ProfileSaving ? null : AutoRouter.of(context).back(),
               icon: const Icon(Icons.arrow_back),
               color: ColorsConstants.primaryBrownColor,
             ),
@@ -229,7 +220,10 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
 
                   PrimaryButton(
                     text: 'Сохранить',
-                    onPressed: state is ProfileSaving ? null : _saveProfile,
+                    onPressed:
+                        state is ProfileSaving || state is NoInternetConnection
+                        ? null
+                        : _saveProfile,
                     isLoading: state is ProfileSaving,
                   ),
                 ],

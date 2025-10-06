@@ -172,7 +172,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleAuthStateChanges(BuildContext context, AuthState state) {
     if (state is AuthFailure) {
       PrimarySnackBar.show(
-        context: context,
         text: state.message,
         borderColor: Colors.red,
       );
@@ -180,7 +179,6 @@ class _LoginScreenState extends State<LoginScreen> {
       AutoRouter.of(context).replaceAll([const MainRoute()]);
     } else if (state is NoInternetConnection) {
       PrimarySnackBar.show(
-        context: context,
         text: 'Проверьте подключение к интернету',
         borderColor: Colors.red,
       );

@@ -215,27 +215,13 @@ class AppwriteService {
 
   Future<Map<String, dynamic>> sendVerificationCode({
     required String phone,
-    required String name,
-    required String surname,
-    required String organization,
-    required String role,
-    required String password,
   }) async {
     final normalizedPhone = _normalizePhone(phone);
-    final email = _buildEmailFromPhone(normalizedPhone);
 
     try {
       final response = await _functions.createExecution(
         functionId: StringConstants.funcSendVerfCodeId,
-        body: jsonEncode({
-          'phone': normalizedPhone,
-          'email': email,
-          'name': name,
-          'surname': surname,
-          'organization': organization,
-          'role': role,
-          'password': password,
-        }),
+        body: jsonEncode({'phone': normalizedPhone}),
       );
 
       return jsonDecode(response.responseBody);
@@ -255,12 +241,25 @@ class AppwriteService {
   Future<Map<String, dynamic>> verifyCode({
     required String phone,
     required String code,
+    required String name,
+    required String surname,
+    required String organization,
+    required String role,
+    required String password,
   }) async {
     final normalizedPhone = _normalizePhone(phone);
 
     final response = await _functions.createExecution(
       functionId: StringConstants.funcVerifyCodeId,
-      body: jsonEncode({'phone': normalizedPhone, 'code': code}),
+      body: jsonEncode({
+        'phone': normalizedPhone,
+        'code': code,
+        'name': name,
+        'surname': surname,
+        'organization': organization,
+        'role': role,
+        'password': password,
+      }),
     );
 
     return jsonDecode(response.responseBody);
