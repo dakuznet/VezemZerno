@@ -276,6 +276,6 @@ class AppwriteService {
   }
 
   String _buildEmailFromPhone(String phone) {
-    return '$phone@example.com';
+    return '$phone@vezemzerno.com';
   }
 }

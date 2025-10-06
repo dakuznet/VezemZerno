@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/routes/router.dart';
 
 @RoutePage()
 class UserApplicationsListScreen extends StatefulWidget {
@@ -48,7 +49,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
       child: PrimaryButton(
         text: 'Создать заявку',
         onPressed: () {
-          // TODO: Добавьте обработчик нажатия для создания заявки
+         AutoRouter.of(context).push(const CreateRequestRoute());
         },
       ),
     );

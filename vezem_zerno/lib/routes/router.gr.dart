@@ -43,6 +43,22 @@ class ChangePasswordRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [CreateRequestScreen]
+class CreateRequestRoute extends PageRouteInfo<void> {
+  const CreateRequestRoute({List<PageRouteInfo>? children})
+    : super(CreateRequestRoute.name, initialChildren: children);
+
+  static const String name = 'CreateRequestRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const CreateRequestScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [LoginScreen]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})
