@@ -35,13 +35,19 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   bool _suitableForDumpTrucks = false;
   bool _carrierWorksByCharter = false;
   String _paymentMethod = 'cash'; // 'cash' or 'cashless'
-
+  DateTime? _selectedStartDate;
+  DateTime? _selectedEndDate;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        title: const Text('Создание заявки'),
+        title:  Text('Создание заявки', style: TextStyle(
+          fontSize: 16.sp,
+          color: ColorsConstants.primaryBrownColor,
+          fontFamily: 'Unbounded',
+          fontWeight: FontWeight.w500,
+        ),),
         centerTitle: true,
       ),
       body: Container(
@@ -58,13 +64,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                 SizedBox(height: 20.h),
                 _buildCargoFields(),
                 SizedBox(height: 20.h),
-                _buildAdditionalFields(),
-                SizedBox(height: 20.h),
-                _buildCheckboxFields(),
-                SizedBox(height: 20.h),
-                _buildPaymentMethodField(),
-                SizedBox(height: 20.h),
-                _buildDescriptionField(),
+                Text('Условия погрузки', style: StyleForTitle(),),
                 SizedBox(height: 20.h),
                 _buildDateStartField(),
                 SizedBox(height: 20.h),
@@ -72,6 +72,25 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                 SizedBox(height: 20.h),
                 _buildChoseLoadingMethod(),
                 SizedBox(height: 20.h),
+                _buildTextFormField(
+                  labelStyle: StyleForFormField(),
+                 controller: _loadingWeightCapacityController,
+                  labelText: 'Грузоподъемность весов на погрузке, тонн',
+                  validator: (value) => _validateNotEmpty(value, 'грузоподъемность весов'),
+                ),
+               SizedBox(height: 20.h),
+               Text('Детали перевозки', style: StyleForTitle(),),
+                SizedBox(height: 20.h),
+               _buildCheckboxFields(),
+                SizedBox(height: 20.h),
+                _buildAdditionalFields(),
+                SizedBox(height: 20.h),
+                _buildPaymentMethodField(),
+                SizedBox(height: 20.h),
+                
+                _buildDescriptionField(),
+                SizedBox(height: 20.h),
+                
                 _buildSubmitButton(),
               ],
             ),
@@ -82,14 +101,23 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   }
 
   Widget _buildLoadingFields() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      Text(
+        "Основное",
+      style:  StyleForTitle()),
+      SizedBox(height: 20.h),
+      Text("Место погрузки",style: StyleForSubtitle(), ),
+          SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _regionController,
         labelText: 'Регион погрузки',
         validator: (value) => _validateNotEmpty(value, 'регион погрузки'),
       ),
       SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _localityController,
         labelText: 'Населенный пункт погрузки',
         validator: (value) => _validateNotEmpty(value, 'населенный пункт погрузки'),
@@ -97,15 +125,22 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     ],
   );
 
+
+
   Widget _buildUnloadingFields() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      Text("Место выгрузки",style: StyleForSubtitle(), ),
+          SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _unloadingRegionController,
         labelText: 'Регион выгрузки',
         validator: (value) => _validateNotEmpty(value, 'регион выгрузки'),
       ),
       SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _locationOfUnloadingController,
         labelText: 'Населенный пункт выгрузки',
         validator: (value) => _validateNotEmpty(value, 'населенный пункт выгрузки'),
@@ -116,18 +151,21 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   Widget _buildCargoFields() => Column(
     children: [
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _cropController,
         labelText: 'Введите культуру',
         validator: (value) => _validateNotEmpty(value, 'культуру'),
       ),
       SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _transportationVolumeController,
         labelText: 'Введите объём перевозки, тонн',
         validator: (value) => _validateNotEmpty(value, 'объём перевозки'),
       ),
       SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _distanceController,
         labelText: 'Введите расстояние, км',
         validator: (value) => _validateNotEmpty(value, 'расстояние'),
@@ -137,30 +175,28 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   Widget _buildAdditionalFields() => Column(
     children: [
       _buildTextFormField(
-        controller: _loadingWeightCapacityController,
-        labelText: 'Грузоподъемность весов на погрузке, тонн',
-        validator: (value) => _validateNotEmpty(value, 'грузоподъемность весов'),
-      ),
-      SizedBox(height: 20.h),
-      _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _shippingPriceController,
         labelText: 'Цена перевозки, руб',
         validator: (value) => _validateNotEmpty(value, 'цену перевозки'),
       ),
       SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _downtimePaymentController,
         labelText: 'Как оплачиваете простой',
         validator: (value) => _validateNotEmpty(value, 'условия оплаты простоя'),
       ),
       SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _allowableShortageController,
         labelText: 'Допустимая недостача, кг',
         validator: (value) => _validateNotEmpty(value, 'допустимую недостачу'),
       ),
       SizedBox(height: 20.h),
       _buildTextFormField(
+        labelStyle: StyleForFormField(),
         controller: _paymentTermsController,
         labelText: 'Сроки оплаты',
         validator: (value) => _validateNotEmpty(value, 'сроки оплаты'),
@@ -173,14 +209,14 @@ Widget _buildCheckboxFields() => Column(
     Container(
       decoration: BoxDecoration(
         color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        borderRadius: BorderRadius.circular(12.0.r),
+        borderRadius: BorderRadius.circular(15.0.r),
         border: Border.all(
           color: Colors.black, // Черная обводка
           width: 1.0,
         ),
       ),
       child: CheckboxListTile(
-        title: const Text('Подходят самосвалы'),
+        title:  Text('Подходят самосвалы',style: StyleForChooseBlock()),
         value: _suitableForDumpTrucks,
         activeColor: ColorsConstants.primaryButtonBackgroundColor,
         checkColor: Colors.white,
@@ -195,15 +231,16 @@ Widget _buildCheckboxFields() => Column(
     SizedBox(height: 10.h),
     Container(
       decoration: BoxDecoration(
+        
         color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        borderRadius: BorderRadius.circular(12.0.r),
+        borderRadius: BorderRadius.circular(15.0.r),
         border: Border.all(
-          color: Colors.black, // Черная обводка
+          color: Colors.black, 
           width: 1.0,
         ),
       ),
       child: CheckboxListTile(
-        title: const Text('Перевозчик работает по хартии'),
+        title:  Text('Перевозчик работает по хартии',style: StyleForChooseBlock()),
         value: _carrierWorksByCharter,
         activeColor: ColorsConstants.primaryButtonBackgroundColor,
         checkColor: Colors.white,
@@ -218,20 +255,30 @@ Widget _buildCheckboxFields() => Column(
   ],
 );
 
-  Widget _buildPaymentMethodField() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Способ оплаты',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-      SizedBox(height: 10.h),
-      Row(
-        children: [
-          Expanded(
+Widget _buildPaymentMethodField() => Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+     Text(
+      'Способ оплаты',
+      style: StyleForSubtitle(),
+    ),
+    SizedBox(height: 10.h),
+    Row(
+      children: [
+        Expanded(
+          child: Container(
+            margin: EdgeInsets.only(right: 8.w),
+            decoration: BoxDecoration(
+              color: ColorsConstants.primaryTextFormFieldBackgorundColor,
+              borderRadius: BorderRadius.circular(12.0.r),
+              border: Border.all(
+                color: Colors.black,
+                width: 1.0,
+              ),
+            ),
             child: RadioListTile<String>(
-  
-              title: const Text('Наличные'),
+              activeColor: ColorsConstants.primaryButtonBackgroundColor,
+              title:  Text('Наличные',style: StyleForChooseBlock(),),
               value: 'cash',
               groupValue: _paymentMethod,
               onChanged: (String? value) {
@@ -241,9 +288,21 @@ Widget _buildCheckboxFields() => Column(
               },
             ),
           ),
-          Expanded(
+        ),
+        Expanded(
+          child: Container(
+            margin: EdgeInsets.only(left: 8.w),
+            decoration: BoxDecoration(
+              color: ColorsConstants.primaryTextFormFieldBackgorundColor,
+              borderRadius: BorderRadius.circular(15.0.r),
+              border: Border.all(
+                color: Colors.black,
+                width: 1.0,
+              ),
+            ),
             child: RadioListTile<String>(
-              title: const Text('Безналичные'),
+              activeColor: ColorsConstants.primaryButtonBackgroundColor,
+              title:  Text('Безналичные',style: StyleForChooseBlock()),
               value: 'cashless',
               groupValue: _paymentMethod,
               onChanged: (String? value) {
@@ -253,12 +312,15 @@ Widget _buildCheckboxFields() => Column(
               },
             ),
           ),
-        ],
-      ),
-    ],
-  );
+        ),
+      ],
+    ),
+  ],
+);
+
 
   Widget _buildDescriptionField() => _buildTextFormField(
+    labelStyle: StyleForFormField(),
     controller: _descriptionController,
     labelText: 'Описание',
     maxLines: 5,
@@ -266,54 +328,56 @@ Widget _buildCheckboxFields() => Column(
   );
 
   Widget _buildDateStartField() => Row(
-    children: [
-      Expanded(
-        child: InkWell(
-          onTap: () => _selectDate(context),
-          child: IgnorePointer(
-            child: _buildTextFormField(
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.black,
-                fontWeight: FontWeight.w900,
-              ),
-              labelText: _selectedDate == null 
-                  ? 'Дата не выбрана'
-                  : 'Дата начала погрузки: ${_selectedDate!.day}.${_selectedDate!.month}.${_selectedDate!.year}',
-              validator: (value) => _validateNotEmpty(value, 'дата'),
-              controller: _dataStartController,
+  children: [
+    Expanded(
+      child: InkWell(
+        onTap: () => _selectStartDate(context),
+        child: IgnorePointer(
+          child: TextFormField(
+            controller: _dataStartController,
+            decoration: InputDecoration(
+              fillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
+              filled: true,
+              labelText: 'Дата начала погрузки',
+              labelStyle: StyleForFormField(),
+              border: BorderStyle(),
             ),
+            style:  StyleForChooseBlock(),
+            validator: (value) => _validateNotEmpty(value, 'дата начала'),
           ),
         ),
       ),
-    ],
-  );
+    ),
+  ],
+);
 
-  Widget _buildDateEndField() => Row(
-    children: [
-      Expanded(
-        child: InkWell(
-          onTap: () => _selectDate(context),
-          child: IgnorePointer(
-            child: _buildTextFormField(
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.black,
-                fontWeight: FontWeight.w900,
-              ),
-              labelText: _selectedDate == null 
-                  ? 'Дата не выбрана'
-                  : 'Дата закрытия получения заявок: ${_selectedDate!.day}.${_selectedDate!.month}.${_selectedDate!.year}',
-              validator: (value) => _validateNotEmpty(value, 'дата'),
-              controller: _dataEndController,
+Widget _buildDateEndField() => Row(
+  children: [
+    Expanded(
+      child: InkWell(
+        onTap: () => _selectEndDate(context),
+        child: IgnorePointer(
+          child: TextFormField(
+            controller: _dataEndController,
+            decoration: InputDecoration(
+              fillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
+              filled: true,
+              labelText: 'Дата закрытия получения заявок',
+             labelStyle: StyleForFormField(),
+              border: BorderStyle(),
             ),
+            style:  StyleForChooseBlock(),
+            validator: (value) => _validateNotEmpty(value, 'дата закрытия'),
           ),
         ),
       ),
-    ],
-  );
+    ),
+  ],
+);
+
 
   Widget _buildChoseLoadingMethod() => DropdownButtonFormField<String>(
+    style: StyleForChooseBlock(),
     value: _selectedCategory,
     items: const [
       'Не указано',
@@ -338,11 +402,12 @@ Widget _buildCheckboxFields() => Column(
         _selectedCategory = value!;
       });
     },
-    decoration: const InputDecoration(
+    decoration:  InputDecoration(
       fillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
       filled: true,
-      labelText: 'Категория',
-      border: OutlineInputBorder(),
+      labelStyle: StyleForFormField(),
+      labelText: 'Выберите способ погрузки',
+      border: BorderStyle(),
     ),
   );
 
@@ -354,7 +419,7 @@ Widget _buildCheckboxFields() => Column(
     ),
     child: Text(
       'Создать заявку',
-      style: TextStyle(color: ColorsConstants.primaryBrownColor),
+      style: TextStyle(color: ColorsConstants.primaryBrownColor, fontSize: 16.sp, fontFamily: 'Unbounded',fontWeight: FontWeight.w500),
     ),
   );
 
@@ -366,7 +431,6 @@ Widget _buildCheckboxFields() => Column(
     TextStyle? style, 
     TextStyle? labelStyle, 
     TextStyle? hintStyle,
-    InputDecoration? decoration, 
   }) {
     return TextFormField(
       controller: controller,
@@ -376,9 +440,7 @@ Widget _buildCheckboxFields() => Column(
         labelText: labelText,
         labelStyle: labelStyle, 
         hintStyle: hintStyle, 
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0.r),
-        ),
+        border: BorderStyle(),
         alignLabelWithHint: true,
       ),
       style: style, 
@@ -394,19 +456,35 @@ Widget _buildCheckboxFields() => Column(
     return null;
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
+  Future<void> _selectStartDate(BuildContext context) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime.now(),
+    lastDate: DateTime(2100),
+  );
+  if (picked != null) {
+    setState(() {
+      _selectedStartDate = picked;
+      _dataStartController.text = "${picked.day}.${picked.month}.${picked.year}";
+    });
   }
+}
+
+Future<void> _selectEndDate(BuildContext context) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime.now(),
+    lastDate: DateTime(2100),
+  );
+  if (picked != null) {
+    setState(() {
+      _selectedEndDate = picked;
+      _dataEndController.text = "${picked.day}.${picked.month}.${picked.year}";
+    });
+  }
+}
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -448,12 +526,14 @@ Widget _buildCheckboxFields() => Column(
       // Очистка формы после успешного создания
       _formKey.currentState!.reset();
       setState(() {
-        _selectedDate = null;
+        _selectedEndDate = null;
+        _selectedStartDate = null;
         _isUrgent = false;
         _suitableForDumpTrucks = false;
         _carrierWorksByCharter = false;
         _paymentMethod = 'cash';
         _selectedCategory = 'Не указано';
+        
       });
     }
   }
@@ -475,4 +555,43 @@ Widget _buildCheckboxFields() => Column(
     _paymentTermsController.dispose();
     super.dispose();
   }
+
+
+    TextStyle StyleForFormField() {
+    return TextStyle( fontSize: 12.sp,
+        color: ColorsConstants.primaryBrownColorWithOpacity,
+        fontFamily: 'Unbounded',
+        fontWeight: FontWeight.w400, );
+  }
+
+    TextStyle StyleForSubtitle() {
+      return TextStyle(
+        fontSize: 12.sp,
+          color: ColorsConstants.primaryBrownColor,
+          fontFamily: 'Unbounded',
+          fontWeight: FontWeight.w400,);
+    }
+
+    TextStyle StyleForTitle() {
+        return TextStyle(
+        fontSize: 16.sp,
+          color: ColorsConstants.primaryBrownColor,
+          fontFamily: 'Unbounded',
+          fontWeight: FontWeight.w500);
+          }
+
+    TextStyle StyleForChooseBlock() {
+      return TextStyle(fontSize: 12.sp,
+        color: ColorsConstants.primaryBrownColor,
+        fontFamily: 'Unbounded',
+        fontWeight: FontWeight.w400,);
+    }
+
+    OutlineInputBorder BorderStyle() {
+  return OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15.0.r),
+              borderSide: BorderSide(color: Colors.black, width: 1.0),
+            );
+}
+
 }
