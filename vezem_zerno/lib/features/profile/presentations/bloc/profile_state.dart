@@ -1,12 +1,14 @@
 import 'package:equatable/equatable.dart';
-import 'package:vezem_zerno/core/entities/user_entity.dart';
+import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
 
 abstract class ProfileState extends Equatable {
+  const ProfileState();
+
   @override
   List<Object?> get props => [];
 }
 
-// PROFILE
+// Initial and Loading States
 class ProfileInitial extends ProfileState {}
 
 class ProfileLoading extends ProfileState {}
@@ -14,12 +16,13 @@ class ProfileLoading extends ProfileState {}
 class ProfileLoaded extends ProfileState {
   final UserEntity user;
 
-  ProfileLoaded(this.user);
+  const ProfileLoaded(this.user);
 
   @override
   List<Object?> get props => [user];
 }
 
+// Profile Saving States
 class ProfileSaving extends ProfileState {}
 
 class ProfileSaved extends ProfileState {}
@@ -27,22 +30,19 @@ class ProfileSaved extends ProfileState {}
 class ProfileError extends ProfileState {
   final String message;
 
-  ProfileError(this.message);
+  const ProfileError(this.message);
 
   @override
   List<Object?> get props => [message];
 }
 
-// CHANGE PROFILE IMAGE
-class ProfileImageUploading extends ProfileState {
-  @override
-  List<Object> get props => [];
-}
+// Profile Image States
+class ProfileImageUploading extends ProfileState {}
 
 class ProfileImageUploaded extends ProfileState {
   final String imageUrl;
 
-  ProfileImageUploaded(this.imageUrl);
+  const ProfileImageUploaded(this.imageUrl);
 
   @override
   List<Object> get props => [imageUrl];
@@ -51,13 +51,13 @@ class ProfileImageUploaded extends ProfileState {
 class ProfileImageError extends ProfileState {
   final String message;
 
-  ProfileImageError(this.message);
+  const ProfileImageError(this.message);
 
   @override
   List<Object> get props => [message];
 }
 
-// DELETE PROFILE
+// Account Deletion States
 class AccountDeleting extends ProfileState {}
 
 class AccountDeleted extends ProfileState {}
@@ -65,13 +65,13 @@ class AccountDeleted extends ProfileState {}
 class AccountDeleteError extends ProfileState {
   final String message;
 
-  AccountDeleteError(this.message);
+  const AccountDeleteError(this.message);
 
   @override
   List<Object?> get props => [message];
 }
 
-// CHANGE PASSWORD
+// Password Update States
 class PasswordUpdating extends ProfileState {}
 
 class PasswordUpdated extends ProfileState {}
@@ -79,15 +79,18 @@ class PasswordUpdated extends ProfileState {}
 class PasswordUpdateError extends ProfileState {
   final String message;
 
-  PasswordUpdateError(this.message);
+  const PasswordUpdateError(this.message);
 
   @override
   List<Object?> get props => [message];
 }
 
-// INTERNET CONNECTION
-final class NoInternetConnection extends ProfileState {
+// Internet Connection State
+class NoInternetConnection extends ProfileState {
   final String message;
 
-  NoInternetConnection(this.message);
+  const NoInternetConnection(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

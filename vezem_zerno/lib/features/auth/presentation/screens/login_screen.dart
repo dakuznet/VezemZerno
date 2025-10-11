@@ -109,7 +109,6 @@ class _LoginScreenState extends State<LoginScreen> {
       'Вход',
       style: TextStyle(
         color: ColorsConstants.primaryBrownColor,
-        fontFamily: 'Unbounded',
         fontSize: 24.sp,
         fontWeight: FontWeight.w500,
       ),
@@ -172,6 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleAuthStateChanges(BuildContext context, AuthState state) {
     if (state is AuthFailure) {
       PrimarySnackBar.show(
+        context,
         text: state.message,
         borderColor: Colors.red,
       );
@@ -179,7 +179,8 @@ class _LoginScreenState extends State<LoginScreen> {
       AutoRouter.of(context).replaceAll([const MainRoute()]);
     } else if (state is NoInternetConnection) {
       PrimarySnackBar.show(
-        text: 'Проверьте подключение к интернету',
+        context,
+        text: 'Проверьте соединение с интернетом',
         borderColor: Colors.red,
       );
     }

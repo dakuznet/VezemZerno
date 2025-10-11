@@ -29,7 +29,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
             StringConstants.textPrivacyPolicy,
             style: TextStyle(
               fontSize: 16.sp,
-              height: 1.5,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),

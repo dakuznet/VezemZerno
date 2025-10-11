@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
@@ -85,10 +86,6 @@ class _SplashScreenState extends State<SplashScreen>
       return _buildLoadingIndicator();
     }
 
-    if (state is NoInternetConnection) {
-      return _buildNoInternetConnection();
-    }
-
     if (state is AuthFailure && !_hasNavigated) {}
 
     return _buildLoadingIndicator();
@@ -109,42 +106,12 @@ class _SplashScreenState extends State<SplashScreen>
           Text(
             'Загрузка...',
             style: TextStyle(
-              fontFamily: 'Unbounded',
-              fontWeight: FontWeight.w400,
-              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              fontSize: 18.sp,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildNoInternetConnection() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.wifi_off_outlined,
-              size: 64.sp,
-              color: ColorsConstants.primaryBrownColor,
-            ),
-            SizedBox(height: 24.h),
-            Text(
-              'Отсутствует соединение с интернетом',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Unbounded',
-                fontWeight: FontWeight.w400,
-                fontSize: 14.sp,
-                color: ColorsConstants.primaryBrownColor,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -192,6 +159,14 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _handleAuthStateChange(BuildContext context, AuthState state) {
     if (_hasNavigated || !mounted) return;
+
+    if (state is NoInternetConnection) {
+      PrimarySnackBar.show(
+        context,
+        text: 'Проверьте соединение с интернетом',
+        borderColor: Colors.red,
+      );
+    }
 
     if (state is SessionRestored || state is LoginSuccess) {
       _hasNavigated = true;

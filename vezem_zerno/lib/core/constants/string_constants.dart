@@ -4,9 +4,11 @@ abstract class StringConstants {
 
   //DB id
   static const dbAuthId = '687f60b70012988ce25a';
+  static const dbApplicationsId = '68e66e9e003145490acf';
 
   //Tables id
   static const tableUsersId = '687f723c0008097bda88';
+  static const tableApplicationsId = 'applications';
 
   //Cloud-functions id
   static const funcDeleteUserId = '68cde36900053573d8ab';

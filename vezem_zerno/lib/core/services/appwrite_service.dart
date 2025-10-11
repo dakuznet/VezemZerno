@@ -6,6 +6,7 @@ import 'package:appwrite/models.dart' as appwrite_models;
 import 'package:vezem_zerno/core/constants/string_constants.dart';
 import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
 import 'package:path/path.dart' as path;
+import 'package:vezem_zerno/features/user_application_list/data/models/application_model.dart';
 
 class AppwriteService {
   late final Client _client;
@@ -27,6 +28,158 @@ class AppwriteService {
     _tablesDB = TablesDB(_client);
   }
 
+  // APPLICATIONS
+
+  // Получение заявок пользователя по статусу заявки
+  Future<List<ApplicationModel>> getUserApplicationsByStatus(
+    String userId,
+    String status,
+  ) async {
+    try {
+      final userResponse = await _tablesDB.listRows(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        queries: [Query.equal('\$id', userId)],
+      );
+
+      if (userResponse.rows.isEmpty) {
+        throw Exception('Пользователь не найден');
+      }
+
+      final userRow = userResponse.rows.first;
+      List<dynamic> userApplicationIds = userRow.data['applications'] ?? [];
+
+      if (userApplicationIds.isEmpty) {
+        return [];
+      }
+
+      final applications = <ApplicationModel>[];
+
+      for (var applicationId in userApplicationIds) {
+        try {
+          final applicationResponse = await _tablesDB.getRow(
+            databaseId: StringConstants.dbApplicationsId,
+            tableId: StringConstants.tableApplicationsId,
+            rowId: applicationId,
+          );
+
+          final application = ApplicationModel.fromJson({
+            ...applicationResponse.data,
+            '\$id': applicationResponse.$id,
+          });
+
+          if (application.status == status) {
+            applications.add(application);
+          }
+        } catch (e) {
+          null;
+        }
+      }
+
+      return applications;
+    } on AppwriteException catch (e) {
+      throw Exception(
+        'Ошибка при получении заявок пользователя по статусу: ${e.message}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Ошибка при получении заявок пользователя по статусу: $e',
+      );
+    }
+  }
+
+  // Получение всех заявок по статусу заявки
+  Future<List<ApplicationModel>> getAllApplicationsByStatus(
+    String status,
+  ) async {
+    try {
+      final response = await _tablesDB.listRows(
+        databaseId: StringConstants.dbApplicationsId,
+        tableId: StringConstants.tableApplicationsId,
+        queries: [
+          Query.equal('status', status),
+          Query.orderDesc('\$createdAt'),
+        ],
+      );
+
+      return response.rows.map((row) {
+        return ApplicationModel.fromJson({...row.data, '\$id': row.$id});
+      }).toList();
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при получении заявок по статусу: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при получении заявок по статусу: $e');
+    }
+  }
+
+  // Создание заявки
+  Future<ApplicationModel> createApplication(
+    ApplicationModel application,
+  ) async {
+    try {
+      final currentUser = await getCurrentUser();
+
+      // Создаем заявку
+      final row = await _tablesDB.createRow(
+        databaseId: StringConstants.dbApplicationsId,
+        tableId: StringConstants.tableApplicationsId,
+        rowId: ID.unique(),
+        data: {...application.toJson()},
+      );
+
+      final createdApplication = ApplicationModel.fromJson({
+        ...row.data,
+        '\$id': row.$id,
+      });
+
+      await _addApplicationToUser(currentUser.id, row.$id);
+
+      return createdApplication;
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при создании заявки: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при создании заявки: $e');
+    }
+  }
+
+  // Привязка заявки к пользователю
+  Future<void> _addApplicationToUser(
+    String userId,
+    String applicationId,
+  ) async {
+    try {
+      // Находим запись пользователя в таблице users
+      final userResponse = await _tablesDB.listRows(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        queries: [Query.equal('\$id', userId)],
+      );
+
+      if (userResponse.rows.isEmpty) {
+        throw Exception('Пользователь не найден');
+      }
+
+      final userRow = userResponse.rows.first;
+      List<dynamic> currentApplications = userRow.data['applications'] ?? [];
+
+      List<String> updatedApplications = List<String>.from(currentApplications);
+      if (!updatedApplications.contains(applicationId)) {
+        updatedApplications.add(applicationId);
+      }
+
+      await _tablesDB.updateRow(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        rowId: userRow.$id,
+        data: {'applications': updatedApplications},
+      );
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при обновлении пользователя: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при обновлении пользователя: $e');
+    }
+  }
+
   // USER
 
   Future<UserModel> getCurrentUser() async {
@@ -34,7 +187,7 @@ class AppwriteService {
     final response = await _tablesDB.listRows(
       databaseId: StringConstants.dbAuthId,
       tableId: StringConstants.tableUsersId,
-      queries: [Query.equal('userId', user.$id)],
+      queries: [Query.equal('\$id', user.$id)],
     );
 
     if (response.rows.isNotEmpty) {
@@ -139,7 +292,7 @@ class AppwriteService {
     final response = await _tablesDB.listRows(
       databaseId: StringConstants.dbAuthId,
       tableId: StringConstants.tableUsersId,
-      queries: [Query.equal('userId', user.$id)],
+      queries: [Query.equal('\$id', user.$id)],
     );
 
     if (response.rows.isNotEmpty) {

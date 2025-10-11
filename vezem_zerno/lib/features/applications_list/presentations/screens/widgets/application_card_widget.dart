@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
-import 'package:vezem_zerno/core/entities/application_entiry.dart';
+import 'package:vezem_zerno/features/user_application_list/data/models/application_model.dart';
 
 class ApplicationCard extends StatelessWidget {
-  final ApplicationEntity application;
+  final ApplicationModel application;
 
   const ApplicationCard({super.key, required this.application});
 
@@ -33,15 +33,15 @@ class ApplicationCard extends StatelessWidget {
   }
 
   Widget _buildHeaderRow() {
+    final DateTime? date = application.createdAt;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "Опубликовано ${application.date}",
+          "Опубликовано ${date!.day}.${date.month}.${date.year}",
           style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w400,
-            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
             color: const Color.fromARGB(172, 66, 44, 26),
           ),
         ),
@@ -79,10 +79,10 @@ class ApplicationCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLocationRow(label: 'Откуда:', value: application.from),
-        if (application.to.isNotEmpty) ...[
+        _buildLocationRow(label: 'Откуда:', value: application.loadingPlace),
+        if (application.unloadingPlace.isNotEmpty) ...[
           SizedBox(height: 16.h),
-          _buildLocationRow(label: 'Куда:', value: application.to),
+          _buildLocationRow(label: 'Куда:', value: application.unloadingPlace),
         ],
       ],
     );
@@ -93,18 +93,16 @@ class ApplicationCard extends StatelessWidget {
       TextSpan(
         text: '$label ',
         style: TextStyle(
-          fontFamily: 'Unbounded',
-          fontWeight: FontWeight.w400,
-          fontSize: 12.sp,
+          fontWeight: FontWeight.w500,
+          fontSize: 16.sp,
           color: const Color.fromARGB(172, 66, 44, 26),
         ),
         children: [
           TextSpan(
             text: value,
             style: TextStyle(
-              fontFamily: 'Unbounded',
-              fontWeight: FontWeight.w400,
-              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),
@@ -115,11 +113,10 @@ class ApplicationCard extends StatelessWidget {
 
   Widget _buildTariffChip() {
     return Text(
-      application.tariff,
+      '${application.price} ₽/кг',
       style: TextStyle(
-        fontSize: 14.sp,
-        fontFamily: 'Unbounded',
-        fontWeight: FontWeight.w400,
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
         color: ColorsConstants.primaryBrownColor,
       ),
     );
@@ -128,16 +125,16 @@ class ApplicationCard extends StatelessWidget {
   Widget _buildCargoInfo() {
     final List<Widget> cargoChips = [];
 
-    if (application.cargo.isNotEmpty) {
-      cargoChips.add(_buildCargoChip(application.cargo));
+    if (application.crop.isNotEmpty) {
+      cargoChips.add(_buildCargoChip(application.crop));
     }
 
-    if (application.weight.isNotEmpty) {
-      cargoChips.add(_buildCargoChip(application.weight));
+    if (application.tonnage.isNotEmpty) {
+      cargoChips.add(_buildCargoChip('${application.tonnage} тонн'));
     }
 
     if (application.distance.isNotEmpty) {
-      cargoChips.add(_buildCargoChip(application.distance));
+      cargoChips.add(_buildCargoChip('${application.distance} км'));
     }
 
     return Wrap(spacing: 8.w, runSpacing: 8.h, children: cargoChips);
@@ -150,15 +147,14 @@ class ApplicationCard extends StatelessWidget {
           color: ColorsConstants.primaryBrownColor,
           width: 2.w,
         ),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 12.sp,
-          fontFamily: 'Unbounded',
-          fontWeight: FontWeight.w400,
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
           color: ColorsConstants.primaryBrownColor,
         ),
       ),
@@ -172,18 +168,16 @@ class ApplicationCard extends StatelessWidget {
         Text(
           "Заказчик",
           style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w400,
-            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+            fontSize: 14.sp,
             color: const Color.fromARGB(172, 66, 44, 26),
           ),
         ),
         Text(
-          application.customer,
+          application.organization,
           style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w400,
-            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            fontSize: 16.sp,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),

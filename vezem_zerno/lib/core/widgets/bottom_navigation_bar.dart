@@ -30,16 +30,14 @@ class CustomBottomNavigationBar extends StatelessWidget {
           elevation: 0.sp,
           backgroundColor: Colors.transparent,
           unselectedLabelStyle: TextStyle(
-            fontFamily: 'Unbounded',
-            fontSize: 10.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
             color: ColorsConstants.primaryBrownColorWithOpacity,
           ),
           selectedIconTheme: IconThemeData(size: 26.sp),
           unselectedIconTheme: IconThemeData(size: 24.sp),
           selectedLabelStyle: TextStyle(
-            fontFamily: 'Unbounded',
-            fontSize: 12.sp,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w500,
             color: ColorsConstants.primaryBrownColor,
           ),

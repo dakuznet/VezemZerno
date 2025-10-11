@@ -140,7 +140,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       'Регистрация',
       style: TextStyle(
         color: ColorsConstants.primaryBrownColor,
-        fontFamily: 'Unbounded',
         fontSize: 24.sp,
         fontWeight: FontWeight.w500,
       ),
@@ -216,14 +215,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             : ColorsConstants.primaryButtonBackgroundColor,
         padding: EdgeInsets.symmetric(vertical: 16.h),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32.r),
+          borderRadius: BorderRadius.circular(12.r),
         ),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontFamily: 'Unbounded',
-          fontSize: 14.sp,
+          fontSize: 16.sp,
           color: isSelected
               ? ColorsConstants.primaryBrownColor
               : ColorsConstants.primaryBrownColorWithOpacity,
@@ -319,13 +317,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void _handleAuthStateChanges(BuildContext context, AuthState state) {
     if (state is AuthFailure) {
       PrimarySnackBar.show(
+        context,
         text: "Ошибка регистрации\n${state.message}",
         borderColor: Colors.red,
       );
     } else if (state is AuthUserAlreadyExists) {
-      PrimarySnackBar.show(text: state.message, borderColor: Colors.red);
+      PrimarySnackBar.show(
+        context,
+        text: state.message,
+        borderColor: Colors.red,
+      );
     } else if (state is NoInternetConnection) {
       PrimarySnackBar.show(
+        context,
         text: "Проверьте подключение к интернету",
         borderColor: Colors.red,
       );
@@ -442,6 +446,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _validateForm(BuildContext context) {
     if (_selectedRole == null) {
       PrimarySnackBar.show(
+        context,
         text: 'Необходимо выбрать род деятельности: заказчик или перевозчик',
         borderColor: Colors.red,
       );
@@ -450,6 +455,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     if (!_isPrivacyAccepted) {
       PrimarySnackBar.show(
+        context,
         text: 'Необходимо принять политику конфиденциальности',
         borderColor: Colors.red,
       );

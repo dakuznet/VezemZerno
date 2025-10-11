@@ -25,9 +25,9 @@ class PrimaryButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: 45.h,
-      child: FilledButton(
+      child: ElevatedButton(
         onPressed: canPress ? onPressed : null,
-        style: FilledButton.styleFrom(
+        style: ElevatedButton.styleFrom(
           backgroundColor: ColorsConstants.primaryButtonBackgroundColor,
           foregroundColor: ColorsConstants.primaryBrownColor,
           disabledBackgroundColor: ColorsConstants.primaryButtonBackgroundColor,
@@ -35,11 +35,9 @@ class PrimaryButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
           textStyle: TextStyle(
-            fontFamily: 'Unbounded',
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w400,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
         child: isLoading

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
-import 'package:vezem_zerno/core/entities/user_entity.dart';
+import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
 class ProfileInfoAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -55,13 +55,14 @@ class ProfileInfoAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 4.h,
       children: [
         if (user?.name != null && user?.surname != null)
           Text(
             '${user!.name} ${user!.surname}',
             style: TextStyle(
-              fontSize: 16.sp,
-              fontFamily: 'Unbounded',
+              fontSize: 20.sp,
+              //fontFamily: 'Unbounded',
               fontWeight: FontWeight.w600,
               color: ColorsConstants.primaryBrownColor,
             ),
@@ -72,9 +73,9 @@ class ProfileInfoAppBar extends StatelessWidget implements PreferredSizeWidget {
           Text(
             _getRoleDisplayName(user!.role!),
             style: TextStyle(
-              fontFamily: 'Unbounded',
+              //fontFamily: 'Unbounded',
               fontWeight: FontWeight.w300,
-              fontSize: 14.sp,
+              fontSize: 16.sp,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),

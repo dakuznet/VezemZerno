@@ -1,7 +1,7 @@
-import 'package:vezem_zerno/core/entities/user_entity.dart';
+import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
-  UserModel({
+  const UserModel({
     required super.id,
     required super.phone,
     super.name,
@@ -10,11 +10,13 @@ class UserModel extends UserEntity {
     super.role,
     super.profileImage,
     super.sessionId,
+    super.activeApplications = const [],
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['userId'] ?? json['id'] ?? '',
+      activeApplications: List<String>.from(json['active_applications'] ?? []),
+      id: json['\$id'] ?? '',
       phone: json['phone'] ?? '',
       name: json['name'],
       surname: json['surname'],
@@ -34,6 +36,7 @@ class UserModel extends UserEntity {
       organization: organization,
       role: role,
       profileImage: profileImage,
+      activeApplications: activeApplications,
     );
   }
 }

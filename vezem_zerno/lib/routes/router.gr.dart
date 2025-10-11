@@ -43,17 +43,17 @@ class ChangePasswordRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [CreateRequestScreen]
-class CreateRequestRoute extends PageRouteInfo<void> {
-  const CreateRequestRoute({List<PageRouteInfo>? children})
-    : super(CreateRequestRoute.name, initialChildren: children);
+/// [CreateApplicationScreen]
+class CreateApplicationRoute extends PageRouteInfo<void> {
+  const CreateApplicationRoute({List<PageRouteInfo>? children})
+    : super(CreateApplicationRoute.name, initialChildren: children);
 
-  static const String name = 'CreateRequestRoute';
+  static const String name = 'CreateApplicationRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const CreateRequestScreen();
+      return const CreateApplicationScreen();
     },
   );
 }

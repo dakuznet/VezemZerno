@@ -1,9 +1,11 @@
+// profile_screen.dart
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart'
     hide NoInternetConnection;
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
@@ -11,8 +13,6 @@ import 'package:vezem_zerno/features/profile/presentations/bloc/profile_event.da
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_state.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/widgets/logout_confirmation_dialog.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/widgets/profile_action_tile.dart';
-import 'package:vezem_zerno/features/profile/presentations/screens/widgets/profile_error_appbar.dart';
-import 'package:vezem_zerno/features/profile/presentations/screens/widgets/profile_error_widget.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/widgets/profile_info_appbar.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/widgets/profile_shimmer_appbar.dart';
 import 'package:vezem_zerno/routes/router.dart';
@@ -29,18 +29,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
-  }
-
-  void _loadProfile() {
     context.read<ProfileBloc>().add(LoadProfileEvent());
   }
 
   bool _shouldBlockInteractions(ProfileState state) {
-    return state is ProfileError ||
-        state is NoInternetConnection ||
-        state is ProfileLoading ||
-        state is ProfileInitial;
+    return state is ProfileLoading ||
+        state is ProfileInitial ||
+        state is ProfileSaving ||
+        state is PasswordUpdating ||
+        state is AccountDeleting;
   }
 
   @override
@@ -56,7 +53,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         BlocListener<ProfileBloc, ProfileState>(
           listener: (context, profileState) {
-            if (profileState is ProfileError) {}
+            if (profileState is NoInternetConnection) {
+              PrimarySnackBar.show(
+                context,
+                text: 'Проверьте соединение с интернетом',
+                borderColor: Colors.red,
+              );
+            }
           },
         ),
       ],
@@ -87,9 +90,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? const ProfileShimmerAppBar()
           : state is ProfileLoaded
           ? ProfileInfoAppBar(user: state.user)
-          : state is ProfileError || state is NoInternetConnection
-          ? ErrorAppBar(onRetry: _loadProfile)
           : const ProfileShimmerAppBar(),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            strokeWidth: 4.w,
+            backgroundColor:
+                ColorsConstants.primaryTextFormFieldBackgorundColor,
+            color: ColorsConstants.primaryBrownColor,
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'Загрузка...',
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 18.sp,
+              color: ColorsConstants.primaryBrownColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -98,47 +124,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ProfileState state,
     bool shouldBlockInteractions,
   ) {
-    if (state is ProfileError || state is NoInternetConnection) {
-      return ProfileErrorWidget(onRetry: _loadProfile);
+    final hasNoInternet = state is NoInternetConnection;
+
+    if (hasNoInternet) {
+      return _buildLoadingIndicator();
     }
-
-    return Stack(
-      children: [
-        CustomScrollView(
-          slivers: [
-            SliverList(
-              delegate: SliverChildListDelegate([
-                _buildProfileManagementSection(shouldBlockInteractions),
-                _buildLogoutButton(context, state, shouldBlockInteractions),
-                SizedBox(height: 16.h),
-              ]),
-            ),
-          ],
+    return CustomScrollView(
+      slivers: [
+        SliverList(
+          delegate: SliverChildListDelegate([
+            _buildProfileManagementSection(shouldBlockInteractions),
+            _buildLogoutButton(context, state, shouldBlockInteractions),
+            SizedBox(height: 16.h),
+          ]),
         ),
-
-        if (shouldBlockInteractions)
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (state is ProfileError || state is NoInternetConnection) ...[
-                  Icon(
-                    state is NoInternetConnection
-                        ? Icons.wifi_off
-                        : Icons.error_outline,
-                    size: 48.sp,
-                    color: Colors.white,
-                  ),
-                  SizedBox(height: 16.h),
-                  PrimaryButton(
-                    text: 'Повторить',
-                    onPressed: state is AuthLoading ? null : _loadProfile,
-                    isLoading: state is ProfileLoading,
-                  ),
-                ],
-              ],
-            ),
-          ),
       ],
     );
   }
@@ -207,17 +206,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final state = context.read<ProfileBloc>().state;
 
     if (_shouldBlockInteractions(state)) {
-      if (state is ProfileError ||
-          state is NoInternetConnection ||
-          state is ProfileLoading) {
-        _loadProfile();
-      }
       return;
     }
 
     showDialog(
       context: context,
-      builder: (context) => LogoutConfirmationDialog(),
+      builder: (context) => const LogoutConfirmationDialog(),
     );
   }
 }

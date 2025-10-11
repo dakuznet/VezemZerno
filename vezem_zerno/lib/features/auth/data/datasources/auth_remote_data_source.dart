@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:vezem_zerno/core/error/failures.dart';
 import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
-import 'package:vezem_zerno/core/entities/user_entity.dart';
+import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthRemoteDataSource {
   Future<Either<Failure, void>> sendVerificationCode({required String phone});

@@ -95,9 +95,8 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
           'Мы отправили SMS с кодом подтверждения на номер:',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w400,
-            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            fontSize: 16.sp,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),
@@ -107,7 +106,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
             fontSize: 16.sp,
             color: ColorsConstants.primaryBrownColor,
           ),
@@ -145,7 +144,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
     return PinTheme(
       shape: PinCodeFieldShape.box,
       borderRadius: BorderRadius.circular(8.r),
-      fieldHeight: 60.h,
+      fieldHeight: 30.h,
       fieldWidth: 40.w,
       selectedFillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
       selectedColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
@@ -158,13 +157,13 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
   Widget _buildErrorText(AuthFailure state) {
     return Padding(
-      padding: EdgeInsets.only(top: 8.h),
+      padding: EdgeInsets.only(top: 16.h),
       child: Text(
         state.message,
         style: TextStyle(
           color: Colors.red,
           fontSize: 14.sp,
-          fontFamily: 'Unbounded',
+          fontWeight: FontWeight.w400,
         ),
       ),
     );
@@ -182,11 +181,13 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   void _handleAuthStateChanges(BuildContext context, AuthState state) {
     if (state is AuthFailure) {
       PrimarySnackBar.show(
+        context,
         text: 'Ошибка регистрации\n${state.message}',
         borderColor: Colors.red,
       );
     } else if (state is NoInternetConnection) {
       PrimarySnackBar.show(
+        context,
         text: 'Ошибка...\nПроверьте подключение к интернету',
         borderColor: Colors.red,
       );
@@ -197,6 +198,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
   void _handleVerificationSuccess(BuildContext context) {
     PrimarySnackBar.show(
+      context,
       text:
           'Регистрация выполнена успешно!\nЧтобы продолжить войдите в аккаунт',
       borderColor: Colors.green,
@@ -221,6 +223,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   void _handleVerification(BuildContext context) {
     if (_codeController.text.length != _codeLength) {
       PrimarySnackBar.show(
+        context,
         text: 'Введите 6-значный код',
         borderColor: Colors.red,
       );

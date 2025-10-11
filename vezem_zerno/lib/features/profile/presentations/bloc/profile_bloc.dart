@@ -1,8 +1,9 @@
+// profile_bloc.dart
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:vezem_zerno/core/entities/user_entity.dart';
+import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart'
     hide CheckInternetConnection, NoInternetConnection;
 import 'package:vezem_zerno/features/profile/domain/usecases/change_password_usecase.dart';
@@ -23,6 +24,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final Connectivity _connectivity;
   final InternetConnection _connectionChecker;
   StreamSubscription? _connectivitySubscription;
+  bool _isInternetAvailable = true;
 
   ProfileBloc({
     required this.getProfileUseCase,
@@ -42,7 +44,28 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<UpdatePasswordEvent>(_onUpdatePassword);
     on<CheckInternetConnection>(_onCheckInternetConnection);
 
+    _initializeInternetMonitoring();
+  }
+
+  Future<void> _initializeInternetMonitoring() async {
+    // Первоначальная проверка интернета
+    await _checkInternetAndUpdateState();
+
+    // Запускаем мониторинг изменений подключения
     _startMonitoring();
+  }
+
+  Future<void> _checkInternetAndUpdateState() async {
+    final hasConnection = await _checkInternetAccess();
+    if (hasConnection != _isInternetAvailable) {
+      _isInternetAvailable = hasConnection;
+      if (!hasConnection) {
+        add(CheckInternetConnection());
+      } else if (state is NoInternetConnection) {
+        // Автоматически загружаем профиль при восстановлении интернета
+        add(LoadProfileEvent());
+      }
+    }
   }
 
   Future<bool> _checkInternetAccess() async {
@@ -64,10 +87,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
       result,
     ) async {
-      final hasConnection = await _checkInternetAccess();
-      if (!hasConnection) {
-        add(CheckInternetConnection());
-      }
+      await _checkInternetAndUpdateState();
     });
   }
 
@@ -81,27 +101,59 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  Future<void> _onUpdatePassword(
-    UpdatePasswordEvent event,
-    Emitter<ProfileState> emit,
-  ) async {
+  Future<void> _executeWithInternetCheck(
+    Future<void> Function() action, {
+    required Emitter<ProfileState> emit,
+    String? loadingState,
+  }) async {
+    // Автоматически проверяем интернет перед выполнением любого действия
     final hasConnection = await _checkInternetAccess();
     if (!hasConnection) {
       emit(NoInternetConnection('Нет интернет-соединения'));
       return;
     }
-    emit(PasswordUpdating());
 
-    final result = await changePasswordUseCase.call(
-      oldPassword: event.oldPassword,
-      newPassword: event.newPassword,
-    );
+    if (loadingState != null) {
+      // Используем динамическое создание состояния загрузки
+      switch (loadingState) {
+        case 'ProfileLoading':
+          emit(ProfileLoading());
+          break;
+        case 'ProfileSaving':
+          emit(ProfileSaving());
+          break;
+        case 'PasswordUpdating':
+          emit(PasswordUpdating());
+          break;
+        case 'AccountDeleting':
+          emit(AccountDeleting());
+          break;
+      }
+    }
 
-    result.fold(
-      (failure) => emit(
-        PasswordUpdateError('Ошибка изменения пароля: ${failure.message}'),
-      ),
-      (_) => emit(PasswordUpdated()),
+    await action();
+  }
+
+  Future<void> _onUpdatePassword(
+    UpdatePasswordEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    await _executeWithInternetCheck(
+      () async {
+        final result = await changePasswordUseCase.call(
+          oldPassword: event.oldPassword,
+          newPassword: event.newPassword,
+        );
+
+        result.fold(
+          (failure) => emit(
+            PasswordUpdateError('Ошибка изменения пароля: ${failure.message}'),
+          ),
+          (_) => emit(PasswordUpdated()),
+        );
+      },
+      emit: emit,
+      loadingState: 'PasswordUpdating',
     );
   }
 
@@ -109,18 +161,17 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     LoadProfileEvent event,
     Emitter<ProfileState> emit,
   ) async {
-    final hasConnection = await _checkInternetAccess();
-    if (!hasConnection) {
-      emit(NoInternetConnection('Нет интернет-соединения'));
-      return;
-    }
-    emit(ProfileLoading());
-
-    final result = await getProfileUseCase.call();
-    result.fold(
-      (failure) =>
-          emit(ProfileError('Ошибка загрузки профиля: ${failure.message}')),
-      (user) => emit(ProfileLoaded(user)),
+    await _executeWithInternetCheck(
+      () async {
+        final result = await getProfileUseCase.call();
+        result.fold(
+          (failure) =>
+              emit(ProfileError('Ошибка загрузки профиля: ${failure.message}')),
+          (user) => emit(ProfileLoaded(user)),
+        );
+      },
+      emit: emit,
+      loadingState: 'ProfileLoading',
     );
   }
 
@@ -128,76 +179,73 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     SaveProfileEvent event,
     Emitter<ProfileState> emit,
   ) async {
-    final hasConnection = await _checkInternetAccess();
-    if (!hasConnection) {
-      emit(NoInternetConnection('Нет интернет-соединения'));
-      return;
-    }
+    await _executeWithInternetCheck(
+      () async {
+        try {
+          String? imageUrl;
+          if (event.imageFile != null) {
+            final uploadResult = await uploadImageUseCase.call(
+              event.imageFile!.path,
+            );
 
-    emit(ProfileSaving());
+            uploadResult.fold(
+              (failure) => emit(
+                ProfileError('Ошибка загрузки изображения: ${failure.message}'),
+              ),
+              (url) => imageUrl = url,
+            );
 
-    try {
-      String? imageUrl;
-      if (event.imageFile != null) {
-        final uploadResult = await uploadImageUseCase.call(
-          event.imageFile!.path,
-        );
+            if (imageUrl == null) return;
+          }
 
-        uploadResult.fold(
-          (failure) => emit(
-            ProfileError('Ошибка загрузки изображения: ${failure.message}'),
-          ),
-          (url) => imageUrl = url,
-        );
+          final userEntity = UserEntity(
+            id: '',
+            phone: event.phone,
+            name: event.name,
+            surname: event.surname,
+            organization: event.organization,
+            role: event.role,
+            profileImage: imageUrl,
+          );
 
-        if (imageUrl == null) return;
-      }
-
-      final userEntity = UserEntity(
-        id: '',
-        phone: event.phone,
-        name: event.name,
-        surname: event.surname,
-        organization: event.organization,
-        role: event.role,
-        profileImage: imageUrl,
-      );
-
-      final updateResult = await updateProfileUseCase.call(userEntity);
-      updateResult.fold(
-        (failure) =>
-            emit(ProfileError('Ошибка сохранения профиля: ${failure.message}')),
-        (_) {
-          emit(ProfileSaved());
-          add(LoadProfileEvent());
-        },
-      );
-    } catch (e) {
-      emit(ProfileError('Неизвестная ошибка: $e'));
-    }
+          final updateResult = await updateProfileUseCase.call(userEntity);
+          updateResult.fold(
+            (failure) => emit(
+              ProfileError('Ошибка сохранения профиля: ${failure.message}'),
+            ),
+            (_) {
+              emit(ProfileSaved());
+              add(LoadProfileEvent());
+            },
+          );
+        } catch (e) {
+          emit(ProfileError('Неизвестная ошибка: $e'));
+        }
+      },
+      emit: emit,
+      loadingState: 'ProfileSaving',
+    );
   }
 
   Future<void> _onDeleteAccount(
     DeleteAccountEvent event,
     Emitter<ProfileState> emit,
   ) async {
-    final hasConnection = await _checkInternetAccess();
-    if (!hasConnection) {
-      emit(NoInternetConnection('Нет интернет-соединения'));
-      return;
-    }
-
-    emit(AccountDeleting());
-
-    final result = await deleteAccountUseCase.call();
-    result.fold(
-      (failure) => emit(
-        AccountDeleteError('Ошибка удаления аккаунта: ${failure.message}'),
-      ),
-      (_) {
-        emit(AccountDeleted());
-        authBloc.add(AuthLogoutEvent());
+    await _executeWithInternetCheck(
+      () async {
+        final result = await deleteAccountUseCase.call();
+        result.fold(
+          (failure) => emit(
+            AccountDeleteError('Ошибка удаления аккаунта: ${failure.message}'),
+          ),
+          (_) {
+            emit(AccountDeleted());
+            authBloc.add(AuthLogoutEvent());
+          },
+        );
       },
+      emit: emit,
+      loadingState: 'AccountDeleting',
     );
   }
 

@@ -49,7 +49,7 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
                 width: 24.w,
                 height: 24.h,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.r),
+                  borderRadius: BorderRadius.circular(3.r),
                   border: Border.all(
                     color: _isChecked
                         ? ColorsConstants.primaryBrownColor
@@ -68,24 +68,23 @@ class _PrivacyCheckboxState extends State<PrivacyCheckbox> {
             SizedBox(width: 12.w),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   RichText(
                     text: TextSpan(
                       text: 'Я согласен с ',
                       style: TextStyle(
-                        fontFamily: 'Unbounded',
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w300,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
                         color: ColorsConstants.primaryBrownColor,
                       ),
                       children: [
                         TextSpan(
                           text: 'политикой конфиденциальности',
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 16.sp,
                             color: ColorsConstants.primaryBrownColor,
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w600,
                             decoration: TextDecoration.underline,
                           ),
                           recognizer: TapGestureRecognizer()

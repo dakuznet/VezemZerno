@@ -22,18 +22,18 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
           title: Text(
             'Удалить аккаунт',
             style: TextStyle(
-              fontFamily: 'Unbounded',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
+              //fontFamily: 'Unbounded',
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
               color: ColorsConstants.primaryBrownColor,
             ),
           ),
           content: Text(
             'Вы уверены, что хотите удалить свой аккаунт? Все ваши данные будут безвозвратно удалены.',
             style: TextStyle(
-              fontFamily: 'Unbounded',
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
+              //fontFamily: 'Unbounded',
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
               color: const Color.fromARGB(195, 66, 44, 26),
             ),
           ),
@@ -55,9 +55,9 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
                       'Отменить',
                       style: TextStyle(
                         color: ColorsConstants.primaryBrownColor,
-                        fontSize: 14.sp,
-                        fontFamily: 'Unbounded',
-                        fontWeight: FontWeight.w400,
+                        fontSize: 16.sp,
+                        //fontFamily: 'Unbounded',
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -74,8 +74,6 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
                             AutoRouter.of(context).pop(),
                           },
                     style: FilledButton.styleFrom(
-                      splashFactory: NoSplash.splashFactory,
-                      elevation: 4.r,
                       backgroundColor: Colors.red,
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                       shape: RoundedRectangleBorder(
@@ -86,9 +84,9 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
                       'Удалить',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14.sp,
-                        fontFamily: 'Unbounded',
-                        fontWeight: FontWeight.w400,
+                        fontSize: 16.sp,
+                        //fontFamily: 'Unbounded',
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),

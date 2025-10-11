@@ -33,6 +33,7 @@ class _SettingScreenState extends State<SettingScreen> {
       listener: (context, state) {
         if (state is AccountDeleted) {
           PrimarySnackBar.show(
+            context,
             text: 'Аккаунт успешно удалён',
             borderColor: Colors.green,
           );
@@ -40,6 +41,7 @@ class _SettingScreenState extends State<SettingScreen> {
           AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
         } else if (state is AccountDeleteError) {
           PrimarySnackBar.show(
+            context,
             text: 'Ошибка удаления аккаунта\n${state.message}',
             borderColor: Colors.red,
           );
@@ -91,9 +93,8 @@ PreferredSizeWidget _buildAppBar(BuildContext context, ProfileState state) {
     title: Text(
       'Настройки',
       style: TextStyle(
-        fontFamily: 'Unbounded',
-        fontSize: 16.sp,
-        fontWeight: FontWeight.w400,
+        fontSize: 20.sp,
+        fontWeight: FontWeight.w500,
         color: ColorsConstants.primaryBrownColor,
       ),
     ),

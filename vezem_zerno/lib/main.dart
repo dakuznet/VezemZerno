@@ -5,7 +5,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/globals.dart';
 import 'package:vezem_zerno/core/injection_container.dart';
-import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
@@ -45,26 +44,16 @@ class MyApp extends StatelessWidget {
             BlocProvider.value(value: authBloc),
             BlocProvider.value(value: profileBloc),
           ],
-          child: BlocListener<AuthBloc, AuthState>(
-            listener: (context, state) {
-              if (state is NoInternetConnection) {
-                PrimarySnackBar.show(
-                  text: state.message,
-                  borderColor: Colors.red,
-                );
-              }
-            },
-            child: MaterialApp.router(
-              scaffoldMessengerKey: AppGlobals.scaffoldMessengerKey,
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              routerConfig: AppRouter(authBloc: authBloc).config(),
-              debugShowCheckedModeBanner: false,
-              supportedLocales: const [Locale('ru', 'RU')],
-            ),
+          child: MaterialApp.router(
+            scaffoldMessengerKey: AppGlobals.scaffoldMessengerKey,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            routerConfig: AppRouter(authBloc: authBloc).config(),
+            debugShowCheckedModeBanner: false,
+            supportedLocales: const [Locale('ru', 'RU')],
           ),
         );
       },

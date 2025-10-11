@@ -41,14 +41,12 @@ class PrimaryTextFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       style: TextStyle(
-        fontFamily: 'Unbounded',
-        fontWeight: FontWeight.w400,
-        fontSize: 14.sp,
+        fontWeight: FontWeight.w500,
+        fontSize: 16.sp,
         color: ColorsConstants.primaryBrownColor,
       ),
       autofillHints: autofillHints,
       readOnly: readOnly,
-      textCapitalization: TextCapitalization.words,
       autovalidateMode: autoValidateMode,
       onTap: onTap,
       cursorColor: ColorsConstants.primaryBrownColor,
@@ -65,9 +63,8 @@ class PrimaryTextFormField extends StatelessWidget {
         labelText: labelText,
         floatingLabelBehavior: labelBehavior,
         labelStyle: TextStyle(
-          fontFamily: 'Unbounded',
-          fontWeight: FontWeight.w400,
-          fontSize: 12.sp,
+          fontWeight: FontWeight.w500,
+          fontSize: 16.sp,
           color: ColorsConstants.primaryBrownColorWithOpacity,
         ),
         prefixIcon: prefixIcon,

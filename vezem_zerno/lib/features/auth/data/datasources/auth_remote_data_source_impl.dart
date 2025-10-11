@@ -3,7 +3,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:vezem_zerno/core/error/failures.dart';
 import 'package:vezem_zerno/core/services/appwrite_service.dart';
 import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
-import 'package:vezem_zerno/core/entities/user_entity.dart';
+import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
 import 'auth_remote_data_source.dart';
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
