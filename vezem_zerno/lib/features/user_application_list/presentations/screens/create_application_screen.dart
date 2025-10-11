@@ -56,9 +56,8 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
       title: Text(
         'Создание заявки',
         style: TextStyle(
-          fontFamily: 'Unbounded',
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w400,
+          fontSize: 20.sp,
+          fontWeight: FontWeight.w500,
           color: ColorsConstants.primaryBrownColor,
         ),
       ),
@@ -87,10 +86,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                 Text(
                   "Основное",
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 18.sp,
                     color: ColorsConstants.primaryBrownColor,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -98,10 +96,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                 Text(
                   "Место погрузки",
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 16.sp,
                     color: ColorsConstants.primaryBrownColor,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -125,10 +122,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                 Text(
                   "Место выгрузки",
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 16.sp,
                     color: ColorsConstants.primaryBrownColor,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -194,10 +190,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                 Text(
                   'Условия погрузки',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 18.sp,
                     color: ColorsConstants.primaryBrownColor,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -217,10 +212,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                 DropdownButtonFormField<String>(
                   borderRadius: BorderRadius.circular(12.r),
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 16.sp,
                     color: ColorsConstants.primaryBrownColor,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                   dropdownColor:
                       ColorsConstants.primaryTextFormFieldBackgorundColor,
@@ -256,9 +250,8 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                     labelText: 'Выберите способ погрузки',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     labelStyle: TextStyle(
-                      fontFamily: 'Unbounded',
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14.sp,
                       color: ColorsConstants.primaryBrownColorWithOpacity,
                     ),
                     border: OutlineInputBorder(
@@ -288,10 +281,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                 Text(
                   'Детали перевозки',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 18.sp,
                     color: ColorsConstants.primaryBrownColor,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -304,10 +296,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                     title: Text(
                       'Подходят самосвалы',
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 16.sp,
                         color: ColorsConstants.primaryBrownColor,
-                        fontFamily: 'Unbounded',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     value: _suitableForDumpTrucks,
@@ -328,10 +319,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                     title: Text(
                       'Перевозчик работает по хартии',
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 16.sp,
                         color: ColorsConstants.primaryBrownColor,
-                        fontFamily: 'Unbounded',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     value: _carrierWorksByCharter,
@@ -383,10 +373,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                 Text(
                   'Способ оплаты',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 18.sp,
                     color: ColorsConstants.primaryBrownColor,
-                    fontFamily: 'Unbounded',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -405,10 +394,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                         title: Text(
                           'Наличные',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 16.sp,
                             color: ColorsConstants.primaryBrownColor,
-                            fontFamily: 'Unbounded',
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         value: 'cash',
@@ -431,10 +419,9 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                         title: Text(
                           'Безналичные',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 16.sp,
                             color: ColorsConstants.primaryBrownColor,
-                            fontFamily: 'Unbounded',
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         value: 'cashless',

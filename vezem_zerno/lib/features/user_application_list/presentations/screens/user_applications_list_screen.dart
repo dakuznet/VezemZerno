@@ -47,9 +47,9 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
       listener: (context, state) {},
       builder: (context, state) {
         final bool isCustomer = state is SessionRestored
-            ? state.user.role == 'customer'
+            ? state.user.role == 'Заказчик'
             : state is LoginSuccess
-            ? state.user.role == 'customer'
+            ? state.user.role == 'Заказчик'
             : false;
         return Scaffold(
           resizeToAvoidBottomInset: false,
@@ -129,7 +129,6 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
   }
 
   Future<void> _loadUserActiveApplications() async {
-    // TODO
     try {
       AppwriteService appwriteService = AppwriteService();
       final currentUser = await appwriteService.getCurrentUser();
