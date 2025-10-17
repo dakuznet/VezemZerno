@@ -2,6 +2,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:vezem_zerno/core/services/appwrite_service.dart';
+import 'package:vezem_zerno/features/applications/data/datasources/applications_list_remote_data_source.dart';
+import 'package:vezem_zerno/features/applications/data/datasources/applications_list_remote_data_source_impl.dart';
+import 'package:vezem_zerno/features/applications/data/repositories/applications_list_repository_impl.dart';
+import 'package:vezem_zerno/features/applications/domain/repositories/applications_list_repository.dart';
+import 'package:vezem_zerno/features/applications/domain/usecases/get_applications_by_status_usecase.dart';
+import 'package:vezem_zerno/features/applications/presentations/bloc/applications_bloc.dart';
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import 'package:vezem_zerno/features/auth/data/repositories/auth_repository_impl.dart';
@@ -24,11 +30,52 @@ import 'package:vezem_zerno/features/profile/domain/usecases/get_profile_usecase
 import 'package:vezem_zerno/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:vezem_zerno/features/profile/domain/usecases/upload_image_usecase.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
+import 'package:vezem_zerno/features/user_applications/data/datasources/user_applications_remote_data_source.dart';
+import 'package:vezem_zerno/features/user_applications/data/datasources/user_applications_remote_data_source_impl.dart';
+import 'package:vezem_zerno/features/user_applications/data/repositories/user_applications_repository_impl.dart';
+import 'package:vezem_zerno/features/user_applications/domain/repositories/user_applications_repository.dart';
+import 'package:vezem_zerno/features/user_applications/domain/usecases/create_application_usecase.dart';
+import 'package:vezem_zerno/features/user_applications/domain/usecases/get_user_applications_usecase.dart';
+import 'package:vezem_zerno/features/user_applications/presentations/bloc/user_applications_bloc.dart';
 
 final getIt = GetIt.instance;
 
 void init() {
-  // Use cases
+  // ===== SERVICES =====
+  getIt.registerLazySingleton(() => Connectivity());
+  getIt.registerLazySingleton(() => InternetConnection());
+  getIt.registerLazySingleton(() => AppwriteService());
+
+  // ===== DATA SOURCES =====
+  getIt.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(getIt()),
+  );
+  getIt.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(getIt()),
+  );
+  getIt.registerLazySingleton<ApplicationsListRemoteDataSource>(
+    () => ApplicationsListRemoteDataSourceImpl(getIt()),
+  );
+  getIt.registerLazySingleton<UserApplicationsRemoteDataSource>(
+    () => UserApplicationsRemoteDataSourceImpl(getIt()),
+  );
+
+  // ===== REPOSITORIES =====
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerLazySingleton<ApplicationsListRepository>(
+    () => ApplicationsListRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerLazySingleton<UserApplicationsRepository>(
+    () => UserApplicationsRepositoryImpl(remoteDataSource: getIt()),
+  );
+
+  // ===== USE CASES =====
+  // Auth
   getIt.registerLazySingleton(() => LoginUseCase(getIt()));
   getIt.registerLazySingleton(() => RegisterUseCase(getIt()));
   getIt.registerLazySingleton(() => VerifyCodeUseCase(getIt()));
@@ -37,14 +84,24 @@ void init() {
   getIt.registerLazySingleton(() => GetCurrentUserUsecase(getIt()));
   getIt.registerLazySingleton(() => ForceLogoutUseCase(getIt()));
 
+  // Profile
   getIt.registerLazySingleton(() => GetProfileUseCase(getIt()));
   getIt.registerLazySingleton(() => UpdateProfileUseCase(getIt()));
   getIt.registerLazySingleton(() => ChangePasswordUseCase(getIt()));
   getIt.registerLazySingleton(() => DeleteAccountUseCase(getIt()));
   getIt.registerLazySingleton(() => UploadImageUseCase(getIt()));
 
-  // Bloc
-  getIt.registerFactory(
+  // Applications
+  getIt.registerLazySingleton(() => GetApplicationsByStatusUsecase(getIt()));
+
+  // User applications
+  getIt.registerLazySingleton(
+    () => GetUserApplicationsByStatusUsecase(getIt()),
+  );
+  getIt.registerLazySingleton(() => CreateUserApplicationUsecase(getIt()));
+
+  // ===== BLOC =====
+  getIt.registerLazySingleton(
     () => AuthBloc(
       registerUseCase: getIt(),
       verifyCodeUseCase: getIt(),
@@ -65,34 +122,19 @@ void init() {
       changePasswordUseCase: getIt(),
       deleteAccountUseCase: getIt(),
       uploadImageUseCase: getIt(),
-      authBloc: getIt(),
       connectionChecker: getIt(),
       connectivity: getIt(),
     ),
   );
 
-  // Internet checker
-  getIt.registerLazySingleton(() => Connectivity());
-  getIt.registerLazySingleton(() => InternetConnection());
-
-  // Repository
-  getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(remoteDataSource: getIt()),
+  getIt.registerFactory(
+    () => ApplicationsBloc(getApplicationsByStatusUsecase: getIt()),
   );
 
-  getIt.registerLazySingleton<ProfileRepository>(
-    () => ProfileRepositoryImpl(remoteDataSource: getIt()),
+  getIt.registerFactory(
+    () => UserApplicationsBloc(
+      getUserApplicationsByStatusUsecase: getIt(),
+      createUserApplicationUsecase: getIt(),
+    ),
   );
-
-  // Data sources
-  getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(getIt()),
-  );
-
-  getIt.registerLazySingleton<ProfileRemoteDataSource>(
-    () => ProfileRemoteDataSourceImpl(getIt()),
-  );
-
-  // Appwrite service
-  getIt.registerLazySingleton(() => AppwriteService());
 }

@@ -116,9 +116,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                 _nameController.text = state.user.name ?? '';
                 _surnameController.text = state.user.surname ?? '';
                 _organizationController.text = state.user.organization ?? '';
-                _roleController.text = state.user.role == 'carrier'
-                    ? 'Перевозчик'
-                    : 'Заказчик';
+                _roleController.text = state.user.role ?? '';
                 _phoneController.text = state.user.phone;
                 _currentImageUrl = state.user.profileImage;
                 _isDataInitialized = true;
@@ -210,7 +208,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
             _buildPhoneField(state),
             SizedBox(height: 16.h),
             _buildRoleField(state),
-            SizedBox(height: 16.h),
+            SizedBox(height: 32.h),
             _buildSaveButton(state),
           ],
         ),

@@ -191,11 +191,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: _buildRoleButton(role: 'customer', label: 'Заказчик'),
+          child: _buildRoleButton(role: 'Заказчик', label: 'Заказчик'),
         ),
         SizedBox(width: 16.w),
         Expanded(
-          child: _buildRoleButton(role: 'carrier', label: 'Перевозчик'),
+          child: _buildRoleButton(role: 'Перевозчик', label: 'Перевозчик'),
         ),
       ],
     );

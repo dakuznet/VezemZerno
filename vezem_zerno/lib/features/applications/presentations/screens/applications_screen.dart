@@ -3,36 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
-import 'package:vezem_zerno/core/services/appwrite_service.dart';
-import 'package:vezem_zerno/core/widgets/primary_button.dart';
-import 'package:vezem_zerno/features/applications_list/presentations/screens/widgets/application_card_widget.dart';
-import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:vezem_zerno/features/user_application_list/data/models/application_model.dart';
-import 'package:vezem_zerno/routes/router.dart';
+import 'package:vezem_zerno/features/applications/presentations/bloc/applications_bloc.dart';
+import 'package:vezem_zerno/features/applications/presentations/screens/widgets/application_card_widget.dart';
+import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
 
 @RoutePage()
-class UserApplicationsListScreen extends StatefulWidget {
-  const UserApplicationsListScreen({super.key});
+class ApplicationsListScreen extends StatefulWidget {
+  const ApplicationsListScreen({super.key});
 
   @override
-  State<UserApplicationsListScreen> createState() =>
-      _UserApplicationsListScreenState();
+  State<ApplicationsListScreen> createState() => _ApplicationsListScreenState();
 }
 
-class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
+class _ApplicationsListScreenState extends State<ApplicationsListScreen>
     with SingleTickerProviderStateMixin {
   static const _tabCount = 2;
 
   late final TabController _tabController;
-  List<ApplicationModel> _userActiveApplications = [];
-  bool _isLoading = true;
-  String _error = '';
+  List<ApplicationModel> _applications = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabCount, vsync: this);
-    _loadUserActiveApplications();
+    context.read<ApplicationsBloc>().add(
+      LoadApplicationsEvent(applicationStatus: 'active'),
+    );
   }
 
   @override
@@ -43,44 +39,31 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {},
-      builder: (context, state) {
-        final bool isCustomer = state is SessionRestored
-            ? state.user.role == 'Заказчик'
-            : state is LoginSuccess
-            ? state.user.role == 'Заказчик'
-            : false;
-        return Scaffold(
-          resizeToAvoidBottomInset: false,
-          backgroundColor: ColorsConstants.backgroundColor,
-          body: _buildNestedScrollView(),
-          bottomNavigationBar: isCustomer
-              ? _buildCreateApplicationButton()
-              : null,
-        );
-      },
-    );
-  }
-
-  Widget _buildCreateApplicationButton() {
-    return Padding(
-      padding: EdgeInsets.all(16.w),
-      child: PrimaryButton(
-        text: 'Создать заявку',
-        onPressed: () =>
-            AutoRouter.of(context).push(const CreateApplicationRoute()),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: ColorsConstants.backgroundColor,
+      body: BlocConsumer<ApplicationsBloc, ApplicationsState>(
+        listener: (context, state) {
+          if (state is ApplicationsLoaded) {
+            setState(() {
+              _applications = state.applications;
+            });
+          }
+        },
+        builder: (context, state) {
+          return _buildNestedScrollView(state);
+        },
       ),
     );
   }
 
-  Widget _buildNestedScrollView() {
+  Widget _buildNestedScrollView(ApplicationsState state) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         _buildSliverAppBar(),
         _buildSliverTabBar(),
       ],
-      body: _buildTabBarView(),
+      body: _buildTabBarView(state),
     );
   }
 
@@ -88,7 +71,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
     return SliverAppBar(
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
       title: Text(
-        'Мои заявки',
+        'Заявки',
         style: TextStyle(
           fontSize: 20.sp,
           color: ColorsConstants.primaryBrownColor,
@@ -99,6 +82,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
       pinned: true,
       floating: true,
       snap: true,
+      elevation: 4,
       surfaceTintColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
     );
   }
@@ -108,59 +92,35 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
       pinned: true,
       delegate: _TabBarSliverDelegate(
         tabController: _tabController,
-        // Явно задаем высоту и округляем до целого пикселя
         height: _calculateTabBarHeight(context),
       ),
     );
   }
 
   double _calculateTabBarHeight(BuildContext context) {
-    // Вычисляем высоту TabBar и округляем до целого пикселя
     final rawHeight = 48.h;
     final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
     return (rawHeight * devicePixelRatio).round() / devicePixelRatio;
   }
 
-  Widget _buildTabBarView() {
+  Widget _buildTabBarView(ApplicationsState state) {
     return TabBarView(
       controller: _tabController,
-      children: [_buildActiveTabContent(), _buildArchiveTabContent()],
+      children: [_buildAllApplicationsTab(state), _buildMyResponsesTab()],
     );
   }
 
-  Future<void> _loadUserActiveApplications() async {
-    try {
-      AppwriteService appwriteService = AppwriteService();
-      final currentUser = await appwriteService.getCurrentUser();
-
-      // Используем новый метод для получения активных заявок пользователя
-      final applications = await appwriteService.getUserApplicationsByStatus(
-        currentUser.id,
-        'active',
-      );
-
-      setState(() {
-        _userActiveApplications = applications;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'Ошибка загрузки заявок: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  Widget _buildActiveTabContent() {
+  Widget _buildAllApplicationsTab(ApplicationsState state) {
     return RefreshIndicator(
       color: ColorsConstants.primaryBrownColor,
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      onRefresh: _loadUserActiveApplications,
+      onRefresh: () async => context.read<ApplicationsBloc>().add(
+        LoadApplicationsEvent(applicationStatus: 'active'),
+      ),
       child: CustomScrollView(
-        physics:
-            const AlwaysScrollableScrollPhysics(), // Важно для работы RefreshIndicator
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          if (_isLoading)
+          if (state is ApplicationsLoading)
             SliverFillRemaining(
               child: Center(
                 child: CircularProgressIndicator(
@@ -171,20 +131,20 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
                 ),
               ),
             )
-          else if (_error.isNotEmpty)
+          else if (state is ApplicationsLoadingFailure)
             SliverFillRemaining(
               child: Center(
                 child: Padding(
                   padding: EdgeInsets.all(16.w),
                   child: Text(
-                    _error,
+                    'Ошибка загрузки...',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.red, fontSize: 16.sp),
                   ),
                 ),
               ),
             )
-          else if (_userActiveApplications.isEmpty)
+          else if (_applications.isEmpty)
             SliverFillRemaining(
               child: Center(
                 child: Padding(
@@ -208,7 +168,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        'Список Ваших активных заявок пуст',
+                        'Список доступных заявок пуст',
                         style: TextStyle(
                           fontSize: 16.sp,
                           color: ColorsConstants.primaryBrownColorWithOpacity,
@@ -224,10 +184,9 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
           else
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => ApplicationCard(
-                  application: _userActiveApplications[index],
-                ),
-                childCount: _userActiveApplications.length,
+                (context, index) =>
+                    ApplicationCard(application: _applications[index]),
+                childCount: _applications.length,
               ),
             ),
         ],
@@ -235,43 +194,20 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
     );
   }
 
-  Widget _buildArchiveTabContent() {
+  Widget _buildMyResponsesTab() {
     return Padding(
       padding: EdgeInsets.all(16.w),
       child: CustomScrollView(
         slivers: [
           SliverFillRemaining(
             child: Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 80.w,
-                      height: 80.h,
-                      decoration: BoxDecoration(
-                        color:
-                            ColorsConstants.primaryTextFormFieldBackgorundColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.archive_outlined,
-                        size: 40.sp,
-                        color: ColorsConstants.primaryBrownColorWithOpacity,
-                      ),
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'Список Ваших архивных заявок пуст',
-                      style: TextStyle(
-                          fontSize: 16.sp,
-                          color: ColorsConstants.primaryBrownColorWithOpacity,
-                          fontWeight: FontWeight.w400,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+              child: Text(
+                textAlign: TextAlign.center,
+                'Заявки с вашими откликами появятся здесь',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: ColorsConstants.primaryBrownColorWithOpacity,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
@@ -300,14 +236,11 @@ class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
       child: TabBar(
         controller: tabController,
         tabs: const [
-          Tab(text: 'Активные'),
-          Tab(text: 'Архив'),
+          Tab(text: 'Все заявки'),
+          Tab(text: 'С моим откликом'),
         ],
         labelColor: ColorsConstants.primaryBrownColor,
-        labelStyle: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w600,
-        ),
+        labelStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
         unselectedLabelColor: ColorsConstants.primaryBrownColorWithOpacity,
         unselectedLabelStyle: TextStyle(
           fontSize: 16.sp,

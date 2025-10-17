@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:vezem_zerno/features/user_application_list/presentations/screens/create_application_screen.dart';
+import 'package:vezem_zerno/features/user_applications/presentations/screens/create_application_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/splash_screen.dart';
-import 'package:vezem_zerno/features/applications_list/presentations/screens/application_screen.dart';
+import 'package:vezem_zerno/features/applications/presentations/screens/applications_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/login_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/phone_verification_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/privacy_policy_screen.dart';
@@ -15,7 +15,7 @@ import 'package:vezem_zerno/features/profile/presentations/screens/change_passwo
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_settings_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/settings_screen.dart';
-import 'package:vezem_zerno/features/user_application_list/presentations/screens/user_applications_list_screen.dart';
+import 'package:vezem_zerno/features/user_applications/presentations/screens/user_applications_list_screen.dart';
 import 'package:vezem_zerno/core/main_screen.dart';
 
 part 'router.gr.dart';
@@ -55,7 +55,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SettingRoute.page, path: '/settings'),
     AutoRoute(page: ProfileSettingRoute.page, path: '/profile-settings'),
     AutoRoute(page: ChangePasswordRoute.page, path: '/change-password'),
-    AutoRoute(page: CreateApplicationRoute.page, path: '/create-request-form')
+    AutoRoute(page: CreateApplicationRoute.page, path: '/create-request-form'),
   ];
 }
 

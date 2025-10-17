@@ -32,13 +32,13 @@ class _SettingScreenState extends State<SettingScreen> {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is AccountDeleted) {
+          context.read<AuthBloc>().add(AuthLogoutEvent());
+          AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
           PrimarySnackBar.show(
             context,
             text: 'Аккаунт успешно удалён',
             borderColor: Colors.green,
           );
-          context.read<AuthBloc>().add(AuthLogoutEvent());
-          AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
         } else if (state is AccountDeleteError) {
           PrimarySnackBar.show(
             context,

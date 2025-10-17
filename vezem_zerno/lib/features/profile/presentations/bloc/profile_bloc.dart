@@ -4,8 +4,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
-import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart'
-    hide CheckInternetConnection, NoInternetConnection;
 import 'package:vezem_zerno/features/profile/domain/usecases/change_password_usecase.dart';
 import 'package:vezem_zerno/features/profile/domain/usecases/delete_account_usecase.dart';
 import 'package:vezem_zerno/features/profile/domain/usecases/get_profile_usecase.dart';
@@ -20,7 +18,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final ChangePasswordUseCase changePasswordUseCase;
   final DeleteAccountUseCase deleteAccountUseCase;
   final UploadImageUseCase uploadImageUseCase;
-  final AuthBloc authBloc;
   final Connectivity _connectivity;
   final InternetConnection _connectionChecker;
   StreamSubscription? _connectivitySubscription;
@@ -31,7 +28,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required this.updateProfileUseCase,
     required this.changePasswordUseCase,
     required this.deleteAccountUseCase,
-    required this.authBloc,
     required this.uploadImageUseCase,
     required Connectivity connectivity,
     required InternetConnection connectionChecker,
@@ -240,7 +236,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           ),
           (_) {
             emit(AccountDeleted());
-            authBloc.add(AuthLogoutEvent());
           },
         );
       },

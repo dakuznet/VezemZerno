@@ -45,6 +45,7 @@ class PrimarySnackBar {
                 ),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.2),
                     blurRadius: 12.r,
                     offset: const Offset(0, 4),

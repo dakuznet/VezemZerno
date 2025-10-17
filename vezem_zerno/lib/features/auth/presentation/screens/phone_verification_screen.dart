@@ -144,7 +144,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
     return PinTheme(
       shape: PinCodeFieldShape.box,
       borderRadius: BorderRadius.circular(8.r),
-      fieldHeight: 30.h,
+      fieldHeight: 50.h,
       fieldWidth: 40.w,
       selectedFillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
       selectedColor: ColorsConstants.primaryTextFormFieldBackgorundColor,

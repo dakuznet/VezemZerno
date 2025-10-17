@@ -5,8 +5,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/globals.dart';
 import 'package:vezem_zerno/core/injection_container.dart';
+import 'package:vezem_zerno/features/applications/presentations/bloc/applications_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
+import 'package:vezem_zerno/features/user_applications/presentations/bloc/user_applications_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
 void main() async {
@@ -21,17 +23,32 @@ void main() async {
 
   final authBloc = getIt<AuthBloc>();
   final profileBloc = getIt<ProfileBloc>();
+  final applicationsBloc = getIt<ApplicationsBloc>();
+  final userApplicationsBloc = getIt<UserApplicationsBloc>();
 
-  authBloc.add(RestoreSessionEvent());
-
-  runApp(MyApp(authBloc: authBloc, profileBloc: profileBloc));
+  runApp(
+    MyApp(
+      authBloc: authBloc,
+      profileBloc: profileBloc,
+      applicationsBloc: applicationsBloc,
+      userApplicationsBloc: userApplicationsBloc,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final AuthBloc authBloc;
   final ProfileBloc profileBloc;
+  final ApplicationsBloc applicationsBloc;
+  final UserApplicationsBloc userApplicationsBloc;
 
-  const MyApp({super.key, required this.authBloc, required this.profileBloc});
+  const MyApp({
+    super.key,
+    required this.authBloc,
+    required this.profileBloc,
+    required this.applicationsBloc,
+    required this.userApplicationsBloc,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +60,8 @@ class MyApp extends StatelessWidget {
           providers: [
             BlocProvider.value(value: authBloc),
             BlocProvider.value(value: profileBloc),
+            BlocProvider.value(value: applicationsBloc),
+            BlocProvider.value(value: userApplicationsBloc),
           ],
           child: MaterialApp.router(
             scaffoldMessengerKey: AppGlobals.scaffoldMessengerKey,

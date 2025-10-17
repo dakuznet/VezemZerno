@@ -1,4 +1,4 @@
-import 'package:vezem_zerno/features/user_application_list/domain/entities/application_entity.dart';
+import 'package:vezem_zerno/features/user_applications/domain/entities/application_entity.dart';
 
 class ApplicationModel {
   final String? id;

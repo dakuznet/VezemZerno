@@ -2,11 +2,10 @@ import 'dart:io' as io;
 import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
-import 'package:appwrite/models.dart' as appwrite_models;
 import 'package:vezem_zerno/core/constants/string_constants.dart';
 import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
 import 'package:path/path.dart' as path;
-import 'package:vezem_zerno/features/user_application_list/data/models/application_model.dart';
+import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
 
 class AppwriteService {
   late final Client _client;
@@ -31,15 +30,16 @@ class AppwriteService {
   // APPLICATIONS
 
   // Получение заявок пользователя по статусу заявки
-  Future<List<ApplicationModel>> getUserApplicationsByStatus(
-    String userId,
-    String status,
-  ) async {
+  Future<List<ApplicationModel>> getUserApplicationsByStatus({
+    required String applicationStatus,
+  }) async {
     try {
+      final user = await getCurrentUser();
+
       final userResponse = await _tablesDB.listRows(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        queries: [Query.equal('\$id', userId)],
+        queries: [Query.equal('\$id', user.id)],
       );
 
       if (userResponse.rows.isEmpty) {
@@ -68,7 +68,7 @@ class AppwriteService {
             '\$id': applicationResponse.$id,
           });
 
-          if (application.status == status) {
+          if (application.status == applicationStatus) {
             applications.add(application);
           }
         } catch (e) {
@@ -89,15 +89,15 @@ class AppwriteService {
   }
 
   // Получение всех заявок по статусу заявки
-  Future<List<ApplicationModel>> getAllApplicationsByStatus(
-    String status,
-  ) async {
+  Future<List<ApplicationModel>> getApplicationsByStatus({
+    required String applicationStatus,
+  }) async {
     try {
       final response = await _tablesDB.listRows(
         databaseId: StringConstants.dbApplicationsId,
         tableId: StringConstants.tableApplicationsId,
         queries: [
-          Query.equal('status', status),
+          Query.equal('status', applicationStatus),
           Query.orderDesc('\$createdAt'),
         ],
       );
@@ -113,11 +113,49 @@ class AppwriteService {
   }
 
   // Создание заявки
-  Future<ApplicationModel> createApplication(
-    ApplicationModel application,
-  ) async {
+  Future<ApplicationModel> createApplication({
+    String? comment,
+    bool? charter,
+    bool? dumpTrucks,
+    required String loadingPlace,
+    required String loadingMethod,
+    required String loadingDate,
+    required String unloadingPlace,
+    required String crop,
+    required String tonnage,
+    required String distance,
+    required String scalesCapacity,
+    required String price,
+    required String downtime,
+    required String shortage,
+    required String paymentTerms,
+    required String paymentMethod,
+    required String status,
+  }) async {
     try {
       final currentUser = await getCurrentUser();
+
+      final application = ApplicationModel(
+        organization: currentUser.organization!,
+        customerId: currentUser.id,
+        loadingPlace: loadingPlace,
+        unloadingPlace: unloadingPlace,
+        distance: distance,
+        crop: crop,
+        tonnage: tonnage,
+        comment: comment!,
+        loadingMethod: loadingMethod,
+        loadingDate: loadingDate,
+        scalesCapacity: scalesCapacity,
+        price: price,
+        downtime: downtime,
+        shortage: shortage,
+        paymentTerms: paymentTerms,
+        dumpTrucks: dumpTrucks!,
+        charter: charter!,
+        paymentMethod: paymentMethod,
+        status: status,
+      );
 
       // Создаем заявку
       final row = await _tablesDB.createRow(
@@ -183,7 +221,7 @@ class AppwriteService {
   // USER
 
   Future<UserModel> getCurrentUser() async {
-    final appwrite_models.User user = await account.get();
+    final User user = await account.get();
     final response = await _tablesDB.listRows(
       databaseId: StringConstants.dbAuthId,
       tableId: StringConstants.tableUsersId,
@@ -288,7 +326,7 @@ class AppwriteService {
     String? phone,
     String? profileImage,
   }) async {
-    final appwrite_models.User user = await account.get();
+    final User user = await account.get();
     final response = await _tablesDB.listRows(
       databaseId: StringConstants.dbAuthId,
       tableId: StringConstants.tableUsersId,
@@ -336,24 +374,18 @@ class AppwriteService {
       // Если сессия валидна - получим пользователя
       await _account.get();
       return true;
-    } on AppwriteException catch (e) {
-      // Сессия невалидна или истекла
-      print('Нет валидной сессии: ${e.message}');
+    } on AppwriteException {
       return false;
     } catch (e) {
-      // Любая другая ошибка
-      print('Ошибка при восстановлении сессии: $e');
       return false;
     }
   }
 
   Future<void> logout() async {
     try {
-      // Удаляем текущую сессию через Appwrite
       await _account.deleteSession(sessionId: 'current');
     } catch (e) {
-      // Игнорируем ошибки при выходе
-      print('Ошибка при выходе: $e');
+      return;
     }
   }
 
@@ -361,7 +393,6 @@ class AppwriteService {
     try {
       await logout();
     } catch (e) {
-      // Гарантированный выход даже с ошибками
       return;
     }
   }
