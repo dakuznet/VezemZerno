@@ -91,13 +91,34 @@ class _LoginScreenState extends State<LoginScreen> {
     return Form(
       key: _loginFormKey,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _buildTitle(),
+          Center(child: _buildTitle()),
           SizedBox(height: 32.h),
           _buildPhoneField(),
           SizedBox(height: 16.h),
           _buildPasswordField(),
-          SizedBox(height: 32.h),
+          SizedBox(height: 16.h),
+          TextButton(
+            onPressed: () => state is AuthLoading
+                ? null
+                : AutoRouter.of(context).push(const ResetPasswordRoute()),
+            style: TextButton.styleFrom(
+              foregroundColor: ColorsConstants.primaryBrownColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+            ),
+            child: Text(
+              "Забыли пароль?",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                color: ColorsConstants.primaryBrownColor,
+              ),
+            ),
+          ),
+          SizedBox(height: 16.h),
           _buildLoginButton(context, state),
         ],
       ),

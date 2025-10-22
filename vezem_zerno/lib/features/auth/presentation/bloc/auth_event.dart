@@ -43,3 +43,19 @@ final class AuthLogoutEvent extends AuthEvent {}
 final class CheckInternetConnection extends AuthEvent {}
 
 final class ForceLogoutEvent extends AuthEvent {}
+
+final class RequestPasswordResetEvent extends AuthEvent {
+  final String phone;
+  RequestPasswordResetEvent({required this.phone});
+}
+
+final class ConfirmPasswordResetEvent extends AuthEvent {
+  final String phone;
+  final String code;
+  final String newPassword;
+  ConfirmPasswordResetEvent({
+    required this.phone,
+    required this.code,
+    required this.newPassword,
+  });
+}

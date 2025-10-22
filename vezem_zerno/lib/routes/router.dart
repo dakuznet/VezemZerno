@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:vezem_zerno/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:vezem_zerno/features/user_applications/presentations/screens/create_application_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/splash_screen.dart';
@@ -56,6 +57,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: ProfileSettingRoute.page, path: '/profile-settings'),
     AutoRoute(page: ChangePasswordRoute.page, path: '/change-password'),
     AutoRoute(page: CreateApplicationRoute.page, path: '/create-request-form'),
+    AutoRoute(page: ResetPasswordRoute.page),
   ];
 }
 

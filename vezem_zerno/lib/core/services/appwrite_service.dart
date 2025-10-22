@@ -219,7 +219,6 @@ class AppwriteService {
   }
 
   // USER
-
   Future<UserModel> getCurrentUser() async {
     final User user = await account.get();
     final response = await _tablesDB.listRows(
@@ -355,13 +354,10 @@ class AppwriteService {
     }
   }
 
-  // AUTH - УПРОЩЕННАЯ ЛОГИКА СЕССИЙ
-
+  // AUTH
   Future<Session> createSession(String phone, String password) async {
     final normalizedPhone = _normalizePhone(phone);
     final email = _buildEmailFromPhone(normalizedPhone);
-
-    // Appwrite автоматически сохранит сессию
     return await _account.createEmailPasswordSession(
       email: email,
       password: password,
@@ -370,8 +366,6 @@ class AppwriteService {
 
   Future<bool> restoreSession() async {
     try {
-      // Просто пытаемся получить данные пользователя
-      // Если сессия валидна - получим пользователя
       await _account.get();
       return true;
     } on AppwriteException {
@@ -460,5 +454,50 @@ class AppwriteService {
 
   String _buildEmailFromPhone(String phone) {
     return '$phone@vezemzerno.com';
+  }
+
+  Future<void> requestPasswordReset({required String phone}) async {
+    try {
+      final normalizedPhone = _normalizePhone(phone);
+
+      final response = await _functions.createExecution(
+        functionId: StringConstants.funcRequestPasswordResetId,
+        body: jsonEncode({'phone': normalizedPhone}),
+      );
+
+      return jsonDecode(response.responseBody);
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при запросе сброса пароля: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при запросе сброса пароля: $e');
+    } 
+  }
+
+  Future<void> confirmPasswordReset({
+    required String phone,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      final normalizedPhone = _normalizePhone(phone);
+
+      final response = await _functions.createExecution(
+        functionId: StringConstants.funcConfirmPasswordResetId,
+        body: jsonEncode({
+          'phone': normalizedPhone,
+          'code': code,
+          'newPassword': newPassword,
+        }),
+      );
+
+      final result = jsonDecode(response.responseBody);
+      if (result['success'] != true) {
+        throw Exception(result['message'] ?? 'Не удалось сбросить пароль');
+      }
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при сбросе пароля: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при сбросе пароля: $e');
+    }
   }
 }

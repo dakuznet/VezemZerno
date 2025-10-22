@@ -12,11 +12,13 @@ import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_sour
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import 'package:vezem_zerno/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:vezem_zerno/features/auth/domain/repositories/auth_repository.dart';
+import 'package:vezem_zerno/features/auth/domain/usecases/confirm_password_reset_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/force_logout_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/login_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/register_usecase.dart';
+import 'package:vezem_zerno/features/auth/domain/usecases/request_password_reset_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/verify_code_usecase.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
@@ -83,6 +85,8 @@ void init() {
   getIt.registerLazySingleton(() => RestoreSessionUseCase(getIt()));
   getIt.registerLazySingleton(() => GetCurrentUserUsecase(getIt()));
   getIt.registerLazySingleton(() => ForceLogoutUseCase(getIt()));
+  getIt.registerLazySingleton(() => RequestPasswordResetUsecase(getIt()));
+  getIt.registerLazySingleton(() => ConfirmPasswordResetUsecase(getIt()));
 
   // Profile
   getIt.registerLazySingleton(() => GetProfileUseCase(getIt()));
@@ -110,6 +114,8 @@ void init() {
       forceLogoutUseCase: getIt(),
       getCurrentUserUseCase: getIt(),
       restoreSessionUseCase: getIt(),
+      requestPasswordResetUsecase: getIt(),
+      confirmPasswordResetUsecase: getIt(),
       connectionChecker: getIt(),
       connectivity: getIt(),
     ),

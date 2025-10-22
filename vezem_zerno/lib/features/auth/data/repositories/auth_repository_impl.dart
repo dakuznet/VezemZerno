@@ -64,4 +64,24 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     return remoteDataSource.getCurrentUser();
   }
+
+  @override
+  Future<Either<Failure, void>> requestPasswordReset({
+    required String phone,
+  }) async {
+    return remoteDataSource.requestPasswordReset(phone: phone);
+  }
+
+  @override
+  Future<Either<Failure, void>> confrimPasswordReset({
+    required String phone,
+    required String code,
+    required String newPassword,
+  }) async {
+    return remoteDataSource.confirmPasswordReset(
+      phone: phone,
+      code: code,
+      newPassword: newPassword,
+    );
+  }
 }
