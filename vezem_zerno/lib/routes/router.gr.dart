@@ -76,6 +76,19 @@ class InfoAboutApplicationRoute
        );
 
   static const String name = 'InfoAboutApplicationRoute';
+/// [FilterScreen]
+class FilterRoute extends PageRouteInfo<FilterRouteArgs> {
+  FilterRoute({
+    Key? key,
+    required ApplicationFilter initialFilter,
+    List<PageRouteInfo>? children, required Null Function(ApplicationFilter p1) onFilterApplied,
+  }) : super(
+         FilterRoute.name,
+         args: FilterRouteArgs(key: key, initialFilter: initialFilter),
+         initialChildren: children,
+       );
+
+  static const String name = 'FilterRoute';
 
   static PageInfo page = PageInfo(
     name,
@@ -85,6 +98,8 @@ class InfoAboutApplicationRoute
         key: args.key,
         application: args.application,
       );
+      final args = data.argsAs<FilterRouteArgs>();
+      return FilterScreen(key: args.key, initialFilter: args.initialFilter);
     },
   );
 }
@@ -99,6 +114,16 @@ class InfoAboutApplicationRouteArgs {
   @override
   String toString() {
     return 'InfoAboutApplicationRouteArgs{key: $key, application: $application}';
+class FilterRouteArgs {
+  const FilterRouteArgs({this.key, required this.initialFilter});
+
+  final Key? key;
+
+  final ApplicationFilter initialFilter;
+
+  @override
+  String toString() {
+    return 'FilterRouteArgs{key: $key, initialFilter: $initialFilter}';
   }
 
   @override
@@ -110,6 +135,12 @@ class InfoAboutApplicationRouteArgs {
 
   @override
   int get hashCode => key.hashCode ^ application.hashCode;
+    if (other is! FilterRouteArgs) return false;
+    return key == other.key && initialFilter == other.initialFilter;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ initialFilter.hashCode;
 }
 
 /// generated route for
@@ -321,6 +352,22 @@ class RegistrationRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const RegistrationScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [ResetPasswordScreen]
+class ResetPasswordRoute extends PageRouteInfo<void> {
+  const ResetPasswordRoute({List<PageRouteInfo>? children})
+    : super(ResetPasswordRoute.name, initialChildren: children);
+
+  static const String name = 'ResetPasswordRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ResetPasswordScreen();
     },
   );
 }

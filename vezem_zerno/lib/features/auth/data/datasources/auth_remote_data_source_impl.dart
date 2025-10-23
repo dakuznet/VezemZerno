@@ -155,4 +155,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return Left(ServerFailure('Ошибка получения пользователя: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> requestPasswordReset({
+    required String phone,
+  }) async {
+    try {
+      await _appwriteService.requestPasswordReset(phone: phone);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+  
+  @override
+  Future<Either<Failure, void>> confirmPasswordReset({required String phone, required String code, required String newPassword}) async {
+    try {
+      await _appwriteService.confirmPasswordReset(phone: phone, code: code, newPassword: newPassword);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
