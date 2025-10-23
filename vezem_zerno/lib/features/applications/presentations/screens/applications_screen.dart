@@ -5,7 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/features/applications/presentations/bloc/applications_bloc.dart';
 import 'package:vezem_zerno/features/applications/presentations/screens/widgets/application_card_widget.dart';
+import 'package:vezem_zerno/features/filter/data/models/application_filter_model.dart';
 import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
+import 'package:vezem_zerno/routes/router.dart';
 
 @RoutePage()
 class ApplicationsListScreen extends StatefulWidget {
@@ -21,6 +23,8 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
 
   late final TabController _tabController;
   List<ApplicationModel> _applications = [];
+  List<ApplicationModel> _filteredApplications = [];
+  ApplicationFilter _currentFilter = ApplicationFilter();
 
   @override
   void initState() {
@@ -37,8 +41,122 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
     super.dispose();
   }
 
+  void _applyFilter(ApplicationFilter filter) {
+    setState(() {
+      _currentFilter = filter;
+      _filteredApplications = _filterApplications(_applications, filter);
+    });
+  }
+
+  List<ApplicationModel> _filterApplications(
+    List<ApplicationModel> applications,
+    ApplicationFilter filter,
+  ) {
+    return applications.where((app) {
+      if (filter.loadingRegion != null &&
+          filter.loadingRegion!.isNotEmpty &&
+          !app.loadingPlace.toLowerCase().contains(
+            filter.loadingRegion!.toLowerCase(),
+          )) {
+        return false;
+      }
+
+      if (filter.loadingDistrict != null &&
+          filter.loadingDistrict!.isNotEmpty &&
+          !app.loadingPlace.toLowerCase().contains(
+            filter.loadingDistrict!.toLowerCase(),
+          )) {
+        return false;
+      }
+
+      if (filter.unloadingRegion != null &&
+          filter.unloadingRegion!.isNotEmpty &&
+          !app.unloadingPlace.toLowerCase().contains(
+            filter.unloadingRegion!.toLowerCase(),
+          )) {
+        return false;
+      }
+
+      if (filter.unloadingDistrict != null &&
+          filter.unloadingDistrict!.isNotEmpty &&
+          !app.unloadingPlace.toLowerCase().contains(
+            filter.unloadingDistrict!.toLowerCase(),
+          )) {
+        return false;
+      }
+
+      if (filter.crop != null &&
+          filter.crop!.isNotEmpty &&
+          !app.crop.toLowerCase().contains(filter.crop!.toLowerCase())) {
+        return false;
+      }
+
+      final appPrice = double.tryParse(app.price.replaceAll(',', '.'));
+      if (filter.minPrice != null && appPrice != null) {
+        if (appPrice < filter.minPrice!) return false;
+      }
+      if (filter.maxPrice != null && appPrice != null) {
+        if (appPrice > filter.maxPrice!) return false;
+      }
+
+      final appDistance = double.tryParse(app.distance.replaceAll(',', '.'));
+      if (filter.minDistance != null && appDistance != null) {
+        if (appDistance < filter.minDistance!) return false;
+      }
+      if (filter.maxDistance != null && appDistance != null) {
+        if (appDistance > filter.maxDistance!) return false;
+      }
+
+      if (app.createdAt != null) {
+        final now = DateTime.now();
+        final difference = now.difference(app.createdAt!).inDays;
+
+        switch (filter.dateFilter) {
+          case DateFilter.last3Days:
+            if (difference > 3) return false;
+            break;
+          case DateFilter.last5Days:
+            if (difference > 5) return false;
+            break;
+          case DateFilter.last7Days:
+            if (difference > 7) return false;
+            break;
+          case DateFilter.any:
+            break;
+        }
+      }
+
+      if (filter.suitableForDumpTrucks && !app.dumpTrucks) {
+        return false;
+      }
+
+      if (filter.charterCarrier && !app.charter) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+  }
+
+  Future<void> _openFilterScreen() async {
+    final result = await context.pushRoute<ApplicationFilter?>(
+      FilterRoute(
+        initialFilter: _currentFilter,
+        onFilterApplied: (ApplicationFilter p1) {},
+      ),
+    );
+
+    if (result != null) {
+      _applyFilter(result);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final displayApplications = _currentFilter.hasActiveFilters
+        ? _filteredApplications
+        : _applications;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: ColorsConstants.backgroundColor,
@@ -47,23 +165,32 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
           if (state is ApplicationsLoaded) {
             setState(() {
               _applications = state.applications;
+              if (_currentFilter.hasActiveFilters) {
+                _filteredApplications = _filterApplications(
+                  _applications,
+                  _currentFilter,
+                );
+              }
             });
           }
         },
         builder: (context, state) {
-          return _buildNestedScrollView(state);
+          return _buildNestedScrollView(state, displayApplications);
         },
       ),
     );
   }
 
-  Widget _buildNestedScrollView(ApplicationsState state) {
+  Widget _buildNestedScrollView(
+    ApplicationsState state,
+    List<ApplicationModel> displayApplications,
+  ) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         _buildSliverAppBar(),
         _buildSliverTabBar(),
       ],
-      body: _buildTabBarView(state),
+      body: _buildTabBarView(state, displayApplications),
     );
   }
 
@@ -82,7 +209,33 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
       pinned: true,
       floating: true,
       snap: true,
-      elevation: 4,
+      actions: [
+        Stack(
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.filter_list_alt,
+                color: ColorsConstants.primaryBrownColor,
+                size: 24.0.sp,
+              ),
+              onPressed: _openFilterScreen,
+            ),
+            if (_currentFilter.hasActiveFilters)
+              Positioned(
+                right: 8.w,
+                top: 8.h,
+                child: Container(
+                  padding: EdgeInsets.all(2.w),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(6.w),
+                  ),
+                  constraints: BoxConstraints(minWidth: 8.w, minHeight: 8.h),
+                ),
+              ),
+          ],
+        ),
+      ],
       surfaceTintColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
     );
   }
@@ -103,14 +256,23 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
     return (rawHeight * devicePixelRatio).round() / devicePixelRatio;
   }
 
-  Widget _buildTabBarView(ApplicationsState state) {
+  Widget _buildTabBarView(
+    ApplicationsState state,
+    List<ApplicationModel> displayApplications,
+  ) {
     return TabBarView(
       controller: _tabController,
-      children: [_buildAllApplicationsTab(state), _buildMyResponsesTab()],
+      children: [
+        _buildAllApplicationsTab(state, displayApplications),
+        _buildMyResponsesTab(),
+      ],
     );
   }
 
-  Widget _buildAllApplicationsTab(ApplicationsState state) {
+  Widget _buildAllApplicationsTab(
+    ApplicationsState state,
+    List<ApplicationModel> displayApplications,
+  ) {
     return RefreshIndicator(
       color: ColorsConstants.primaryBrownColor,
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
@@ -136,15 +298,16 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
               child: Center(
                 child: Padding(
                   padding: EdgeInsets.all(16.w),
-                  child: Text(
-                    'Ошибка загрузки...',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.red, fontSize: 16.sp),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 4.w,
+                    backgroundColor:
+                        ColorsConstants.primaryTextFormFieldBackgorundColor,
+                    color: ColorsConstants.primaryBrownColor,
                   ),
                 ),
               ),
             )
-          else if (_applications.isEmpty)
+          else if (displayApplications.isEmpty)
             SliverFillRemaining(
               child: Center(
                 child: Padding(
@@ -168,7 +331,9 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        'Список доступных заявок пуст',
+                        _currentFilter.hasActiveFilters
+                            ? 'По вашему запросу ничего не найдено'
+                            : 'Список доступных заявок пуст',
                         style: TextStyle(
                           fontSize: 16.sp,
                           color: ColorsConstants.primaryBrownColorWithOpacity,
@@ -176,6 +341,17 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
                         ),
                         textAlign: TextAlign.center,
                       ),
+                      if (_currentFilter.hasActiveFilters)
+                        TextButton(
+                          onPressed: _openFilterScreen,
+                          child: Text(
+                            'Изменить фильтры',
+                            style: TextStyle(
+                              color: ColorsConstants.primaryBrownColor,
+                              fontSize: 16.sp,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -185,8 +361,8 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) =>
-                    ApplicationCard(application: _applications[index]),
-                childCount: _applications.length,
+                    ApplicationCard(application: displayApplications[index]),
+                childCount: displayApplications.length,
               ),
             ),
         ],

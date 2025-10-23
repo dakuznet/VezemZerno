@@ -14,6 +14,8 @@ abstract class StringConstants {
   static const funcDeleteUserId = '68cde36900053573d8ab';
   static const funcSendVerfCodeId = '687f672c003d9a81e0d6';
   static const funcVerifyCodeId = '687f73a60022fe36c951';
+  static const funcRequestPasswordResetId = '68f8bcf5002d2429b942';
+  static const funcConfirmPasswordResetId = '68f8c0f8003d7825cc6c';
 
   //Buckets id
   static const bucketProfileImagesId = '68bc5a62002b49eb959e';
