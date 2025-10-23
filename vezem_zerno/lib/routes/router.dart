@@ -62,6 +62,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: CreateApplicationRoute.page, path: '/create-request-form'),
     AutoRoute(page: InfoAboutApplicationRoute.page, path: '/info-application'),
     AutoRoute(page: FilterRoute.page, path: '/filters'),
+    AutoRoute(page: ResetPasswordRoute.page),
   ];
 }
 
