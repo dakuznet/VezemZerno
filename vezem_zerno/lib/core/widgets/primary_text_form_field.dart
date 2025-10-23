@@ -72,22 +72,22 @@ class PrimaryTextFormField extends StatelessWidget {
         suffixIcon: suffixIcon,
         suffixIconColor: ColorsConstants.primaryBrownColor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12).r,
+          borderRadius: BorderRadius.circular(16).r,
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12).r,
+          borderRadius: BorderRadius.circular(16).r,
           borderSide: BorderSide(
             color: ColorsConstants.primaryBrownColor,
             width: 2.0.w,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12).r,
+          borderRadius: BorderRadius.circular(16).r,
           borderSide: BorderSide(color: Colors.red, width: 2.w),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12).r,
+          borderRadius: BorderRadius.circular(16).r,
           borderSide: BorderSide(color: Colors.red, width: 2.w),
         ),
       ),

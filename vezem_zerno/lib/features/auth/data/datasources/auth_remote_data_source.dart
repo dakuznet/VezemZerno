@@ -25,12 +25,4 @@ abstract class AuthRemoteDataSource {
   Future<Either<Failure, void>> forceLogout();
 
   Future<Either<Failure, UserEntity>> getCurrentUser();
-
-  Future<Either<Failure, void>> requestPasswordReset({required String phone});
-
-  Future<Either<Failure, void>> confirmPasswordReset({
-    required String phone,
-    required String code,
-    required String newPassword,
-  });
 }

@@ -89,7 +89,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           "Уже есть аккаунт",
           style: TextStyle(
             fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             color: ColorsConstants.primaryBrownColor,
           ),
         ),

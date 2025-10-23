@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vezem_zerno/core/error/failures.dart';
 import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
-import 'package:vezem_zerno/features/auth/domain/usecases/confirm_password_reset_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/force_logout_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/login_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/register_usecase.dart';
-import 'package:vezem_zerno/features/auth/domain/usecases/request_password_reset_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/verify_code_usecase.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -26,16 +24,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ForceLogoutUseCase forceLogoutUseCase;
   final RestoreSessionUseCase restoreSessionUseCase;
   final GetCurrentUserUsecase getCurrentUserUseCase;
-  final RequestPasswordResetUsecase requestPasswordResetUsecase;
-  final ConfirmPasswordResetUsecase confirmPasswordResetUsecase;
   final Connectivity _connectivity;
   final InternetConnection _connectionChecker;
   StreamSubscription? _connectivitySubscription;
   bool _hasAttemptedRestore = false;
 
   AuthBloc({
-    required this.confirmPasswordResetUsecase,
-    required this.requestPasswordResetUsecase,
     required this.registerUseCase,
     required this.verifyCodeUseCase,
     required this.loginUseCase,
@@ -55,8 +49,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutEvent>(_onLogout);
     on<CheckInternetConnection>(_onCheckInternetConnection);
     on<ForceLogoutEvent>(_onForceLogout);
-    on<RequestPasswordResetEvent>(_onRequestPasswordReset);
-    on<ConfirmPasswordResetEvent>(_onConfirmPasswordReset);
 
     _startMonitoring();
   }
@@ -197,50 +189,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onRequestPasswordReset(
-    RequestPasswordResetEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    final hasConnection = await _checkInternetAccess();
-    if (!hasConnection) {
-      emit(NoInternetConnection('Нет интернет-соединения'));
-      return;
-    }
-
-    emit(PasswordResetLoading());
-
-    final result = await requestPasswordResetUsecase.call(phone: event.phone);
-
-    result.fold(
-      (failure) => emit(PasswordResetFailure()),
-      (_) => emit(PasswordResetCodeSent()),
-    );
-  }
-
-  Future<void> _onConfirmPasswordReset(
-    ConfirmPasswordResetEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    final hasConnection = await _checkInternetAccess();
-    if (!hasConnection) {
-      emit(NoInternetConnection('Нет интернет-соединения'));
-      return;
-    }
-
-    emit(PasswordResetLoading());
-
-    final result = await confirmPasswordResetUsecase.call(
-      phone: event.phone,
-      code: event.code,
-      newPassword: event.newPassword,
-    );
-
-    result.fold(
-      (failure) => emit(PasswordResetFailure()),
-      (_) => emit(PasswordResetSuccess()),
-    );
-  }
-
   Future<void> _onSendVerificationCode(
     SendVerificationCodeEvent event,
     Emitter<AuthState> emit,
@@ -274,7 +222,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
 
     emit(AuthLoading());
-
+    
     final result = await verifyCodeUseCase.call(
       phone: event.phone,
       code: event.code,

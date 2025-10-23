@@ -50,11 +50,3 @@ final class NoInternetConnection extends AuthState {
 
   NoInternetConnection(this.message);
 }
-
-final class PasswordResetLoading extends AuthState {}
-
-final class PasswordResetCodeSent extends AuthState {}
-
-final class PasswordResetSuccess extends AuthState {}
-
-final class PasswordResetFailure extends AuthState {}

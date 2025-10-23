@@ -145,7 +145,8 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
         );
       },
       child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics:
+            const AlwaysScrollableScrollPhysics(), // Важно для работы RefreshIndicator
         slivers: [
           if (state is UserApplicationsLoading)
             SliverFillRemaining(
@@ -163,11 +164,10 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
               child: Center(
                 child: Padding(
                   padding: EdgeInsets.all(16.w),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 4.w,
-                    backgroundColor:
-                        ColorsConstants.primaryTextFormFieldBackgorundColor,
-                    color: ColorsConstants.primaryBrownColor,
+                  child: Text(
+                    'Ошибка загрузки...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.red, fontSize: 16.sp),
                   ),
                 ),
               ),
