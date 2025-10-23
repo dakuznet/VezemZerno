@@ -1,7 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
+import 'package:vezem_zerno/features/applications/presentations/screens/info_about_application.dart';
 
 class ApplicationCard extends StatelessWidget {
   final ApplicationModel application;
@@ -10,23 +12,31 @@ class ApplicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-      color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      margin: EdgeInsets.all(16.w),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeaderRow(),
-            _buildDivider(),
-            _buildLocationWithTariff(),
-            SizedBox(height: 16.h),
-            _buildCargoInfo(),
-            _buildDivider(),
-            _buildCustomerInfo(),
-          ],
+
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+  MaterialPageRoute(
+    builder: (context) => InfoAboutApplicationScreen(application: application), // ← используется здесь
+  ),
+),
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        color: ColorsConstants.primaryTextFormFieldBackgorundColor,
+        margin: EdgeInsets.all(16.w),
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeaderRow(),
+              _buildDivider(),
+              _buildLocationWithTariff(),
+              SizedBox(height: 16.h),
+              _buildCargoInfo(),
+              _buildDivider(),
+              _buildCustomerInfo(),
+            ],
+          ),
         ),
       ),
     );

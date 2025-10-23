@@ -17,6 +17,8 @@ import 'package:vezem_zerno/features/profile/presentations/screens/profile_setti
 import 'package:vezem_zerno/features/profile/presentations/screens/settings_screen.dart';
 import 'package:vezem_zerno/features/user_applications/presentations/screens/user_applications_list_screen.dart';
 import 'package:vezem_zerno/core/main_screen.dart';
+import 'package:vezem_zerno/features/applications/presentations/screens/info_about_application.dart';
+import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
 
 part 'router.gr.dart';
 
@@ -48,7 +50,6 @@ class AppRouter extends RootStackRouter {
           page: UserApplicationsListRoute.page,
           path: 'user-applications-list',
         ),
-
         AutoRoute(page: ProfileRoute.page, path: 'profile'),
       ],
     ),
@@ -56,6 +57,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: ProfileSettingRoute.page, path: '/profile-settings'),
     AutoRoute(page: ChangePasswordRoute.page, path: '/change-password'),
     AutoRoute(page: CreateApplicationRoute.page, path: '/create-request-form'),
+    AutoRoute(page: InfoAboutApplicationRoute.page, path: '/info-application'),
   ];
 }
 
