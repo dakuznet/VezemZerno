@@ -49,44 +49,48 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
   }
 
   List<ApplicationModel> _filterApplications(
-      List<ApplicationModel> applications, ApplicationFilter filter) {
+    List<ApplicationModel> applications,
+    ApplicationFilter filter,
+  ) {
     return applications.where((app) {
-      
-      if (filter.loadingRegion != null && 
+      if (filter.loadingRegion != null &&
           filter.loadingRegion!.isNotEmpty &&
-          !app.loadingPlace.toLowerCase().contains(filter.loadingRegion!.toLowerCase())) {
+          !app.loadingPlace.toLowerCase().contains(
+            filter.loadingRegion!.toLowerCase(),
+          )) {
         return false;
       }
 
-     
-      if (filter.loadingDistrict != null && 
+      if (filter.loadingDistrict != null &&
           filter.loadingDistrict!.isNotEmpty &&
-          !app.loadingPlace.toLowerCase().contains(filter.loadingDistrict!.toLowerCase())) {
+          !app.loadingPlace.toLowerCase().contains(
+            filter.loadingDistrict!.toLowerCase(),
+          )) {
         return false;
       }
 
-    
-      if (filter.unloadingRegion != null && 
+      if (filter.unloadingRegion != null &&
           filter.unloadingRegion!.isNotEmpty &&
-          !app.unloadingPlace.toLowerCase().contains(filter.unloadingRegion!.toLowerCase())) {
+          !app.unloadingPlace.toLowerCase().contains(
+            filter.unloadingRegion!.toLowerCase(),
+          )) {
         return false;
       }
 
-        
-      if (filter.unloadingDistrict != null && 
+      if (filter.unloadingDistrict != null &&
           filter.unloadingDistrict!.isNotEmpty &&
-          !app.unloadingPlace.toLowerCase().contains(filter.unloadingDistrict!.toLowerCase())) {
+          !app.unloadingPlace.toLowerCase().contains(
+            filter.unloadingDistrict!.toLowerCase(),
+          )) {
         return false;
       }
 
-      
-      if (filter.crop != null && 
+      if (filter.crop != null &&
           filter.crop!.isNotEmpty &&
           !app.crop.toLowerCase().contains(filter.crop!.toLowerCase())) {
         return false;
       }
 
-      
       final appPrice = double.tryParse(app.price.replaceAll(',', '.'));
       if (filter.minPrice != null && appPrice != null) {
         if (appPrice < filter.minPrice!) return false;
@@ -95,7 +99,6 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
         if (appPrice > filter.maxPrice!) return false;
       }
 
-      
       final appDistance = double.tryParse(app.distance.replaceAll(',', '.'));
       if (filter.minDistance != null && appDistance != null) {
         if (appDistance < filter.minDistance!) return false;
@@ -104,11 +107,10 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
         if (appDistance > filter.maxDistance!) return false;
       }
 
-      
       if (app.createdAt != null) {
         final now = DateTime.now();
         final difference = now.difference(app.createdAt!).inDays;
-        
+
         switch (filter.dateFilter) {
           case DateFilter.last3Days:
             if (difference > 3) return false;
@@ -124,12 +126,10 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
         }
       }
 
-
       if (filter.suitableForDumpTrucks && !app.dumpTrucks) {
         return false;
       }
 
-     
       if (filter.charterCarrier && !app.charter) {
         return false;
       }
@@ -140,9 +140,12 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
 
   Future<void> _openFilterScreen() async {
     final result = await context.pushRoute<ApplicationFilter?>(
-      FilterRoute(initialFilter: _currentFilter, onFilterApplied: (ApplicationFilter p1) {  }),
+      FilterRoute(
+        initialFilter: _currentFilter,
+        onFilterApplied: (ApplicationFilter p1) {},
+      ),
     );
-    
+
     if (result != null) {
       _applyFilter(result);
     }
@@ -150,8 +153,8 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
 
   @override
   Widget build(BuildContext context) {
-    final displayApplications = _currentFilter.hasActiveFilters 
-        ? _filteredApplications 
+    final displayApplications = _currentFilter.hasActiveFilters
+        ? _filteredApplications
         : _applications;
 
     return Scaffold(
@@ -163,7 +166,10 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
             setState(() {
               _applications = state.applications;
               if (_currentFilter.hasActiveFilters) {
-                _filteredApplications = _filterApplications(_applications, _currentFilter);
+                _filteredApplications = _filterApplications(
+                  _applications,
+                  _currentFilter,
+                );
               }
             });
           }
@@ -175,7 +181,10 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
     );
   }
 
-  Widget _buildNestedScrollView(ApplicationsState state, List<ApplicationModel> displayApplications) {
+  Widget _buildNestedScrollView(
+    ApplicationsState state,
+    List<ApplicationModel> displayApplications,
+  ) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         _buildSliverAppBar(),
@@ -200,37 +209,33 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
       pinned: true,
       floating: true,
       snap: true,
-      elevation: 4,
       actions: [
         Stack(
           children: [
             IconButton(
               icon: Icon(
-                Icons.filter_list_alt, 
-                color: ColorsConstants.primaryBrownColor, 
-                size: 34.0,
-              ), 
+                Icons.filter_list_alt,
+                color: ColorsConstants.primaryBrownColor,
+                size: 24.0.sp,
+              ),
               onPressed: _openFilterScreen,
             ),
             if (_currentFilter.hasActiveFilters)
               Positioned(
-                right: 8,
-                top: 8,
+                right: 8.w,
+                top: 8.h,
                 child: Container(
-                  padding: EdgeInsets.all(2),
+                  padding: EdgeInsets.all(2.w),
                   decoration: BoxDecoration(
                     color: Colors.red,
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(6.w),
                   ),
-                  constraints: BoxConstraints(
-                    minWidth: 12,
-                    minHeight: 12,
-                  ),
+                  constraints: BoxConstraints(minWidth: 8.w, minHeight: 8.h),
                 ),
               ),
           ],
         ),
-      ], 
+      ],
       surfaceTintColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
     );
   }
@@ -251,17 +256,23 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
     return (rawHeight * devicePixelRatio).round() / devicePixelRatio;
   }
 
-  Widget _buildTabBarView(ApplicationsState state, List<ApplicationModel> displayApplications) {
+  Widget _buildTabBarView(
+    ApplicationsState state,
+    List<ApplicationModel> displayApplications,
+  ) {
     return TabBarView(
       controller: _tabController,
       children: [
-        _buildAllApplicationsTab(state, displayApplications), 
-        _buildMyResponsesTab()
+        _buildAllApplicationsTab(state, displayApplications),
+        _buildMyResponsesTab(),
       ],
     );
   }
 
-  Widget _buildAllApplicationsTab(ApplicationsState state, List<ApplicationModel> displayApplications) {
+  Widget _buildAllApplicationsTab(
+    ApplicationsState state,
+    List<ApplicationModel> displayApplications,
+  ) {
     return RefreshIndicator(
       color: ColorsConstants.primaryBrownColor,
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
@@ -320,7 +331,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        _currentFilter.hasActiveFilters 
+                        _currentFilter.hasActiveFilters
                             ? 'По вашему запросу ничего не найдено'
                             : 'Список доступных заявок пуст',
                         style: TextStyle(

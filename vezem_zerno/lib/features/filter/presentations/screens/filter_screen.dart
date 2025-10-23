@@ -1,7 +1,10 @@
+// ignore_for_file: unused_element
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/widgets/primary_button.dart';
 import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/filter/data/models/application_filter_model.dart';
 
@@ -9,13 +12,13 @@ import 'package:vezem_zerno/features/filter/data/models/application_filter_model
 class FilterScreen extends StatefulWidget {
   final ApplicationFilter initialFilter;
 
-  const FilterScreen({Key? key, required this.initialFilter}) : super(key: key);
+  const FilterScreen({super.key, required this.initialFilter});
 
   @override
-  _FilterScreenState createState() => _FilterScreenState();
+  FilterScreenState createState() => FilterScreenState();
 }
 
-class _FilterScreenState extends State<FilterScreen> {
+class FilterScreenState extends State<FilterScreen> {
   late ApplicationFilter _currentFilter;
 
   final TextEditingController _minPriceController = TextEditingController();
@@ -120,16 +123,14 @@ class _FilterScreenState extends State<FilterScreen> {
     return Scaffold(
       backgroundColor: ColorsConstants.backgroundColor,
       appBar: AppBar(
+        surfaceTintColor: Colors.transparent,
         backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        foregroundColor: ColorsConstants.primaryBrownColor,
-        elevation: 0,
         title: Text(
           'Фильтры',
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 20.sp,
             color: ColorsConstants.primaryBrownColor,
-            fontWeight: FontWeight.w400,
-            fontFamily: 'Unbounded',
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,
@@ -139,9 +140,8 @@ class _FilterScreenState extends State<FilterScreen> {
             child: Text(
               'Сбросить',
               style: TextStyle(
-                color: ColorsConstants.primaryBrownColorWithOpacity,
+                color: ColorsConstants.primaryBrownColor,
                 fontSize: 14.sp,
-                fontFamily: 'Unbounded',
               ),
             ),
           ),
@@ -224,48 +224,25 @@ class _FilterScreenState extends State<FilterScreen> {
               }),
             ),
 
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
             _buildDivider(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
             _buildPriceSection(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
             _buildDivider(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
             _buildDistanceSection(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
             _buildDivider(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
             _buildDateSection(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
             _buildDivider(),
             SizedBox(height: 24.h),
             _buildCheckboxSection(),
 
             SizedBox(height: 32.h),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _applyFilter,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorsConstants.primaryButtonBackgroundColor,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                ),
-                child: Text(
-                  'Показать заявки',
-                  style: TextStyle(
-                    color: ColorsConstants.primaryBrownColor,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Unbounded',
-                  ),
-                ),
-              ),
-            ),
+            PrimaryButton(text: 'Показать заявки', onPressed: _applyFilter),
             SizedBox(height: 16.h),
           ],
         ),
@@ -275,8 +252,8 @@ class _FilterScreenState extends State<FilterScreen> {
 
   Widget _buildDivider() {
     return Divider(
-      height: 1.h,
-      color: ColorsConstants.primaryBrownColorWithOpacity.withOpacity(0.3),
+      thickness: 2.h,
+      color: ColorsConstants.primaryBrownColorWithOpacity,
     );
   }
 
@@ -304,7 +281,6 @@ class _FilterScreenState extends State<FilterScreen> {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
                       color: ColorsConstants.primaryBrownColor,
-                      fontFamily: 'Unbounded',
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -315,7 +291,6 @@ class _FilterScreenState extends State<FilterScreen> {
                       color: value != null
                           ? ColorsConstants.primaryBrownColor
                           : ColorsConstants.primaryBrownColorWithOpacity,
-                      fontFamily: 'Unbounded',
                     ),
                   ),
                 ],
@@ -339,9 +314,8 @@ class _FilterScreenState extends State<FilterScreen> {
           'Цена, ₽/кг',
           style: TextStyle(
             fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: ColorsConstants.primaryBrownColor,
-            fontFamily: 'Unbounded',
           ),
         ),
         SizedBox(height: 16.h),
@@ -374,9 +348,8 @@ class _FilterScreenState extends State<FilterScreen> {
           'Расстояние, км',
           style: TextStyle(
             fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: ColorsConstants.primaryBrownColor,
-            fontFamily: 'Unbounded',
           ),
         ),
         SizedBox(height: 16.h),
@@ -408,34 +381,32 @@ class _FilterScreenState extends State<FilterScreen> {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.numberWithOptions(decimal: true),
-      style: TextStyle(
-        color: ColorsConstants.primaryBrownColor,
-        fontFamily: 'Unbounded',
-      ),
+      style: TextStyle(color: ColorsConstants.primaryBrownColor),
       decoration: InputDecoration(
+        labelStyle: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 16.sp,
+          color: ColorsConstants.primaryBrownColorWithOpacity,
+        ),
         hintText: hintText,
         filled: true,
         fillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15.r),
-          borderSide: BorderSide(
-            color: ColorsConstants.primaryBrownColorWithOpacity,
-          ),
+          borderRadius: BorderRadius.circular(12).r,
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15.r),
-          borderSide: BorderSide(color: ColorsConstants.primaryBrownColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15.r),
+          borderRadius: BorderRadius.circular(12).r,
           borderSide: BorderSide(
-            color: ColorsConstants.primaryBrownColorWithOpacity,
+            color: ColorsConstants.primaryBrownColor,
+            width: 2.0.w,
           ),
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         hintStyle: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 16.sp,
           color: ColorsConstants.primaryBrownColorWithOpacity,
-          fontFamily: 'Unbounded',
         ),
       ),
     );
@@ -449,9 +420,8 @@ class _FilterScreenState extends State<FilterScreen> {
           'Дата публикации',
           style: TextStyle(
             fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: ColorsConstants.primaryBrownColor,
-            fontFamily: 'Unbounded',
           ),
         ),
         SizedBox(height: 16.h),
@@ -475,11 +445,9 @@ class _FilterScreenState extends State<FilterScreen> {
       label: Text(
         label,
         style: TextStyle(
-          color: isSelected
-              ? ColorsConstants.primaryBrownColor
-              : ColorsConstants.primaryBrownColor,
-          fontSize: 14.sp,
-          fontFamily: 'Unbounded',
+          color: ColorsConstants.primaryBrownColor,
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w600,
         ),
       ),
       selected: isSelected,
@@ -492,7 +460,6 @@ class _FilterScreenState extends State<FilterScreen> {
       },
       selectedColor: ColorsConstants.primaryButtonBackgroundColor,
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      side: BorderSide(color: ColorsConstants.primaryBrownColorWithOpacity),
     );
   }
 
@@ -503,7 +470,7 @@ class _FilterScreenState extends State<FilterScreen> {
         Container(
           decoration: BoxDecoration(
             color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-            borderRadius: BorderRadius.circular(15.r),
+            borderRadius: BorderRadius.circular(12.r),
           ),
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           child: _buildCheckbox(
@@ -522,7 +489,7 @@ class _FilterScreenState extends State<FilterScreen> {
         Container(
           decoration: BoxDecoration(
             color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-            borderRadius: BorderRadius.circular(15.r),
+            borderRadius: BorderRadius.circular(12.r),
           ),
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           child: _buildCheckbox(
@@ -561,7 +528,7 @@ class _FilterScreenState extends State<FilterScreen> {
             style: TextStyle(
               fontSize: 16.sp,
               color: ColorsConstants.primaryBrownColor,
-              fontFamily: 'Unbounded',
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -577,12 +544,11 @@ class _FilterScreenState extends State<FilterScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
         title: Text(
-          'Выбор $title',
+          title,
           style: TextStyle(
             color: ColorsConstants.primaryBrownColor,
             fontSize: 18.sp,
             fontWeight: FontWeight.w500,
-            fontFamily: 'Unbounded',
           ),
         ),
         content: SizedBox(
@@ -599,7 +565,8 @@ class _FilterScreenState extends State<FilterScreen> {
                       'Не выбрано',
                       style: TextStyle(
                         color: ColorsConstants.primaryBrownColorWithOpacity,
-                        fontFamily: 'Unbounded',
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     onTap: () {
@@ -618,7 +585,8 @@ class _FilterScreenState extends State<FilterScreen> {
                     item,
                     style: TextStyle(
                       color: ColorsConstants.primaryBrownColor,
-                      fontFamily: 'Unbounded',
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   onTap: () {
@@ -637,7 +605,8 @@ class _FilterScreenState extends State<FilterScreen> {
               'Отмена',
               style: TextStyle(
                 color: ColorsConstants.primaryBrownColor,
-                fontFamily: 'Unbounded',
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
