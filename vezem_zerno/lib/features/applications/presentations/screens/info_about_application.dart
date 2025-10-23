@@ -1,19 +1,18 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
 
 @RoutePage()
 class InfoAboutApplicationScreen extends StatefulWidget {
-  const InfoAboutApplicationScreen({
-    Key? key,
-    required this.application,
-  }) : super(key: key);
+  final ApplicationModel application;
 
-  final ApplicationModel application; 
+  const InfoAboutApplicationScreen({super.key, required this.application});
 
   @override
-  State<InfoAboutApplicationScreen> createState() => _InfoAboutApplicationScreenState();
+  State<InfoAboutApplicationScreen> createState() =>
+      _InfoAboutApplicationScreenState();
 }
 
 class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
@@ -24,7 +23,7 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
   void initState() {
     super.initState();
     // Изменить на 3 когда будут готовы остальные вкладки
-    _tabController = TabController(length: 1, vsync: this); 
+    _tabController = TabController(length: 1, vsync: this);
   }
 
   @override
@@ -38,15 +37,18 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
     return Scaffold(
       backgroundColor: ColorsConstants.backgroundColor,
       appBar: AppBar(
-        title: Text('Заявка ${widget.application.organization}', 
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        title: Text(
+          'Заявка',
           style: TextStyle(
-          fontSize: 20,
-          color: ColorsConstants.primaryBrownColor,
-          fontWeight: FontWeight.w500,
-        ),),
+            fontSize: 20.sp,
+            color: ColorsConstants.primaryBrownColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
         foregroundColor: ColorsConstants.primaryBrownColor,
-        elevation: 0,
       ),
       body: Column(
         children: [
@@ -68,16 +70,16 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
           ),
           */
           Expanded(
-            child: 
-              // Раскомментировать когда будут готовы остальные вкладки
-              // TabBarView(
-              //   controller: _tabController,
-              //   children: [
-                  _buildInfoTab(),
-                  // _buildReviewsTab(),
-                  // _buildDialogueTab(),
-              //   ],
-              // ),
+            child:
+                // Раскомментировать когда будут готовы остальные вкладки
+                // TabBarView(
+                //   controller: _tabController,
+                //   children: [
+                _buildInfoTab(),
+            // _buildReviewsTab(),
+            // _buildDialogueTab(),
+            //   ],
+            // ),
           ),
         ],
       ),
@@ -91,77 +93,79 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Основная информация
-          _buildInfoCard(
-            'Основная информация',
-            [
-              _buildInfoRow('Культура', widget.application.crop),
-              _buildInfoRow('Объем перевозки', '${widget.application.tonnage} т'),
-              _buildInfoRow('Цена', '${widget.application.price} ₽/кг'),
-              _buildInfoRow('Расстояние', '${widget.application.distance} км'),
-              _buildInfoRow('Статус', _getStatusText(widget.application.status)),
-              _buildInfoRow('Дата создания', _formatDate(widget.application.createdAt)),
-            ],
-          ),
-          const SizedBox(height: 16),
+          _buildInfoCard('Основная информация', [
+            _buildInfoRow('Культура', widget.application.crop),
+            _buildInfoRow('Объем перевозки', '${widget.application.tonnage} т'),
+            _buildInfoRow('Цена', '${widget.application.price} ₽/кг'),
+            _buildInfoRow('Расстояние', '${widget.application.distance} км'),
+            _buildInfoRow(
+              'Дата создания',
+              _formatDate(widget.application.createdAt),
+            ),
+          ]),
+          SizedBox(height: 16.h),
 
           // Маршрут
-          _buildInfoCard(
-            'Маршрут',
-            [
-              _buildLocationRow('Погрузка', widget.application.loadingPlace),
-              _buildLocationRow('Выгрузка', widget.application.unloadingPlace),
-            ],
-          ),
-          const SizedBox(height: 16),
+          _buildInfoCard('Маршрут', [
+            _buildLocationRow('Погрузка', widget.application.loadingPlace),
+            _buildLocationRow('Выгрузка', widget.application.unloadingPlace),
+          ]),
+          SizedBox(height: 16.h),
 
           // Условия погрузки
-          _buildInfoCard(
-            'Условия погрузки',
-            [
-              _buildInfoRow('Способ погрузки', widget.application.loadingMethod),
-              _buildInfoRow('Грузоподъемность весов', '${widget.application.scalesCapacity} т'),
-              _buildInfoRow('Дата погрузки', widget.application.loadingDate),
-            ],
-          ),
-          const SizedBox(height: 16),
+          _buildInfoCard('Условия погрузки', [
+            _buildInfoRow('Способ погрузки', widget.application.loadingMethod),
+            _buildInfoRow(
+              'Грузоподъемность весов',
+              '${widget.application.scalesCapacity} т',
+            ),
+            _buildInfoRow('Дата погрузки', widget.application.loadingDate),
+          ]),
+          SizedBox(height: 16.h),
 
           // Детали перевозки
-          _buildInfoCard(
-            'Детали перевозки',
-            [
-              _buildInfoRow('Простой', '${widget.application.downtime} дней'),
-              _buildInfoRow('Допустимая недостача', '${widget.application.shortage} кг'),
-              _buildInfoRow('Вид оплаты', widget.application.paymentMethod),
-              _buildInfoRow('Сроки оплаты', '${widget.application.paymentTerms} дней'),
-              _buildInfoRow('Самосвалы', widget.application.dumpTrucks ? 'Да' : 'Нет'),
-              _buildInfoRow('Чартер', widget.application.charter ? 'Да' : 'Нет'),
-            ],
-          ),
+          _buildInfoCard('Детали перевозки', [
+            _buildInfoRow('Простой', widget.application.downtime),
+            _buildInfoRow(
+              'Допустимая недостача',
+              '${widget.application.shortage} кг',
+            ),
+            _buildInfoRow('Вид оплаты', widget.application.paymentMethod),
+            _buildInfoRow(
+              'Сроки оплаты',
+              widget.application.paymentTerms,
+            ),
+            _buildInfoRow(
+              'Самосвалы',
+              widget.application.dumpTrucks ? 'Да' : 'Нет',
+            ),
+            _buildInfoRow(
+              'Перевозчик работает по хартии',
+              widget.application.charter ? 'Да' : 'Нет',
+            ),
+          ]),
           const SizedBox(height: 16),
 
           // Заказчик
-          _buildInfoCard(
-            'Заказчик',
-            [
-              _buildInfoRow('Организация', widget.application.organization),
-            ],
-          ),
-          const SizedBox(height: 16),
+          _buildInfoCard('Заказчик', [
+            _buildInfoRow('Организация', widget.application.organization),
+          ]),
+          SizedBox(height: 16.h),
 
           // Комментарий
           if (widget.application.comment.isNotEmpty)
-            _buildInfoCard(
-              'Комментарий',
-              [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    widget.application.comment,
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+            _buildInfoCard('Комментарий', [
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                child: Text(
+                  widget.application.comment,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: ColorsConstants.primaryBrownColor,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ]),
         ],
       ),
     );
@@ -196,22 +200,21 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
   Widget _buildInfoCard(String title, List<Widget> children) {
     return Card(
       color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.w)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: ColorsConstants.primaryBrownColor,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 8.h),
             ...children,
           ],
         ),
@@ -221,28 +224,30 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
+        spacing: 12.w,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[700],
+                fontSize: 16.sp,
+                color: const Color.fromARGB(134, 66, 44, 26),
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 2,
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
+              style: TextStyle(
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
-                color: Colors.black87,
+                color: ColorsConstants.primaryBrownColor,
               ),
             ),
           ),
@@ -253,23 +258,22 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
 
   Widget _buildLocationRow(String type, String location) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 24,
-            height: 24,
-            margin: const EdgeInsets.only(right: 12),
+            width: 24.w,
+            height: 24.h,
+            margin: EdgeInsets.only(right: 12.w),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.blue, width: 2),
+              border: Border.all(
+                color: type == 'Погрузка' ? Colors.blue : Colors.red,
+                width: 2.w,
+              ),
             ),
-            child: Icon(
-              Icons.circle,
-              size: 8,
-              color: Colors.blue[700],
-            ),
+            child: Icon(Icons.circle, size: 8.sp, color: type == 'Погрузка' ? Colors.blue : Colors.red),
           ),
           Expanded(
             child: Column(
@@ -278,15 +282,16 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
                 Text(
                   type,
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+                    fontSize: 16.sp,
+                    color: const Color.fromARGB(134, 66, 44, 26),
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 2),
                 Text(
                   location,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: ColorsConstants.primaryBrownColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -301,22 +306,5 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
   String _formatDate(DateTime? date) {
     if (date == null) return 'Не указана';
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
-  }
-
-  String _getStatusText(String status) {
-    switch (status) {
-      case 'draft':
-        return 'Черновик';
-      case 'published':
-        return 'Опубликована';
-      case 'in_progress':
-        return 'В работе';
-      case 'completed':
-        return 'Завершена';
-      case 'cancelled':
-        return 'Отменена';
-      default:
-        return status;
-    }
   }
 }

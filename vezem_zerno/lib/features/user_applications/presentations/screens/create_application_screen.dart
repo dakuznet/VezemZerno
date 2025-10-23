@@ -433,7 +433,7 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            value: 'cash',
+                            value: 'Наличные',
                             groupValue: _paymentMethod,
                             onChanged: (String? value) {
                               setState(() {
@@ -458,7 +458,7 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            value: 'cashless',
+                            value: 'Безналичные',
                             groupValue: _paymentMethod,
                             onChanged: (String? value) {
                               setState(() {
@@ -539,7 +539,7 @@ class _CreateApplicationScreenState extends State<CreateApplicationScreen> {
           paymentTerms: _paymentTermsController.text,
           dumpTrucks: _suitableForDumpTrucks,
           charter: _carrierWorksByCharter,
-          paymentMethod: _paymentMethod ?? 'cash',
+          paymentMethod: _paymentMethod ?? 'Наличные',
           status: _applicationStatus.value,
         ),
       );
