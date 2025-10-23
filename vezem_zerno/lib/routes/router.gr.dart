@@ -59,6 +59,83 @@ class CreateApplicationRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [CreateRequestScreen]
+class CreateRequestRoute extends PageRouteInfo<void> {
+  const CreateRequestRoute({List<PageRouteInfo>? children})
+    : super(CreateRequestRoute.name, initialChildren: children);
+
+  static const String name = 'CreateRequestRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const CreateRequestScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [FilterScreen]
+class FilterRoute extends PageRouteInfo<FilterRouteArgs> {
+  FilterRoute({
+    Key? key,
+    required ApplicationFilter initialFilter,
+    required dynamic Function(ApplicationFilter) onFilterApplied,
+    List<PageRouteInfo>? children,
+  }) : super(
+         FilterRoute.name,
+         args: FilterRouteArgs(
+           key: key,
+           initialFilter: initialFilter,
+           onFilterApplied: onFilterApplied,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'FilterRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<FilterRouteArgs>();
+      return FilterScreen(
+        key: args.key,
+        initialFilter: args.initialFilter,
+      );
+    },
+  );
+}
+
+class FilterRouteArgs {
+  const FilterRouteArgs({
+    this.key,
+    required this.initialFilter,
+    required this.onFilterApplied,
+  });
+
+  final Key? key;
+
+  final ApplicationFilter initialFilter;
+
+  final dynamic Function(ApplicationFilter) onFilterApplied;
+
+  @override
+  String toString() {
+    return 'FilterRouteArgs{key: $key, initialFilter: $initialFilter, onFilterApplied: $onFilterApplied}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! FilterRouteArgs) return false;
+    return key == other.key && initialFilter == other.initialFilter;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ initialFilter.hashCode;
+}
+
+/// generated route for
 /// [LoginScreen]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})
