@@ -8,3 +8,5 @@ final class LoadApplicationsEvent extends ApplicationsEvent {
 
   LoadApplicationsEvent({required this.applicationStatus});
 }
+
+final class LoadResponsesEvent extends ApplicationsEvent {}

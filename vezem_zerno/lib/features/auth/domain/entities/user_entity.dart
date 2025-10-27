@@ -7,12 +7,14 @@ class UserEntity {
   final String? role;
   final String? profileImage;
   final String? sessionId;
-  final List<String>? activeApplications;
+  final List<String>? applications;
+  final List<String>? responses;
 
   const UserEntity({
     required this.id,
     required this.phone,
-    this.activeApplications,
+    this.responses,
+    this.applications,
     this.profileImage,
     this.name,
     this.surname,

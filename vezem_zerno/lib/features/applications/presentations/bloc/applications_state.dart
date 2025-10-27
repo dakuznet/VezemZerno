@@ -21,3 +21,16 @@ final class ApplicationsLoaded extends ApplicationsState {
 }
 
 final class ApplicationsLoadingFailure extends ApplicationsState {}
+
+final class ResponsesLoading extends ApplicationsState {}
+
+final class ResponsesLoaded extends ApplicationsState {
+  final List<ApplicationModel> applications;
+
+  const ResponsesLoaded({required this.applications});
+
+  @override
+  List<Object?> get props => [applications];
+}
+
+final class ResponsesLoadingFailure extends ApplicationsState {}

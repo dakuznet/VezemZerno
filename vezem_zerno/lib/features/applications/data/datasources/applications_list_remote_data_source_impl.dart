@@ -24,4 +24,15 @@ class ApplicationsListRemoteDataSourceImpl
       return Left(ServerFailure('Ошибка получения заявок по статусу: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<ApplicationModel>>> getUserResponses() async {
+    try {
+      final responses = await _appwriteService.getUserResponses();
+
+      return Right(responses);
+    } catch (e) {
+      return Left(ServerFailure('Ошибка получения откликов пользователя: $e'));
+    }
+  }
 }

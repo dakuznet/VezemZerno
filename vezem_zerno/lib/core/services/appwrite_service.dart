@@ -2,6 +2,7 @@ import 'dart:io' as io;
 import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
+import 'package:flutter/material.dart';
 import 'package:vezem_zerno/core/constants/string_constants.dart';
 import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
 import 'package:path/path.dart' as path;
@@ -29,82 +30,144 @@ class AppwriteService {
 
   // APPLICATIONS
 
+  Future<List<ApplicationModel>> getUserResponses() async {
+    try {
+      final user = await _account.get();
+
+      final userRow = await _tablesDB.getRow(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        rowId: user.$id,
+      );
+
+      final List<dynamic> responseIds = userRow.data['responses'] ?? [];
+
+      if (responseIds.isEmpty) return [];
+
+      final responses = await Future.wait(
+        responseIds.map((id) async {
+          try {
+            final response = await _tablesDB.getRow(
+              databaseId: StringConstants.dbApplicationsId,
+              tableId: StringConstants.tableApplicationsId,
+              rowId: id.toString(),
+            );
+
+            return ApplicationModel.fromJson({
+              ...response.data,
+              '\$id': response.$id,
+            });
+          } catch (e, stackTrace) {
+            debugPrint('Ошибка при получении заявки $id: $e\n$stackTrace');
+            return null;
+          }
+        }),
+      );
+      return responses.whereType<ApplicationModel>().toList();
+    } on AppwriteException catch (e) {
+      throw Exception('Не удалось получить заявки пользователя: ${e.message}');
+    } catch (e) {
+      throw Exception('Не удалось получить заявки пользователя: $e');
+    }
+  }
+
+  Future<void> respondToApplicaiton({required String applicationId}) async {
+    try {
+      final User user = await _account.get();
+
+      final userRow = await _tablesDB.getRow(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        rowId: user.$id,
+      );
+
+      List<dynamic> currentResponses = userRow.data['responses'] ?? [];
+
+      List<String> updatedResponses = List<String>.from(currentResponses);
+      if (!updatedResponses.contains(applicationId)) {
+        updatedResponses.add(applicationId);
+      }
+
+      await _tablesDB.updateRow(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        rowId: userRow.$id,
+        data: {'responses': updatedResponses},
+      );
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при обновлении пользователя: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при обновлении пользователя: $e');
+    }
+  }
+
   // Получение заявок пользователя по статусу заявки
   Future<List<ApplicationModel>> getUserApplicationsByStatus({
     required String applicationStatus,
   }) async {
     try {
-      final user = await getCurrentUser();
+      final user = await _account.get();
 
-      final userResponse = await _tablesDB.listRows(
+      final userRow = await _tablesDB.getRow(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        queries: [Query.equal('\$id', user.id)],
+        rowId: user.$id,
       );
 
-      if (userResponse.rows.isEmpty) {
-        throw Exception('Пользователь не найден');
-      }
+      final List<dynamic> applicationIds = userRow.data['applications'] ?? [];
 
-      final userRow = userResponse.rows.first;
-      List<dynamic> userApplicationIds = userRow.data['applications'] ?? [];
-
-      if (userApplicationIds.isEmpty) {
+      if (applicationIds.isEmpty) {
         return [];
       }
 
-      final applications = <ApplicationModel>[];
+      final applicationsResponse = await _tablesDB.listRows(
+        databaseId: StringConstants.dbApplicationsId,
+        tableId: StringConstants.tableApplicationsId,
+        queries: [
+          Query.contains(
+            '\$id',
+            applicationIds.map((e) => e.toString()).toList(),
+          ),
+          Query.equal('status', applicationStatus),
+        ],
+      );
 
-      for (var applicationId in userApplicationIds) {
-        try {
-          final applicationResponse = await _tablesDB.getRow(
-            databaseId: StringConstants.dbApplicationsId,
-            tableId: StringConstants.tableApplicationsId,
-            rowId: applicationId,
-          );
-
-          final application = ApplicationModel.fromJson({
-            ...applicationResponse.data,
-            '\$id': applicationResponse.$id,
-          });
-
-          if (application.status == applicationStatus) {
-            applications.add(application);
-          }
-        } catch (e) {
-          null;
-        }
-      }
+      final applications = applicationsResponse.rows.map((row) {
+        return ApplicationModel.fromJson({...row.data, '\$id': row.$id});
+      }).toList();
 
       return applications;
     } on AppwriteException catch (e) {
-      throw Exception(
-        'Ошибка при получении заявок пользователя по статусу: ${e.message}',
-      );
+      throw Exception('Не удалось получить заявки пользователя: ${e.message}');
     } catch (e) {
-      throw Exception(
-        'Ошибка при получении заявок пользователя по статусу: $e',
-      );
+      throw Exception('Не удалось получить заявки пользователя: $e');
     }
   }
 
   // Получение всех заявок по статусу заявки
   Future<List<ApplicationModel>> getApplicationsByStatus({
     required String applicationStatus,
+    bool descending = true,
   }) async {
     try {
+      final queries = <String>[
+        Query.equal('status', applicationStatus),
+        descending
+            ? Query.orderDesc('\$createdAt')
+            : Query.orderAsc('\$createdAt'),
+      ];
+
       final response = await _tablesDB.listRows(
         databaseId: StringConstants.dbApplicationsId,
         tableId: StringConstants.tableApplicationsId,
-        queries: [
-          Query.equal('status', applicationStatus),
-          Query.orderDesc('\$createdAt'),
-        ],
+        queries: queries,
       );
 
-      return response.rows.map((row) {
+      final applications = response.rows.map((row) {
         return ApplicationModel.fromJson({...row.data, '\$id': row.$id});
       }).toList();
+
+      return applications;
     } on AppwriteException catch (e) {
       throw Exception('Ошибка при получении заявок по статусу: ${e.message}');
     } catch (e) {
@@ -112,7 +175,7 @@ class AppwriteService {
     }
   }
 
-  // Создание заявки
+  /// Создание новой заявки и привязка её к пользователю
   Future<ApplicationModel> createApplication({
     String? comment,
     bool? charter,
@@ -133,17 +196,17 @@ class AppwriteService {
     required String status,
   }) async {
     try {
-      final currentUser = await getCurrentUser();
+      final currentUser = await getCurrentUserDocument();
 
       final application = ApplicationModel(
-        organization: currentUser.organization!,
+        organization: currentUser.organization ?? '',
         customerId: currentUser.id,
         loadingPlace: loadingPlace,
         unloadingPlace: unloadingPlace,
         distance: distance,
         crop: crop,
         tonnage: tonnage,
-        comment: comment!,
+        comment: comment ?? '',
         loadingMethod: loadingMethod,
         loadingDate: loadingDate,
         scalesCapacity: scalesCapacity,
@@ -151,18 +214,17 @@ class AppwriteService {
         downtime: downtime,
         shortage: shortage,
         paymentTerms: paymentTerms,
-        dumpTrucks: dumpTrucks!,
-        charter: charter!,
+        dumpTrucks: dumpTrucks ?? false,
+        charter: charter ?? false,
         paymentMethod: paymentMethod,
         status: status,
       );
 
-      // Создаем заявку
       final row = await _tablesDB.createRow(
         databaseId: StringConstants.dbApplicationsId,
         tableId: StringConstants.tableApplicationsId,
         rowId: ID.unique(),
-        data: {...application.toJson()},
+        data: application.toJson(),
       );
 
       final createdApplication = ApplicationModel.fromJson({
@@ -172,6 +234,9 @@ class AppwriteService {
 
       await _addApplicationToUser(currentUser.id, row.$id);
 
+      debugPrint(
+        '✅ Заявка ${row.$id} успешно создана пользователем ${currentUser.id}',
+      );
       return createdApplication;
     } on AppwriteException catch (e) {
       throw Exception('Ошибка при создании заявки: ${e.message}');
@@ -180,13 +245,12 @@ class AppwriteService {
     }
   }
 
-  // Привязка заявки к пользователю
+  /// Привязка заявки к пользователю
   Future<void> _addApplicationToUser(
     String userId,
     String applicationId,
   ) async {
     try {
-      // Находим запись пользователя в таблице users
       final userResponse = await _tablesDB.listRows(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
@@ -198,19 +262,21 @@ class AppwriteService {
       }
 
       final userRow = userResponse.rows.first;
-      List<dynamic> currentApplications = userRow.data['applications'] ?? [];
 
-      List<String> updatedApplications = List<String>.from(currentApplications);
-      if (!updatedApplications.contains(applicationId)) {
-        updatedApplications.add(applicationId);
-      }
-
-      await _tablesDB.updateRow(
-        databaseId: StringConstants.dbAuthId,
-        tableId: StringConstants.tableUsersId,
-        rowId: userRow.$id,
-        data: {'applications': updatedApplications},
+      final currentApplications = List<String>.from(
+        userRow.data['applications'] ?? const <String>[],
       );
+
+      if (!currentApplications.contains(applicationId)) {
+        currentApplications.add(applicationId);
+
+        await _tablesDB.updateRow(
+          databaseId: StringConstants.dbAuthId,
+          tableId: StringConstants.tableUsersId,
+          rowId: userRow.$id,
+          data: {'applications': currentApplications},
+        );
+      }
     } on AppwriteException catch (e) {
       throw Exception('Ошибка при обновлении пользователя: ${e.message}');
     } catch (e) {
@@ -219,24 +285,25 @@ class AppwriteService {
   }
 
   // USER
-  Future<UserModel> getCurrentUser() async {
-    final User user = await account.get();
-    final response = await _tablesDB.listRows(
+  Future<UserModel> getCurrentUserDocument() async {
+    final User user = await _account.get();
+
+    final userRow = await _tablesDB.getRow(
       databaseId: StringConstants.dbAuthId,
       tableId: StringConstants.tableUsersId,
-      queries: [Query.equal('\$id', user.$id)],
+      rowId: user.$id,
     );
 
-    if (response.rows.isNotEmpty) {
-      final row = response.rows.first;
+    if (userRow.data.isNotEmpty) {
+      final userData = userRow.data;
       return UserModel(
-        id: row.$id,
-        name: row.data['name'] ?? '',
-        surname: row.data['surname'] ?? '',
-        organization: row.data['organization'] ?? '',
-        role: row.data['role'] ?? '',
-        phone: row.data['phone'] ?? '',
-        profileImage: row.data['profileImage'] ?? '',
+        id: user.$id,
+        name: userData['name'] ?? '',
+        surname: userData['surname'] ?? '',
+        organization: userData['organization'] ?? '',
+        role: userData['role'] ?? '',
+        phone: userData['phone'] ?? '',
+        profileImage: userData['profileImage'] ?? '',
       );
     } else {
       throw Exception('Пользователь не найден');
@@ -325,15 +392,14 @@ class AppwriteService {
     String? phone,
     String? profileImage,
   }) async {
-    final User user = await account.get();
-    final response = await _tablesDB.listRows(
+    final User user = await _account.get();
+    final response = await _tablesDB.getRow(
       databaseId: StringConstants.dbAuthId,
       tableId: StringConstants.tableUsersId,
-      queries: [Query.equal('\$id', user.$id)],
+      rowId: user.$id,
     );
 
-    if (response.rows.isNotEmpty) {
-      final rowId = response.rows.first.$id;
+    if (response.data.isNotEmpty) {
       Map<String, dynamic> data = {};
 
       if (name != null) data['name'] = name;
@@ -346,7 +412,7 @@ class AppwriteService {
       await _tablesDB.updateRow(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        rowId: rowId,
+        rowId: user.$id,
         data: data,
       );
     } else {
@@ -376,19 +442,11 @@ class AppwriteService {
   }
 
   Future<void> logout() async {
-    try {
-      await _account.deleteSession(sessionId: 'current');
-    } catch (e) {
-      return;
-    }
+    await _account.deleteSession(sessionId: 'current');
   }
 
   Future<void> forceLogout() async {
-    try {
-      await logout();
-    } catch (e) {
-      return;
-    }
+    await logout();
   }
 
   Future<Map<String, dynamic>> sendVerificationCode({
@@ -443,19 +501,6 @@ class AppwriteService {
     return jsonDecode(response.responseBody);
   }
 
-  String _normalizePhone(String phone) {
-    final digits = phone.replaceAll(RegExp(r'[^\d]'), '');
-    return digits.startsWith('8')
-        ? '7${digits.substring(1)}'
-        : digits.startsWith('7')
-        ? digits
-        : '7$digits';
-  }
-
-  String _buildEmailFromPhone(String phone) {
-    return '$phone@vezemzerno.com';
-  }
-
   Future<void> requestPasswordReset({required String phone}) async {
     try {
       final normalizedPhone = _normalizePhone(phone);
@@ -470,7 +515,7 @@ class AppwriteService {
       throw Exception('Ошибка при запросе сброса пароля: ${e.message}');
     } catch (e) {
       throw Exception('Ошибка при запросе сброса пароля: $e');
-    } 
+    }
   }
 
   Future<void> confirmPasswordReset({
@@ -499,5 +544,18 @@ class AppwriteService {
     } catch (e) {
       throw Exception('Ошибка при сбросе пароля: $e');
     }
+  }
+
+  String _normalizePhone(String phone) {
+    final digits = phone.replaceAll(RegExp(r'[^\d]'), '');
+    return digits.startsWith('8')
+        ? '7${digits.substring(1)}'
+        : digits.startsWith('7')
+        ? digits
+        : '7$digits';
+  }
+
+  String _buildEmailFromPhone(String phone) {
+    return '$phone@vezemzerno.com';
   }
 }

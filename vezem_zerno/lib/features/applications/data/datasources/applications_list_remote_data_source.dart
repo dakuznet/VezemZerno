@@ -4,4 +4,6 @@ import 'package:vezem_zerno/features/user_applications/data/models/application_m
 
 abstract class ApplicationsListRemoteDataSource {
   Future<Either<Failure, List<ApplicationModel>>> getApplicationsByStatus({required String applicationStatus});
+
+  Future<Either<Failure, List<ApplicationModel>>> getUserResponses();
 }

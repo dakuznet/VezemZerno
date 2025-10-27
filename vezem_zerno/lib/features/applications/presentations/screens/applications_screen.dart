@@ -22,17 +22,20 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
   static const _tabCount = 2;
 
   late final TabController _tabController;
+  List<ApplicationModel> _responses = [];
+  late List<ApplicationModel> _filteredResponses = [];
   List<ApplicationModel> _applications = [];
-  List<ApplicationModel> _filteredApplications = [];
-  ApplicationFilter _currentFilter = ApplicationFilter();
+  late List<ApplicationModel> _filteredApplications = [];
+  late ApplicationFilter _currentFilter = ApplicationFilter();
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _tabController = TabController(length: _tabCount, vsync: this);
     context.read<ApplicationsBloc>().add(
       LoadApplicationsEvent(applicationStatus: 'active'),
     );
+    context.read<ApplicationsBloc>().add(LoadResponsesEvent());
   }
 
   @override
@@ -157,6 +160,10 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
         ? _filteredApplications
         : _applications;
 
+    final displayResponses = _currentFilter.hasActiveFilters
+        ? _filteredResponses
+        : _responses;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: ColorsConstants.backgroundColor,
@@ -172,10 +179,24 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
                 );
               }
             });
+          } else if (state is ResponsesLoaded) {
+            setState(() {
+              _responses = state.applications;
+              if (_currentFilter.hasActiveFilters) {
+                _filteredResponses = _filterApplications(
+                  _applications,
+                  _currentFilter,
+                );
+              }
+            });
           }
         },
         builder: (context, state) {
-          return _buildNestedScrollView(state, displayApplications);
+          return _buildNestedScrollView(
+            state,
+            displayApplications,
+            displayResponses,
+          );
         },
       ),
     );
@@ -184,13 +205,14 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
   Widget _buildNestedScrollView(
     ApplicationsState state,
     List<ApplicationModel> displayApplications,
+    List<ApplicationModel> displayResponses,
   ) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         _buildSliverAppBar(),
         _buildSliverTabBar(),
       ],
-      body: _buildTabBarView(state, displayApplications),
+      body: _buildTabBarView(state, displayApplications, displayResponses),
     );
   }
 
@@ -259,12 +281,13 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
   Widget _buildTabBarView(
     ApplicationsState state,
     List<ApplicationModel> displayApplications,
+    List<ApplicationModel> displayResponses,
   ) {
     return TabBarView(
       controller: _tabController,
       children: [
         _buildAllApplicationsTab(state, displayApplications),
-        _buildMyResponsesTab(),
+        _buildMyResponsesTab(state, displayResponses),
       ],
     );
   }
@@ -370,24 +393,101 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
     );
   }
 
-  Widget _buildMyResponsesTab() {
-    return Padding(
-      padding: EdgeInsets.all(16.w),
+  Widget _buildMyResponsesTab(
+    ApplicationsState state,
+    List<ApplicationModel> displayApplications,
+  ) {
+    return RefreshIndicator(
+      color: ColorsConstants.primaryBrownColor,
+      backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
+      onRefresh: () async =>
+          context.read<ApplicationsBloc>().add(LoadResponsesEvent()),
       child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          SliverFillRemaining(
-            child: Center(
-              child: Text(
-                textAlign: TextAlign.center,
-                'Заявки с вашими откликами появятся здесь',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: ColorsConstants.primaryBrownColorWithOpacity,
-                  fontWeight: FontWeight.w400,
+          if (state is ApplicationsLoading)
+            SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 4.w,
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  color: ColorsConstants.primaryBrownColor,
                 ),
               ),
+            )
+          else if (state is ApplicationsLoadingFailure)
+            SliverFillRemaining(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 4.w,
+                    backgroundColor:
+                        ColorsConstants.primaryTextFormFieldBackgorundColor,
+                    color: ColorsConstants.primaryBrownColor,
+                  ),
+                ),
+              ),
+            )
+          else if (displayApplications.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 80.w,
+                        height: 80.h,
+                        decoration: BoxDecoration(
+                          color: ColorsConstants
+                              .primaryTextFormFieldBackgorundColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.list_alt_outlined,
+                          size: 40.sp,
+                          color: ColorsConstants.primaryBrownColorWithOpacity,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        _currentFilter.hasActiveFilters
+                            ? 'По вашему запросу ничего не найдено'
+                            : 'Список заявок с Вашим откликом пуст',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: ColorsConstants.primaryBrownColorWithOpacity,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      if (_currentFilter.hasActiveFilters)
+                        TextButton(
+                          onPressed: _openFilterScreen,
+                          child: Text(
+                            'Изменить фильтры',
+                            style: TextStyle(
+                              color: ColorsConstants.primaryBrownColor,
+                              fontSize: 16.sp,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) =>
+                    ApplicationCard(application: displayApplications[index]),
+                childCount: displayApplications.length,
+              ),
             ),
-          ),
         ],
       ),
     );

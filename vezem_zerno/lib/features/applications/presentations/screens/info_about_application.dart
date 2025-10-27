@@ -1,7 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/services/appwrite_service.dart';
+import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
 
 @RoutePage()
@@ -47,7 +51,8 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
             fontWeight: FontWeight.w500,
           ),
         ),
-        backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
+        backgroundColor:
+            ColorsConstants.primaryTextFormFieldBackgorundColor,
         foregroundColor: ColorsConstants.primaryBrownColor,
       ),
       body: Column(
@@ -86,10 +91,29 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
     );
   }
 
+  Widget _buildRequestApplicationButton() {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final bool isCustomer = authState is SessionRestored
+            ? authState.user.role == 'Перевозчик'
+            : authState is LoginSuccess
+            ? authState.user.role == 'Перевозчик'
+            : false;
+
+        if (!isCustomer) return const SizedBox.shrink();
+
+        return PrimaryButton(text: 'Откликнуться', onPressed: () async {
+          await AppwriteService().respondToApplicaiton(applicationId: widget.application.id!);
+        });
+      },
+    );
+  }
+
   Widget _buildInfoTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        spacing: 16.sp,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Основная информация
@@ -103,14 +127,12 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
               _formatDate(widget.application.createdAt),
             ),
           ]),
-          SizedBox(height: 16.h),
 
           // Маршрут
           _buildInfoCard('Маршрут', [
             _buildLocationRow('Погрузка', widget.application.loadingPlace),
             _buildLocationRow('Выгрузка', widget.application.unloadingPlace),
           ]),
-          SizedBox(height: 16.h),
 
           // Условия погрузки
           _buildInfoCard('Условия погрузки', [
@@ -121,7 +143,6 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
             ),
             _buildInfoRow('Дата погрузки', widget.application.loadingDate),
           ]),
-          SizedBox(height: 16.h),
 
           // Детали перевозки
           _buildInfoCard('Детали перевозки', [
@@ -131,10 +152,7 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
               '${widget.application.shortage} кг',
             ),
             _buildInfoRow('Вид оплаты', widget.application.paymentMethod),
-            _buildInfoRow(
-              'Сроки оплаты',
-              widget.application.paymentTerms,
-            ),
+            _buildInfoRow('Сроки оплаты', widget.application.paymentTerms),
             _buildInfoRow(
               'Самосвалы',
               widget.application.dumpTrucks ? 'Да' : 'Нет',
@@ -144,28 +162,23 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
               widget.application.charter ? 'Да' : 'Нет',
             ),
           ]),
-          const SizedBox(height: 16),
 
           // Заказчик
           _buildInfoCard('Заказчик', [
             _buildInfoRow('Организация', widget.application.organization),
           ]),
-          SizedBox(height: 16.h),
 
-          // Комментарий
-          if (widget.application.comment.isNotEmpty)
-            _buildInfoCard('Комментарий', [
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.h),
-                child: Text(
-                  widget.application.comment,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: ColorsConstants.primaryBrownColor,
-                  ),
-                ),
+          _buildInfoCard('Комментарий', [
+            Text(
+              widget.application.comment,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: ColorsConstants.primaryBrownColor,
               ),
-            ]),
+            ),
+          ]),
+
+          _buildRequestApplicationButton(),
         ],
       ),
     );
@@ -198,13 +211,17 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
   */
 
   Widget _buildInfoCard(String title, List<Widget> children) {
-    return Card(
-      color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.w)),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.r),
+        color: ColorsConstants.primaryTextFormFieldBackgorundColor,
+      ),
+      width: double.infinity,
       child: Padding(
         padding: EdgeInsets.all(16.w),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
           children: [
             Text(
               title,
@@ -273,7 +290,11 @@ class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
                 width: 2.w,
               ),
             ),
-            child: Icon(Icons.circle, size: 8.sp, color: type == 'Погрузка' ? Colors.blue : Colors.red),
+            child: Icon(
+              Icons.circle,
+              size: 8.sp,
+              color: type == 'Погрузка' ? Colors.blue : Colors.red,
+            ),
           ),
           Expanded(
             child: Column(

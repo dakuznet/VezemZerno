@@ -10,12 +10,13 @@ class UserModel extends UserEntity {
     super.role,
     super.profileImage,
     super.sessionId,
-    super.activeApplications = const [],
+    super.applications = const [],
+    super.responses = const [],
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      activeApplications: List<String>.from(json['active_applications'] ?? []),
+      applications: List<String>.from(json['applications'] ?? []),
       id: json['\$id'] ?? '',
       phone: json['phone'] ?? '',
       name: json['name'],
@@ -24,6 +25,7 @@ class UserModel extends UserEntity {
       role: json['role'],
       sessionId: json['sessionId'],
       profileImage: json['profileImage'],
+      responses:  List<String>.from(json['responses'] ?? []),
     );
   }
 
@@ -36,7 +38,7 @@ class UserModel extends UserEntity {
       organization: organization,
       role: role,
       profileImage: profileImage,
-      activeApplications: activeApplications,
+      applications: applications,
     );
   }
 }

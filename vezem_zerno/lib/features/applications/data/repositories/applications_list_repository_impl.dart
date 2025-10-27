@@ -13,6 +13,13 @@ class ApplicationsListRepositoryImpl extends ApplicationsListRepository {
   Future<Either<Failure, List<ApplicationModel>>> getApplicationsByStatus({
     required String applicationStatus,
   }) async {
-    return remoteDataSource.getApplicationsByStatus(applicationStatus: applicationStatus);
+    return remoteDataSource.getApplicationsByStatus(
+      applicationStatus: applicationStatus,
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<ApplicationModel>>> getUserResponses() async {
+    return remoteDataSource.getUserResponses();
   }
 }

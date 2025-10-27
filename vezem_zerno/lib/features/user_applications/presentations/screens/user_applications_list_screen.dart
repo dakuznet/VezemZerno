@@ -54,13 +54,13 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
           resizeToAvoidBottomInset: false,
           backgroundColor: ColorsConstants.backgroundColor,
           body: _buildNestedScrollView(state),
-          bottomNavigationBar: _buildCreateApplicationButton(state),
+          bottomNavigationBar: _buildCreateApplicationButton(),
         );
       },
     );
   }
 
-  Widget _buildCreateApplicationButton(UserApplicationsState state) {
+  Widget _buildCreateApplicationButton() {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
         final bool isCustomer = authState is SessionRestored
@@ -72,7 +72,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
         if (!isCustomer) return const SizedBox.shrink();
 
         return Padding(
-          padding: EdgeInsets.all(16.w),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           child: PrimaryButton(
             text: 'Создать заявку',
             onPressed: () =>

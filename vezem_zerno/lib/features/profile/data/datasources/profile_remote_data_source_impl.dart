@@ -13,7 +13,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<Either<Failure, UserEntity>> getProfile() async {
     try {
-      final userModel = await _appwriteService.getCurrentUser();
+      final userModel = await _appwriteService.getCurrentUserDocument();
       return Right(userModel.toEntity());
     } catch (e) {
       return Left(ServerFailure('Ошибка загрузки профиля: $e'));

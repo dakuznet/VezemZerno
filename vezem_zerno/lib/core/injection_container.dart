@@ -7,6 +7,7 @@ import 'package:vezem_zerno/features/applications/data/datasources/applications_
 import 'package:vezem_zerno/features/applications/data/repositories/applications_list_repository_impl.dart';
 import 'package:vezem_zerno/features/applications/domain/repositories/applications_list_repository.dart';
 import 'package:vezem_zerno/features/applications/domain/usecases/get_applications_by_status_usecase.dart';
+import 'package:vezem_zerno/features/applications/domain/usecases/get_user_responses_usecase.dart';
 import 'package:vezem_zerno/features/applications/presentations/bloc/applications_bloc.dart';
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source_impl.dart';
@@ -97,6 +98,7 @@ void init() {
 
   // Applications
   getIt.registerLazySingleton(() => GetApplicationsByStatusUsecase(getIt()));
+  getIt.registerLazySingleton(() => GetUserResponsesUsecase(getIt()));
 
   // User applications
   getIt.registerLazySingleton(
@@ -134,7 +136,10 @@ void init() {
   );
 
   getIt.registerFactory(
-    () => ApplicationsBloc(getApplicationsByStatusUsecase: getIt()),
+    () => ApplicationsBloc(
+      getApplicationsByStatusUsecase: getIt(),
+      getUserResponsesUsecase: getIt(),
+    ),
   );
 
   getIt.registerFactory(
