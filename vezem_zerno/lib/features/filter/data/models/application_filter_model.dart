@@ -1,8 +1,8 @@
 class ApplicationFilter {
   String? loadingRegion;
-  String? loadingDistrict;
+  //String? loadingLocality;
   String? unloadingRegion;
-  String? unloadingDistrict;
+  //String? unloadingLocality;
   String? crop;
   double? minPrice;
   double? maxPrice;
@@ -14,9 +14,9 @@ class ApplicationFilter {
 
   ApplicationFilter({
     this.loadingRegion,
-    this.loadingDistrict,
+    //this.loadingLocality,
     this.unloadingRegion,
-    this.unloadingDistrict,
+    //this.unloadingLocality,
     this.crop,
     this.minPrice,
     this.maxPrice,
@@ -29,9 +29,9 @@ class ApplicationFilter {
 
   ApplicationFilter copyWith({
     String? loadingRegion,
-    String? loadingDistrict,
+    //String? loadingLocality,
     String? unloadingRegion,
-    String? unloadingDistrict,
+    //String? unloadingLocality,
     String? crop,
     double? minPrice,
     double? maxPrice,
@@ -43,25 +43,26 @@ class ApplicationFilter {
   }) {
     return ApplicationFilter(
       loadingRegion: loadingRegion ?? this.loadingRegion,
-      loadingDistrict: loadingDistrict ?? this.loadingDistrict,
+      //loadingLocality: loadingLocality ?? this.loadingLocality,
       unloadingRegion: unloadingRegion ?? this.unloadingRegion,
-      unloadingDistrict: unloadingDistrict ?? this.unloadingDistrict,
+      //unloadingLocality: unloadingLocality ?? this.unloadingLocality,
       crop: crop ?? this.crop,
       minPrice: minPrice ?? this.minPrice,
       maxPrice: maxPrice ?? this.maxPrice,
       minDistance: minDistance ?? this.minDistance,
       maxDistance: maxDistance ?? this.maxDistance,
       dateFilter: dateFilter ?? this.dateFilter,
-      suitableForDumpTrucks: suitableForDumpTrucks ?? this.suitableForDumpTrucks,
+      suitableForDumpTrucks:
+          suitableForDumpTrucks ?? this.suitableForDumpTrucks,
       charterCarrier: charterCarrier ?? this.charterCarrier,
     );
   }
 
   bool get hasActiveFilters {
     return loadingRegion != null ||
-        loadingDistrict != null ||
+        //loadingLocality != null ||
         unloadingRegion != null ||
-        unloadingDistrict != null ||
+        //unloadingLocality != null ||
         crop != null ||
         minPrice != null ||
         maxPrice != null ||
@@ -72,15 +73,48 @@ class ApplicationFilter {
         charterCarrier;
   }
 
-  @override
-  String toString() {
-    return 'ApplicationFilter{loadingRegion: $loadingRegion, loadingDistrict: $loadingDistrict, unloadingRegion: $unloadingRegion,unloadingDistrict: $unloadingDistrict, crop: $crop, minPrice: $minPrice, maxPrice: $maxPrice, minDistance: $minDistance, maxDistance: $maxDistance, dateFilter: $dateFilter, suitableForDumpTrucks: $suitableForDumpTrucks, charterCarrier: $charterCarrier}';
+  Map<String, dynamic> toQueryParams() {
+    final params = <String, dynamic>{};
+
+    if (loadingRegion != null && loadingRegion!.isNotEmpty) {
+      params['loadingRegion'] = loadingRegion;
+    }
+    // if (loadingLocality != null && loadingLocality!.isNotEmpty) {
+    //   params['loadingLocality'] = loadingLocality;
+    // }
+    if (unloadingRegion != null && unloadingRegion!.isNotEmpty) {
+      params['unloadingRegion'] = unloadingRegion;
+    }
+    // if (unloadingLocality != null && unloadingLocality!.isNotEmpty) {
+    //   params['unloadingLocality'] = unloadingLocality;
+    // }
+    if (crop != null && crop!.isNotEmpty) {
+      params['crop'] = crop;
+    }
+    if (minPrice != null) {
+      params['minPrice'] = minPrice;
+    }
+    if (maxPrice != null) {
+      params['maxPrice'] = maxPrice;
+    }
+    if (minDistance != null) {
+      params['minDistance'] = minDistance;
+    }
+    if (maxDistance != null) {
+      params['maxDistance'] = maxDistance;
+    }
+    if (dateFilter != DateFilter.any) {
+      params['dateFilter'] = dateFilter.name;
+    }
+    if (suitableForDumpTrucks) {
+      params['dumpTrucks'] = true;
+    }
+    if (charterCarrier) {
+      params['charter'] = true;
+    }
+
+    return params;
   }
 }
 
-enum DateFilter {
-  any,
-  last3Days,
-  last5Days,
-  last7Days,
-}
+enum DateFilter { any, last3Days, last5Days, last7Days }

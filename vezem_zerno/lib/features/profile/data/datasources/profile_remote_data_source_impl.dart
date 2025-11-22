@@ -2,7 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'dart:io' as io;
 import 'package:vezem_zerno/core/error/failures.dart';
 import 'package:vezem_zerno/core/services/appwrite_service.dart';
-import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
 import 'package:vezem_zerno/features/profile/data/datasources/profile_remote_data_source.dart';
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -30,6 +30,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         role: user.role,
         phone: user.phone,
         profileImage: user.profileImage,
+        userId: user.id
       );
       return const Right(null);
     } catch (e) {

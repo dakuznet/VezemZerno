@@ -56,136 +56,113 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: _handleAuthStateChanges,
-      builder: (context, state) => _buildScaffold(context, state),
-    );
-  }
-
-  Widget _buildScaffold(BuildContext context, AuthState state) {
-    return Scaffold(
-      appBar: _buildAppBar(context, state),
-      backgroundColor: ColorsConstants.backgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: _buildLoginForm(context, state),
-        ),
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context, AuthState state) {
-    return AppBar(
-      backgroundColor: ColorsConstants.backgroundColor,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        color: ColorsConstants.primaryBrownColor,
-        iconSize: 24.sp,
-        onPressed: () => state is AuthLoading
-            ? null
-            : AutoRouter.of(context).replaceAll([const WelcomeRoute()]),
-      ),
-    );
-  }
-
-  Widget _buildLoginForm(BuildContext context, AuthState state) {
-    return Form(
-      key: _loginFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Center(child: _buildTitle()),
-          SizedBox(height: 32.h),
-          _buildPhoneField(),
-          SizedBox(height: 16.h),
-          _buildPasswordField(),
-          SizedBox(height: 16.h),
-          TextButton(
-            onPressed: () => state is AuthLoading
-                ? null
-                : AutoRouter.of(context).push(const ResetPasswordRoute()),
-            style: TextButton.styleFrom(
-              foregroundColor: ColorsConstants.primaryBrownColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.r),
-              ),
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: ColorsConstants.backgroundColor,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              color: ColorsConstants.primaryBrownColor,
+              iconSize: 24.sp,
+              onPressed: () =>
+                  context.router.replaceAll([const WelcomeRoute()]),
             ),
-            child: Text(
-              "Забыли пароль?",
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: ColorsConstants.primaryBrownColor,
+          ),
+          backgroundColor: ColorsConstants.backgroundColor,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
+              child: Form(
+                key: _loginFormKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Center(
+                      child: Text(
+                        'Вход',
+                        style: TextStyle(
+                          color: ColorsConstants.primaryBrownColor,
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 32.h),
+                    StatefulBuilder(
+                      builder: (context, setLocalState) {
+                        return PrimaryTextFormField(
+                          readOnly: false,
+                          labelBehavior: FloatingLabelBehavior.auto,
+                          autoValidateMode: AutovalidateMode.onUserInteraction,
+                          controller: _phoneController,
+                          labelText: 'Номер телефона',
+                          keyboardType: TextInputType.phone,
+                          inputFormatters: [_phoneMaskFormatter],
+                          prefixIcon: const Icon(Icons.phone),
+                          validator: _validatePhone,
+                          onTap: () => _handlePhoneFieldTap(setLocalState),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    StatefulBuilder(
+                      builder: (context, setLocalState) {
+                        return PrimaryTextFormField(
+                          readOnly: false,
+                          labelBehavior: FloatingLabelBehavior.auto,
+                          autoValidateMode: AutovalidateMode.onUserInteraction,
+                          controller: _passwordController,
+                          labelText: 'Пароль',
+                          obscureText: _obscurePassword,
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () =>
+                                _togglePasswordVisibility(setLocalState),
+                          ),
+                          validator: _validatePassword,
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    TextButton(
+                      onPressed: () => state is AuthLoading
+                          ? null
+                          : AutoRouter.of(
+                              context,
+                            ).push(const ResetPasswordRoute()),
+                      style: TextButton.styleFrom(
+                        foregroundColor: ColorsConstants.primaryBrownColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      child: Text(
+                        "Забыли пароль?",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                          color: ColorsConstants.primaryBrownColor,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    PrimaryButton(
+                      text: 'Войти',
+                      isLoading: state is AuthLoading,
+                      onPressed: () => _handleLogin(context),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          SizedBox(height: 16.h),
-          _buildLoginButton(context, state),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTitle() {
-    return Text(
-      'Вход',
-      style: TextStyle(
-        color: ColorsConstants.primaryBrownColor,
-        fontSize: 24.sp,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-
-  Widget _buildPhoneField() {
-    return StatefulBuilder(
-      builder: (context, setLocalState) {
-        return PrimaryTextFormField(
-          readOnly: false,
-          labelBehavior: FloatingLabelBehavior.auto,
-          autoValidateMode: AutovalidateMode.onUserInteraction,
-          controller: _phoneController,
-          labelText: 'Номер телефона',
-          keyboardType: TextInputType.phone,
-          inputFormatters: [_phoneMaskFormatter],
-          prefixIcon: const Icon(Icons.phone),
-          validator: _validatePhone,
-          onTap: () => _handlePhoneFieldTap(setLocalState),
         );
       },
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return StatefulBuilder(
-      builder: (context, setLocalState) {
-        return PrimaryTextFormField(
-          readOnly: false,
-          labelBehavior: FloatingLabelBehavior.auto,
-          autoValidateMode: AutovalidateMode.onUserInteraction,
-          controller: _passwordController,
-          labelText: 'Пароль',
-          obscureText: _obscurePassword,
-          prefixIcon: const Icon(Icons.lock_outline),
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscurePassword ? Icons.visibility_off : Icons.visibility,
-            ),
-            onPressed: () => _togglePasswordVisibility(setLocalState),
-          ),
-          validator: _validatePassword,
-        );
-      },
-    );
-  }
-
-  Widget _buildLoginButton(BuildContext context, AuthState state) {
-    return SizedBox(
-      width: double.infinity,
-      child: PrimaryButton(
-        text: 'Войти',
-        isLoading: state is AuthLoading,
-        onPressed: () => state is AuthLoading ? null : _handleLogin(context),
-      ),
     );
   }
 

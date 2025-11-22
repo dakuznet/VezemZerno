@@ -7,11 +7,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/core/widgets/primary_loading_indicator.dart';
 import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
-import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
+import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_event.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_state.dart';
+import 'package:vezem_zerno/features/profile/presentations/screens/widgets/profile_settings_image_section.dart';
+import 'package:vezem_zerno/features/profile/presentations/screens/widgets/profile_settings_text_field_section.dart';
 
 @RoutePage()
 class ProfileSettingScreen extends StatefulWidget {
@@ -31,7 +34,6 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
   io.File? _profileImage;
   String? _currentImageUrl;
   bool _isImageLoading = false;
-  bool _isDataInitialized = false;
 
   @override
   void initState() {
@@ -50,7 +52,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
   }
 
   Future<void> _pickImage() async {
-    context.read<ProfileBloc>();
+    if (_isImageLoading) return;
 
     try {
       setState(() {
@@ -71,11 +73,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
       }
     } catch (e) {
       if (mounted) {
-        PrimarySnackBar.show(
-          context,
-          text: 'Ошибка при выборе изображения',
-          borderColor: Colors.red,
-        );
+        _showErrorSnackBar('Ошибка при выборе изображения');
       }
     } finally {
       if (mounted) {
@@ -86,9 +84,16 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
     }
   }
 
+  void _showErrorSnackBar(String message) {
+    PrimarySnackBar.show(context, text: message, borderColor: Colors.red);
+  }
+
   void _saveProfile() {
+    final authState = context.read<AuthBloc>().state;
+    final userId = authState is LoginSuccess ? authState.user.id : null;
     context.read<ProfileBloc>().add(
       SaveProfileEvent(
+        userId: userId!,
         name: _nameController.text.trim(),
         surname: _surnameController.text.trim(),
         organization: _organizationController.text.trim(),
@@ -99,370 +104,162 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
     );
   }
 
-  bool _shouldBlockInteractions(ProfileState state) {
-    return state is NoInternetConnection ||
-        state is ProfileSaving ||
-        state is ProfileLoading;
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
-        if (state is ProfileLoaded && !_isDataInitialized) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {
-                _nameController.text = state.user.name ?? '';
-                _surnameController.text = state.user.surname ?? '';
-                _organizationController.text = state.user.organization ?? '';
-                _roleController.text = state.user.role ?? '';
-                _phoneController.text = state.user.phone;
-                _currentImageUrl = state.user.profileImage;
-                _isDataInitialized = true;
-              });
-            }
+        if (state is ProfileLoaded) {
+          setState(() {
+            _nameController.text = state.user.name;
+            _surnameController.text = state.user.surname;
+            _organizationController.text = state.user.organization;
+            _roleController.text = state.user.role;
+            _phoneController.text = state.user.phone;
+            _currentImageUrl = state.user.profileImage;
           });
         }
-
-        if (state is ProfileError) {
+        if (state is ProfileSaved) {
           PrimarySnackBar.show(
             context,
-            text: 'Ошибка сохранения профиля\n${state.message}',
-            borderColor: Colors.red,
-          );
-        } else if (state is ProfileSaved) {
-          PrimarySnackBar.show(
-            context,
-            text: 'Профиль успешно сохранён',
+            text: 'Профиль сохранён',
             borderColor: Colors.green,
           );
         }
       },
       builder: (context, state) {
-        final shouldBlockInteractions = _shouldBlockInteractions(state);
-        final hasNoInternet = state is NoInternetConnection;
-
         return Scaffold(
-          appBar: _buildAppBar(state, shouldBlockInteractions),
-          backgroundColor: ColorsConstants.backgroundColor,
-          body: SafeArea(
-            child: _buildContent(state, shouldBlockInteractions, hasNoInternet),
-          ),
-        );
-      },
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(
-    ProfileState state,
-    bool shouldBlockInteractions,
-  ) {
-    return AppBar(
-      backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      centerTitle: true,
-      surfaceTintColor: Colors.transparent,
-      title: Text(
-        'Управление профилем',
-        style: TextStyle(
-          fontSize: 20.sp,
-          fontWeight: FontWeight.w500,
-          color: ColorsConstants.primaryBrownColor,
-        ),
-      ),
-      leading: IconButton(
-        onPressed: shouldBlockInteractions
-            ? null
-            : () => AutoRouter.of(context).pop(),
-        icon: const Icon(Icons.arrow_back),
-        color: shouldBlockInteractions
-            ? ColorsConstants.primaryBrownColorWithOpacity
-            : ColorsConstants.primaryBrownColor,
-      ),
-    );
-  }
-
-  Widget _buildContent(
-    ProfileState state,
-    bool shouldBlockInteractions,
-    bool hasNoInternet,
-  ) {
-    if (hasNoInternet) {
-      return _buildNoInternetContent();
-    }
-
-    return AbsorbPointer(
-      absorbing: shouldBlockInteractions,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            _buildImageSection(state),
-            SizedBox(height: 16.h),
-            _buildNameField(state),
-            SizedBox(height: 16.h),
-            _buildSurnameField(state),
-            SizedBox(height: 16.h),
-            _buildOrganizationField(state),
-            SizedBox(height: 16.h),
-            _buildPhoneField(state),
-            SizedBox(height: 16.h),
-            _buildRoleField(state),
-            SizedBox(height: 32.h),
-            _buildSaveButton(state),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNoInternetContent() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            strokeWidth: 4.w,
+          appBar: AppBar(
             backgroundColor:
                 ColorsConstants.primaryTextFormFieldBackgorundColor,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-          SizedBox(height: 24.h),
-          Text(
-            'Загрузка...',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 18.sp,
+            centerTitle: true,
+            surfaceTintColor: Colors.transparent,
+            title: Text(
+              'Управление профилем',
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w500,
+                color: ColorsConstants.primaryBrownColor,
+              ),
+            ),
+            leading: IconButton(
+              onPressed: () => context.router.pop(),
+              icon: const Icon(Icons.arrow_back),
               color: ColorsConstants.primaryBrownColor,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImageSection(ProfileState state) {
-    final isSaving = state is ProfileSaving;
-
-    return GestureDetector(
-      onTap: isSaving ? null : _pickImage,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.r),
-          color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        ),
-        padding: EdgeInsets.all(8.w),
-        width: 360.w,
-        height: 120.h,
-        child: _isImageLoading
-            ? Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 4.w,
-                  backgroundColor:
-                      ColorsConstants.primaryTextFormFieldBackgorundColor,
-                  color: ColorsConstants.primaryBrownColor,
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: ColorsConstants.backgroundColor,
-                    foregroundColor: ColorsConstants.primaryBrownColor,
-                    radius: 50.r,
-                    backgroundImage: _profileImage != null
-                        ? FileImage(_profileImage!)
-                        : (_currentImageUrl != null &&
-                                  _currentImageUrl!.isNotEmpty
-                              ? NetworkImage(_currentImageUrl!)
-                              : null),
-                    child:
-                        _profileImage == null &&
-                            (_currentImageUrl == null ||
-                                _currentImageUrl!.isEmpty)
-                        ? Icon(Icons.camera_alt, size: 24.w)
-                        : null,
-                  ),
-                  Text(
-                    'Изменить фото',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      color: isSaving
-                          ? ColorsConstants.primaryBrownColorWithOpacity
-                          : ColorsConstants.primaryBrownColor,
+          backgroundColor: ColorsConstants.backgroundColor,
+          body: Padding(
+            padding: EdgeInsetsGeometry.all(16.w),
+            child: CustomScrollView(
+              slivers: [
+                if (state is ProfileLoading)
+                  SliverToBoxAdapter(child: const PrimaryLoadingIndicator())
+                else if (state is ProfileError)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.w),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 80.w,
+                              height: 80.h,
+                              decoration: BoxDecoration(
+                                color: ColorsConstants
+                                    .primaryTextFormFieldBackgorundColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.error_outline,
+                                size: 40.sp,
+                                color: Colors.red,
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+                            Text(
+                              'Возникла ошибка при загрузке данных...',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 16.h),
+                            TextButton(
+                              onPressed: () => context.read<ProfileBloc>().add(
+                                LoadProfileEvent(),
+                              ),
+                              child: Text(
+                                'Повторить',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  color: ColorsConstants.primaryBrownColor,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
+                  )
+                else
+                  SliverList(
+                    delegate: SliverChildListDelegate([
+                      ProfileSettingsImageSection(
+                        isSaving: state is ProfileSaving,
+                        isLoading: _isImageLoading,
+                        onTap: _pickImage,
+                        currentImageUrl: _currentImageUrl,
+                        profileImage: _profileImage,
+                      ),
+                      SizedBox(height: 16.h),
+                      ProfileSettingsTextFieldSection(
+                        label: 'Имя',
+                        controller: _nameController,
+                        isSaving: state is ProfileSaving,
+                      ),
+                      SizedBox(height: 16.h),
+                      ProfileSettingsTextFieldSection(
+                        label: 'Фамилия',
+                        controller: _surnameController,
+                        isSaving: state is ProfileSaving,
+                      ),
+                      SizedBox(height: 16.h),
+                      ProfileSettingsTextFieldSection(
+                        label: 'Организация',
+                        controller: _organizationController,
+                        isSaving: state is ProfileSaving,
+                      ),
+                      SizedBox(height: 16.h),
+                      ProfileSettingsTextFieldSection(
+                        label: 'Телефон',
+                        controller: _phoneController,
+                        isSaving: state is ProfileSaving,
+                        readOnly: true,
+                      ),
+                      SizedBox(height: 16.h),
+                      ProfileSettingsTextFieldSection(
+                        label: 'Вид деятельности',
+                        controller: _roleController,
+                        isSaving: state is ProfileSaving,
+                        readOnly: true,
+                      ),
+                      SizedBox(height: 32.h),
+                      PrimaryButton(
+                        text: 'Сохранить',
+                        isLoading: state is ProfileSaving,
+                        onPressed: _saveProfile,
+                      ),
+                    ]),
                   ),
-                ],
-              ),
-      ),
-    );
-  }
-
-  Widget _buildNameField(ProfileState state) {
-    final isSaving = state is ProfileSaving;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Имя',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: isSaving
-                ? ColorsConstants.primaryBrownColorWithOpacity
-                : ColorsConstants.primaryBrownColor,
+              ],
+            ),
           ),
-        ),
-        SizedBox(height: 4.h),
-        PrimaryTextFormField(
-          readOnly: isSaving,
-          controller: _nameController,
-          labelBehavior: FloatingLabelBehavior.never,
-          labelText: 'Имя',
-          suffixIcon: Icon(
-            Icons.drive_file_rename_outline,
-            size: 24.sp,
-            color: isSaving
-                ? ColorsConstants.primaryBrownColorWithOpacity
-                : ColorsConstants.primaryBrownColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSurnameField(ProfileState state) {
-    final isSaving = state is ProfileSaving;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Фамилия',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: isSaving
-                ? ColorsConstants.primaryBrownColorWithOpacity
-                : ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        PrimaryTextFormField(
-          readOnly: isSaving,
-          controller: _surnameController,
-          labelBehavior: FloatingLabelBehavior.never,
-          labelText: 'Фамилия',
-          suffixIcon: Icon(
-            Icons.drive_file_rename_outline,
-            size: 24.sp,
-            color: isSaving
-                ? ColorsConstants.primaryBrownColorWithOpacity
-                : ColorsConstants.primaryBrownColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOrganizationField(ProfileState state) {
-    final isSaving = state is ProfileSaving;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Название организации',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: isSaving
-                ? ColorsConstants.primaryBrownColorWithOpacity
-                : ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        PrimaryTextFormField(
-          readOnly: isSaving,
-          controller: _organizationController,
-          labelBehavior: FloatingLabelBehavior.never,
-          labelText: 'Название организации',
-          suffixIcon: Icon(
-            Icons.drive_file_rename_outline,
-            size: 24.sp,
-            color: isSaving
-                ? ColorsConstants.primaryBrownColorWithOpacity
-                : ColorsConstants.primaryBrownColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPhoneField(ProfileState state) {
-    final isSaving = state is ProfileSaving;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Телефон',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: isSaving
-                ? ColorsConstants.primaryBrownColorWithOpacity
-                : ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        PrimaryTextFormField(
-          controller: _phoneController,
-          readOnly: true,
-          labelBehavior: FloatingLabelBehavior.never,
-          labelText: 'Телефон',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRoleField(ProfileState state) {
-    final isSaving = state is ProfileSaving;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Вид деятельности',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: isSaving
-                ? ColorsConstants.primaryBrownColorWithOpacity
-                : ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        PrimaryTextFormField(
-          controller: _roleController,
-          readOnly: true,
-          labelBehavior: FloatingLabelBehavior.never,
-          labelText: 'Вид деятельности',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSaveButton(ProfileState state) {
-    final isSaving = state is ProfileSaving;
-    final hasNoInternet = state is NoInternetConnection;
-
-    return PrimaryButton(
-      text: 'Сохранить',
-      onPressed: (isSaving || hasNoInternet) ? null : _saveProfile,
-      isLoading: isSaving,
+        );
+      },
     );
   }
 }

@@ -2,11 +2,11 @@ import 'dart:io' as io;
 import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
-import 'package:flutter/material.dart';
 import 'package:vezem_zerno/core/constants/string_constants.dart';
-import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
 import 'package:path/path.dart' as path;
-import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
+import 'package:vezem_zerno/core/models/application_model.dart';
+import 'package:vezem_zerno/core/models/user_model.dart';
+import 'package:vezem_zerno/features/filter/data/models/application_filter_model.dart';
 
 class AppwriteService {
   late final Client _client;
@@ -14,8 +14,6 @@ class AppwriteService {
   late final Functions _functions;
   late final Storage _imageStorage;
   late final TablesDB _tablesDB;
-
-  Account get account => _account;
 
   AppwriteService() {
     _client = Client()
@@ -30,40 +28,125 @@ class AppwriteService {
 
   // APPLICATIONS
 
-  Future<List<ApplicationModel>> getUserResponses() async {
+  // Отметить заявку выполненной (Заказчик)
+  Future<void> markApplicationCompleted({required String applicationId}) async {
     try {
-      final user = await _account.get();
+      await _tablesDB.updateRow(
+        databaseId: StringConstants.dbApplicationsId,
+        tableId: StringConstants.tableApplicationsId,
+        rowId: applicationId,
+        data: {'status': 'completed'},
+      );
+    } on AppwriteException catch (e) {
+      throw Exception('Не удалось завершить заявку: ${e.message}');
+    } catch (e) {
+      throw Exception('Не удалось завершить заявку: $e');
+    }
+  }
 
+  // Отметить заявку доставленной (Перевозчик)
+  Future<void> markApplicationDelivered({required String applicationId}) async {
+    try {
+      await _tablesDB.updateRow(
+        databaseId: StringConstants.dbApplicationsId,
+        tableId: StringConstants.tableApplicationsId,
+        rowId: applicationId,
+        data: {'delivered': true},
+      );
+    } on AppwriteException catch (e) {
+      throw Exception(
+        'Не удалось отметить заявку, как завершённая: ${e.message}',
+      );
+    } catch (e) {
+      throw Exception('Не удалось отметить заявку, как завершённая: $e');
+    }
+  }
+
+  // Принять отклик на заявку (Заказчик)
+  Future<void> acceptResponse({
+    required String carrierId,
+    required String applicationId,
+  }) async {
+    try {
       final userRow = await _tablesDB.getRow(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        rowId: user.$id,
+        rowId: carrierId,
+        queries: [
+          Query.select(['applications', 'responses']),
+        ],
       );
 
-      final List<dynamic> responseIds = userRow.data['responses'] ?? [];
-
-      if (responseIds.isEmpty) return [];
-
-      final responses = await Future.wait(
-        responseIds.map((id) async {
-          try {
-            final response = await _tablesDB.getRow(
-              databaseId: StringConstants.dbApplicationsId,
-              tableId: StringConstants.tableApplicationsId,
-              rowId: id.toString(),
-            );
-
-            return ApplicationModel.fromJson({
-              ...response.data,
-              '\$id': response.$id,
-            });
-          } catch (e, stackTrace) {
-            debugPrint('Ошибка при получении заявки $id: $e\n$stackTrace');
-            return null;
-          }
-        }),
+      final currentApplications = List<String>.from(
+        userRow.data['applications'] ?? [],
       );
-      return responses.whereType<ApplicationModel>().toList();
+      final currentResponses = List<String>.from(
+        userRow.data['responses'] ?? [],
+      );
+
+      final updatedApplications = currentApplications.contains(applicationId)
+          ? currentApplications
+          : [...currentApplications, applicationId];
+
+      final updatedResponses = currentResponses
+          .where((id) => id != applicationId)
+          .toList();
+
+      await Future.wait([
+        _tablesDB.updateRow(
+          databaseId: StringConstants.dbAuthId,
+          tableId: StringConstants.tableUsersId,
+          rowId: carrierId,
+          data: {
+            'applications': updatedApplications,
+            'responses': updatedResponses,
+          },
+        ),
+        _tablesDB.updateRow(
+          databaseId: StringConstants.dbApplicationsId,
+          tableId: StringConstants.tableApplicationsId,
+          rowId: applicationId,
+          data: {
+            'status': 'processing',
+            'responses': null,
+            'carrierID': carrierId,
+          },
+        ),
+      ]);
+    } on AppwriteException catch (e) {
+      throw Exception('Не удалось принять отклик по заявке: ${e.message}');
+    } catch (e) {
+      throw Exception('Не удалось принять отклик по заявке: $e');
+    }
+  }
+
+  // Получение заявок пользователя
+  Future<List<ApplicationModel>> getUserResponses({required String userId}) async {
+    try {
+      final userRow = await _tablesDB.getRow(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        rowId: userId,
+        queries: [
+          Query.select(['responses']),
+        ],
+      );
+
+      final List<dynamic> responsesData = userRow.data['responses'] ?? [];
+
+      if (responsesData.isEmpty) return [];
+
+      final List<String> responsesIDs = List<String>.from(responsesData);
+
+      final responses = await _tablesDB.listRows(
+        databaseId: StringConstants.dbApplicationsId,
+        tableId: StringConstants.tableApplicationsId,
+        queries: [Query.contains('\$id', responsesIDs)],
+      );
+
+      return responses.rows
+          .map((row) => ApplicationModel.fromJson(row.data..['\$id'] = row.$id))
+          .toList();
     } on AppwriteException catch (e) {
       throw Exception('Не удалось получить заявки пользователя: ${e.message}');
     } catch (e) {
@@ -71,65 +154,145 @@ class AppwriteService {
     }
   }
 
-  Future<void> respondToApplicaiton({required String applicationId}) async {
+  // Откликнуться на заявку
+  Future<void> respondToApplication({required String applicationId, required String userId}) async {
     try {
-      final User user = await _account.get();
 
-      final userRow = await _tablesDB.getRow(
+      final userFuture = _tablesDB.getRow(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        rowId: user.$id,
+        rowId: userId,
+        queries: [
+          Query.select(['responses']),
+        ],
       );
 
-      List<dynamic> currentResponses = userRow.data['responses'] ?? [];
+      final applicationFuture = _tablesDB.getRow(
+        databaseId: StringConstants.dbApplicationsId,
+        tableId: StringConstants.tableApplicationsId,
+        rowId: applicationId,
+        queries: [
+          Query.select(['responses']),
+        ],
+      );
 
-      List<String> updatedResponses = List<String>.from(currentResponses);
-      if (!updatedResponses.contains(applicationId)) {
-        updatedResponses.add(applicationId);
+      final userRow = await userFuture;
+      final applicationRow = await applicationFuture;
+
+      final userResponses = List<String>.from(userRow.data['responses'] ?? []);
+      final applicationResponses = List<String>.from(
+        applicationRow.data['responses'] ?? [],
+      );
+
+      final bool needUserUpdate = !userResponses.contains(applicationId);
+      final bool needApplicationUpdate = !applicationResponses.contains(userId);
+
+      if (!needUserUpdate && !needApplicationUpdate) return;
+
+      final updates = <Future>[];
+
+      if (needUserUpdate) {
+        updates.add(
+          _tablesDB.updateRow(
+            databaseId: StringConstants.dbAuthId,
+            tableId: StringConstants.tableUsersId,
+            rowId: userId,
+            data: {
+              'responses': [...userResponses, applicationId],
+            },
+          ),
+        );
       }
 
-      await _tablesDB.updateRow(
+      if (needApplicationUpdate) {
+        updates.add(
+          _tablesDB.updateRow(
+            databaseId: StringConstants.dbApplicationsId,
+            tableId: StringConstants.tableApplicationsId,
+            rowId: applicationId,
+            data: {
+              'responses': [...applicationResponses, userId],
+            },
+          ),
+        );
+      }
+
+      if (updates.isNotEmpty) {
+        await Future.wait(updates);
+      }
+    } on AppwriteException catch (e) {
+      throw Exception('Ошибка при отклике на заявку: ${e.message}');
+    } catch (e) {
+      throw Exception('Ошибка при отклике на заявку: $e');
+    }
+  }
+
+  // Получение откликов на заявку
+  Future<List<UserModel>> getApplicationResponses({
+    required String applicationId,
+  }) async {
+    try {
+      final applicationRow = await _tablesDB.getRow(
+        databaseId: StringConstants.dbApplicationsId,
+        tableId: StringConstants.tableApplicationsId,
+        rowId: applicationId,
+        queries: [
+          Query.select(['responses']),
+        ],
+      );
+
+      final List<dynamic> responsesData =
+          applicationRow.data['responses'] ?? [];
+
+      if (responsesData.isEmpty) return [];
+
+      final List<String> responses = List<String>.from(responsesData);
+
+      final usersResponse = await _tablesDB.listRows(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        rowId: userRow.$id,
-        data: {'responses': updatedResponses},
+        queries: [Query.contains('\$id', responses)],
       );
+
+      return usersResponse.rows
+          .map((row) => UserModel.fromJson(row.data..['\$id'] = row.$id))
+          .toList();
     } on AppwriteException catch (e) {
-      throw Exception('Ошибка при обновлении пользователя: ${e.message}');
+      throw Exception(
+        'Не удалось получить откликнувшихся пользователей: ${e.message}',
+      );
     } catch (e) {
-      throw Exception('Ошибка при обновлении пользователя: $e');
+      throw Exception('Не удалось получить откликнувшихся пользователей: $e');
     }
   }
 
   // Получение заявок пользователя по статусу заявки
   Future<List<ApplicationModel>> getUserApplicationsByStatus({
     required String applicationStatus,
+    required String userId,
   }) async {
     try {
-      final user = await _account.get();
-
       final userRow = await _tablesDB.getRow(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        rowId: user.$id,
+        rowId: userId,
+        queries: [
+          Query.select(['applications']),
+        ],
       );
 
-      final List<dynamic> applicationIds = userRow.data['applications'] ?? [];
+      final List<dynamic> applicationsIds = userRow.data['applications'] ?? [];
 
-      if (applicationIds.isEmpty) {
+      if (applicationsIds.isEmpty) {
         return [];
       }
+
+      final List<String> appsIds = List<String>.from(applicationsIds);
 
       final applicationsResponse = await _tablesDB.listRows(
         databaseId: StringConstants.dbApplicationsId,
         tableId: StringConstants.tableApplicationsId,
-        queries: [
-          Query.contains(
-            '\$id',
-            applicationIds.map((e) => e.toString()).toList(),
-          ),
-          Query.equal('status', applicationStatus),
-        ],
+        queries: [Query.contains('\$id', appsIds), Query.equal('status', applicationStatus)],
       );
 
       final applications = applicationsResponse.rows.map((row) {
@@ -144,18 +307,127 @@ class AppwriteService {
     }
   }
 
+  double? _parsePrice(String priceStr) {
+    try {
+      final cleanStr = priceStr
+          .replaceAll('₽', '')
+          .replaceAll('/кг', '')
+          .replaceAll(',', '.')
+          .replaceAll(RegExp(r'[^\d.]'), '')
+          .trim();
+      return double.tryParse(cleanStr);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  double? _parseDistance(String distanceStr) {
+    try {
+      final cleanStr = distanceStr
+          .replaceAll('км', '')
+          .replaceAll(',', '.')
+          .replaceAll(RegExp(r'[^\d.]'), '')
+          .trim();
+      return double.tryParse(cleanStr);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  List<ApplicationModel> _applyNumericFilters(
+    List<ApplicationModel> applications,
+    ApplicationFilter filter,
+  ) {
+    return applications.where((app) {
+      // Фильтр по цене
+      if (filter.minPrice != null || filter.maxPrice != null) {
+        final price = _parsePrice(app.price);
+        if (price == null) return false;
+
+        if (filter.minPrice != null && price < filter.minPrice!) return false;
+        if (filter.maxPrice != null && price > filter.maxPrice!) return false;
+      }
+
+      // Фильтр по расстоянию
+      if (filter.minDistance != null || filter.maxDistance != null) {
+        final distance = _parseDistance(app.distance);
+        if (distance == null) return false;
+
+        if (filter.minDistance != null && distance < filter.minDistance!) {
+          return false;
+        }
+        if (filter.maxDistance != null && distance > filter.maxDistance!) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
+  }
+
   // Получение всех заявок по статусу заявки
-  Future<List<ApplicationModel>> getApplicationsByStatus({
+  Future<List<ApplicationModel>> getApplicationsByStatusWithFilter({
     required String applicationStatus,
-    bool descending = true,
+    ApplicationFilter? filter,
+    int limit = 20,
+    int offset = 0,
   }) async {
     try {
       final queries = <String>[
         Query.equal('status', applicationStatus),
-        descending
-            ? Query.orderDesc('\$createdAt')
-            : Query.orderAsc('\$createdAt'),
+        Query.orderDesc('\$createdAt'),
+        Query.limit(limit),
+        Query.offset(offset),
       ];
+
+      if (filter != null) {
+        if (filter.loadingRegion != null && filter.loadingRegion!.isNotEmpty) {
+          queries.add(Query.equal('loadingRegion', filter.loadingRegion));
+        }
+
+        if (filter.unloadingRegion != null &&
+            filter.unloadingRegion!.isNotEmpty) {
+          queries.add(Query.equal('unloadingRegion', filter.unloadingRegion));
+        }
+
+        if (filter.crop != null && filter.crop!.isNotEmpty) {
+          queries.add(Query.equal('crop', filter.crop!));
+        }
+
+        if (filter.suitableForDumpTrucks) {
+          queries.add(Query.equal('dumpTrucks', true));
+        }
+
+        if (filter.charterCarrier) {
+          queries.add(Query.equal('charter', true));
+        }
+
+        if (filter.dateFilter != DateFilter.any) {
+          final now = DateTime.now();
+          DateTime startDate;
+
+          switch (filter.dateFilter) {
+            case DateFilter.last3Days:
+              startDate = now.subtract(const Duration(days: 3));
+              break;
+            case DateFilter.last5Days:
+              startDate = now.subtract(const Duration(days: 5));
+              break;
+            case DateFilter.last7Days:
+              startDate = now.subtract(const Duration(days: 7));
+              break;
+            case DateFilter.any:
+              startDate = now;
+              break;
+          }
+
+          if (filter.dateFilter != DateFilter.any) {
+            queries.add(
+              Query.greaterThanEqual('\$createdAt', startDate.toString()),
+            );
+          }
+        }
+      }
 
       final response = await _tablesDB.listRows(
         databaseId: StringConstants.dbApplicationsId,
@@ -163,15 +435,19 @@ class AppwriteService {
         queries: queries,
       );
 
-      final applications = response.rows.map((row) {
+      List<ApplicationModel> applications = response.rows.map((row) {
         return ApplicationModel.fromJson({...row.data, '\$id': row.$id});
       }).toList();
 
+      if (filter != null) {
+        applications = _applyNumericFilters(applications, filter);
+      }
+
       return applications;
     } on AppwriteException catch (e) {
-      throw Exception('Ошибка при получении заявок по статусу: ${e.message}');
+      throw Exception('Ошибка при получении заявок с фильтром: ${e.message}');
     } catch (e) {
-      throw Exception('Ошибка при получении заявок по статусу: $e');
+      throw Exception('Ошибка при получении заявок с фильтром: $e');
     }
   }
 
@@ -180,10 +456,12 @@ class AppwriteService {
     String? comment,
     bool? charter,
     bool? dumpTrucks,
-    required String loadingPlace,
+    required String loadingRegion,
+    required String loadingLocality,
+    required String unloadingRegion,
+    required String unloadingLocality,
     required String loadingMethod,
     required String loadingDate,
-    required String unloadingPlace,
     required String crop,
     required String tonnage,
     required String distance,
@@ -194,15 +472,25 @@ class AppwriteService {
     required String paymentTerms,
     required String paymentMethod,
     required String status,
+    required String userId,
   }) async {
     try {
-      final currentUser = await getCurrentUserDocument();
+      final userRow = await _tablesDB.getRow(
+        databaseId: StringConstants.dbAuthId,
+        tableId: StringConstants.tableUsersId,
+        rowId: userId,
+        queries: [
+          Query.select(['organization'])
+        ]
+      );
 
       final application = ApplicationModel(
-        organization: currentUser.organization ?? '',
-        customerId: currentUser.id,
-        loadingPlace: loadingPlace,
-        unloadingPlace: unloadingPlace,
+        organization: userRow.data['organization'],
+        customerId: userId,
+        loadingRegion: loadingRegion,
+        loadingLocality: loadingLocality,
+        unloadingRegion: unloadingRegion,
+        unloadingLocality: unloadingLocality,
         distance: distance,
         crop: crop,
         tonnage: tonnage,
@@ -218,6 +506,9 @@ class AppwriteService {
         charter: charter ?? false,
         paymentMethod: paymentMethod,
         status: status,
+        responses: null,
+        carrier: null,
+        delivered: false,
       );
 
       final row = await _tablesDB.createRow(
@@ -232,11 +523,8 @@ class AppwriteService {
         '\$id': row.$id,
       });
 
-      await _addApplicationToUser(currentUser.id, row.$id);
+      await _addApplicationToUser(userId, row.$id);
 
-      debugPrint(
-        '✅ Заявка ${row.$id} успешно создана пользователем ${currentUser.id}',
-      );
       return createdApplication;
     } on AppwriteException catch (e) {
       throw Exception('Ошибка при создании заявки: ${e.message}');
@@ -251,30 +539,26 @@ class AppwriteService {
     String applicationId,
   ) async {
     try {
-      final userResponse = await _tablesDB.listRows(
+      final userRow = await _tablesDB.getRow(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        queries: [Query.equal('\$id', userId)],
+        rowId: userId,
+        queries: [
+          Query.select(["applications"]),
+        ],
       );
-
-      if (userResponse.rows.isEmpty) {
-        throw Exception('Пользователь не найден');
-      }
-
-      final userRow = userResponse.rows.first;
 
       final currentApplications = List<String>.from(
-        userRow.data['applications'] ?? const <String>[],
+        userRow.data['applications'] ?? [],
       );
-
       if (!currentApplications.contains(applicationId)) {
-        currentApplications.add(applicationId);
-
         await _tablesDB.updateRow(
           databaseId: StringConstants.dbAuthId,
           tableId: StringConstants.tableUsersId,
-          rowId: userRow.$id,
-          data: {'applications': currentApplications},
+          rowId: userId,
+          data: {
+            'applications': [...currentApplications, applicationId],
+          },
         );
       }
     } on AppwriteException catch (e) {
@@ -284,7 +568,36 @@ class AppwriteService {
     }
   }
 
-  // USER
+  //USER
+  Future<UserModel> getUserById({required String userId}) async {
+    final userRow = await _tablesDB.getRow(
+      databaseId: StringConstants.dbAuthId,
+      tableId: StringConstants.tableUsersId,
+      rowId: userId,
+    );
+
+    if (userRow.data.isNotEmpty) {
+      final userData = userRow.data;
+      return UserModel(
+        id: userId,
+        name: userData['name'] ?? '',
+        surname: userData['surname'] ?? '',
+        organization: userData['organization'] ?? '',
+        role: userData['role'] ?? '',
+        phone: userData['phone'] ?? '',
+        profileImage: userData['profileImage'] ?? '',
+        responses: userData['respones'] == null
+            ? null
+            : List<String>.from(userData['respones']),
+        applications: userData['applications'] == null
+            ? null
+            : List<String>.from(userData['applications']),
+      );
+    } else {
+      throw Exception('Пользователь не найден');
+    }
+  }
+
   Future<UserModel> getCurrentUserDocument() async {
     final User user = await _account.get();
 
@@ -304,13 +617,19 @@ class AppwriteService {
         role: userData['role'] ?? '',
         phone: userData['phone'] ?? '',
         profileImage: userData['profileImage'] ?? '',
+        responses: userData['respones'] == null
+            ? null
+            : List<String>.from(userData['respones']),
+        applications: userData['applications'] == null
+            ? null
+            : List<String>.from(userData['applications']),
       );
     } else {
       throw Exception('Пользователь не найден');
     }
   }
 
-  Future<Map<String, dynamic>> getUserByPhone(String phone) async {
+  Future<UserModel> getUserByPhone(String phone) async {
     try {
       final response = await _tablesDB.listRows(
         databaseId: StringConstants.dbAuthId,
@@ -322,7 +641,22 @@ class AppwriteService {
         throw Exception('Пользователь не найден');
       }
 
-      return response.rows.first.data;
+      final userData = response.rows.first.data;
+      return UserModel(
+        id: userData['\$id'],
+        name: userData['name'] ?? '',
+        surname: userData['surname'] ?? '',
+        organization: userData['organization'] ?? '',
+        role: userData['role'] ?? '',
+        phone: userData['phone'] ?? '',
+        profileImage: userData['profileImage'] ?? '',
+        responses: userData['respones'] == null
+            ? null
+            : List<String>.from(userData['respones']),
+        applications: userData['applications'] == null
+            ? null
+            : List<String>.from(userData['applications']),
+      );
     } on AppwriteException catch (e) {
       throw Exception('Ошибка получения данных о пользователе: ${e.message}');
     }
@@ -338,8 +672,6 @@ class AppwriteService {
       if (result['success'] != true) {
         throw Exception(result['message'] ?? 'Не удалось удалить пользователя');
       }
-
-      await forceLogout();
     } on AppwriteException catch (e) {
       throw Exception('Ошибка при удалении пользователя: ${e.message}');
     } catch (e) {
@@ -391,15 +723,8 @@ class AppwriteService {
     String? role,
     String? phone,
     String? profileImage,
+    required String userId 
   }) async {
-    final User user = await _account.get();
-    final response = await _tablesDB.getRow(
-      databaseId: StringConstants.dbAuthId,
-      tableId: StringConstants.tableUsersId,
-      rowId: user.$id,
-    );
-
-    if (response.data.isNotEmpty) {
       Map<String, dynamic> data = {};
 
       if (name != null) data['name'] = name;
@@ -412,12 +737,9 @@ class AppwriteService {
       await _tablesDB.updateRow(
         databaseId: StringConstants.dbAuthId,
         tableId: StringConstants.tableUsersId,
-        rowId: user.$id,
+        rowId: userId,
         data: data,
       );
-    } else {
-      throw Exception('Пользователь не найден');
-    }
   }
 
   // AUTH
@@ -443,10 +765,6 @@ class AppwriteService {
 
   Future<void> logout() async {
     await _account.deleteSession(sessionId: 'current');
-  }
-
-  Future<void> forceLogout() async {
-    await logout();
   }
 
   Future<Map<String, dynamic>> sendVerificationCode({

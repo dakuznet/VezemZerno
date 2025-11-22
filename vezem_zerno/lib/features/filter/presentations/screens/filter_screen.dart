@@ -1,12 +1,13 @@
-// ignore_for_file: unused_element
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/core/widgets/primary_divider.dart';
 import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/filter/data/models/application_filter_model.dart';
+import 'package:vezem_zerno/features/filter/presentations/screens/widgets/date_chip.dart';
+import 'package:vezem_zerno/features/filter/presentations/screens/widgets/number_field.dart';
 
 @RoutePage()
 class FilterScreen extends StatefulWidget {
@@ -28,11 +29,7 @@ class FilterScreenState extends State<FilterScreen> {
 
   final TextEditingController _loadingRegionController =
       TextEditingController();
-  final TextEditingController _loadingDistrictController =
-      TextEditingController();
   final TextEditingController _unloadingRegionController =
-      TextEditingController();
-  final TextEditingController _unloadingDistrictController =
       TextEditingController();
   final TextEditingController _cropController = TextEditingController();
 
@@ -44,13 +41,6 @@ class FilterScreenState extends State<FilterScreen> {
       'Ростовская область',
       'Воронежская область',
     ],
-    'Район погрузки': [
-      'Центральный район',
-      'Северный район',
-      'Южный район',
-      'Восточный район',
-      'Западный район',
-    ],
     'Регион выгрузки': [
       'Московская область',
       'Ленинградская область',
@@ -58,20 +48,12 @@ class FilterScreenState extends State<FilterScreen> {
       'Ростовская область',
       'Воронежская область',
     ],
-    'Район выгрузки': [
-      'Центральный район',
-      'Северный район',
-      'Южный район',
-      'Восточный район',
-      'Западный район',
-    ],
     'Культура': [
       'Пшеница',
       'Ячмень',
       'Кукуруза',
       'Подсолнечник',
       'Рапс',
-      'Соја',
       'Горох',
     ],
   };
@@ -88,11 +70,8 @@ class FilterScreenState extends State<FilterScreen> {
     _maxPriceController.text = _currentFilter.maxPrice?.toString() ?? '';
     _minDistanceController.text = _currentFilter.minDistance?.toString() ?? '';
     _maxDistanceController.text = _currentFilter.maxDistance?.toString() ?? '';
-
     _loadingRegionController.text = _currentFilter.loadingRegion ?? '';
-    _loadingDistrictController.text = _currentFilter.loadingDistrict ?? '';
     _unloadingRegionController.text = _currentFilter.unloadingRegion ?? '';
-    _unloadingDistrictController.text = _currentFilter.unloadingDistrict ?? '';
     _cropController.text = _currentFilter.crop ?? '';
   }
 
@@ -100,12 +79,23 @@ class FilterScreenState extends State<FilterScreen> {
     controller.text = value ?? '';
   }
 
+  double? _parseNumber(String text) {
+    if (text.isEmpty) return null;
+    final cleanText = text.replaceAll(',', '.');
+    return double.tryParse(cleanText);
+  }
+
   void _applyFilter() {
+    final minPrice = _parseNumber(_minPriceController.text);
+    final maxPrice = _parseNumber(_maxPriceController.text);
+    final minDistance = _parseNumber(_minDistanceController.text);
+    final maxDistance = _parseNumber(_maxDistanceController.text);
+
     final updatedFilter = _currentFilter.copyWith(
-      minPrice: double.tryParse(_minPriceController.text),
-      maxPrice: double.tryParse(_maxPriceController.text),
-      minDistance: double.tryParse(_minDistanceController.text),
-      maxDistance: double.tryParse(_maxDistanceController.text),
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      minDistance: minDistance,
+      maxDistance: maxDistance,
     );
 
     context.pop(updatedFilter);
@@ -166,22 +156,6 @@ class FilterScreenState extends State<FilterScreen> {
               }),
             ),
             SizedBox(height: 16.h),
-
-            PrimaryTextFormField(
-              readOnly: true,
-              controller: _loadingDistrictController,
-              labelText: 'Район погрузки',
-              onTap: () => _showSelectionDialog('Район погрузки', (value) {
-                setState(() {
-                  _currentFilter = _currentFilter.copyWith(
-                    loadingDistrict: value,
-                  );
-                  _updateSelectionField(_loadingDistrictController, value);
-                });
-              }),
-            ),
-            SizedBox(height: 16.h),
-
             PrimaryTextFormField(
               readOnly: true,
               controller: _unloadingRegionController,
@@ -196,22 +170,6 @@ class FilterScreenState extends State<FilterScreen> {
               }),
             ),
             SizedBox(height: 16.h),
-
-            PrimaryTextFormField(
-              readOnly: true,
-              controller: _unloadingDistrictController,
-              labelText: 'Район выгрузки',
-              onTap: () => _showSelectionDialog('Район выгрузки', (value) {
-                setState(() {
-                  _currentFilter = _currentFilter.copyWith(
-                    unloadingDistrict: value,
-                  );
-                  _updateSelectionField(_unloadingDistrictController, value);
-                });
-              }),
-            ),
-            SizedBox(height: 16.h),
-
             PrimaryTextFormField(
               readOnly: true,
               controller: _cropController,
@@ -225,21 +183,240 @@ class FilterScreenState extends State<FilterScreen> {
             ),
 
             SizedBox(height: 16.h),
-            _buildDivider(),
+            const PrimaryDivider(),
             SizedBox(height: 16.h),
-            _buildPriceSection(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Цена, ₽/кг',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: ColorsConstants.primaryBrownColor,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: NumberField(
+                        controller: _minPriceController,
+                        hintText: 'От',
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: NumberField(
+                        controller: _maxPriceController,
+                        hintText: 'До',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             SizedBox(height: 16.h),
-            _buildDivider(),
+            const PrimaryDivider(),
             SizedBox(height: 16.h),
-            _buildDistanceSection(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Расстояние, км',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: ColorsConstants.primaryBrownColor,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: NumberField(
+                        controller: _minDistanceController,
+                        hintText: 'От',
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: NumberField(
+                        controller: _minDistanceController,
+                        hintText: 'До',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             SizedBox(height: 16.h),
-            _buildDivider(),
+            const PrimaryDivider(),
             SizedBox(height: 16.h),
-            _buildDateSection(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Дата публикации',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: ColorsConstants.primaryBrownColor,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Wrap(
+                  spacing: 8.w,
+                  runSpacing: 8.h,
+                  children: [
+                    DateChip(
+                      label: 'Любая',
+                      value: DateFilter.any,
+                      isSelected: _currentFilter.dateFilter == DateFilter.any,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          if (selected) {
+                            _currentFilter = _currentFilter.copyWith(
+                              dateFilter: DateFilter.any,
+                            );
+                          }
+                        });
+                      },
+                    ),
+                    DateChip(
+                      label: 'За 3 дня',
+                      value: DateFilter.last3Days,
+                      isSelected:
+                          _currentFilter.dateFilter == DateFilter.last3Days,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          if (selected) {
+                            _currentFilter = _currentFilter.copyWith(
+                              dateFilter: DateFilter.last3Days,
+                            );
+                          }
+                        });
+                      },
+                    ),
+                    DateChip(
+                      label: 'За 5 дней',
+                      value: DateFilter.last5Days,
+                      isSelected:
+                          _currentFilter.dateFilter == DateFilter.last5Days,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          if (selected) {
+                            _currentFilter = _currentFilter.copyWith(
+                              dateFilter: DateFilter.last5Days,
+                            );
+                          }
+                        });
+                      },
+                    ),
+                    DateChip(
+                      label: 'За 7 дней',
+                      value: DateFilter.last7Days,
+                      isSelected:
+                          _currentFilter.dateFilter == DateFilter.last7Days,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          if (selected) {
+                            _currentFilter = _currentFilter.copyWith(
+                              dateFilter: DateFilter.last7Days,
+                            );
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
             SizedBox(height: 16.h),
-            _buildDivider(),
+            const PrimaryDivider(),
             SizedBox(height: 24.h),
-            _buildCheckboxSection(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: ColorsConstants.primaryTextFormFieldBackgorundColor,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: _currentFilter.suitableForDumpTrucks,
+                        onChanged: (value) {
+                          setState(() {
+                            _currentFilter = _currentFilter.copyWith(
+                              suitableForDumpTrucks: value ?? false,
+                            );
+                          });
+                        },
+                        activeColor: ColorsConstants.primaryBrownColor,
+                        checkColor:
+                            ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          'Подходят самосвалы',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: ColorsConstants.primaryBrownColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Container(
+                  decoration: BoxDecoration(
+                    color: ColorsConstants.primaryTextFormFieldBackgorundColor,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: _currentFilter.charterCarrier,
+                        onChanged: (value) {
+                          setState(() {
+                            _currentFilter = _currentFilter.copyWith(
+                              charterCarrier: value ?? false,
+                            );
+                          });
+                        },
+                        activeColor: ColorsConstants.primaryBrownColor,
+                        checkColor:
+                            ColorsConstants.primaryTextFormFieldBackgorundColor,
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          'Перевозчик работает по хартии',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: ColorsConstants.primaryBrownColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
 
             SizedBox(height: 32.h),
             PrimaryButton(text: 'Показать заявки', onPressed: _applyFilter),
@@ -247,292 +424,6 @@ class FilterScreenState extends State<FilterScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Divider(
-      thickness: 2.h,
-      color: ColorsConstants.primaryBrownColorWithOpacity,
-    );
-  }
-
-  Widget _buildSelectField({
-    required String title,
-    required String? value,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12.h),
-        decoration: BoxDecoration(
-          color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      color: ColorsConstants.primaryBrownColor,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    value ?? 'Не выбрано',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: value != null
-                          ? ColorsConstants.primaryBrownColor
-                          : ColorsConstants.primaryBrownColorWithOpacity,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: ColorsConstants.primaryBrownColorWithOpacity,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPriceSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Цена, ₽/кг',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Row(
-          children: [
-            Expanded(
-              child: _buildNumberField(
-                controller: _minPriceController,
-                hintText: 'От',
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: _buildNumberField(
-                controller: _maxPriceController,
-                hintText: 'До',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDistanceSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Расстояние, км',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Row(
-          children: [
-            Expanded(
-              child: _buildNumberField(
-                controller: _minDistanceController,
-                hintText: 'От',
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: _buildNumberField(
-                controller: _maxDistanceController,
-                hintText: 'До',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNumberField({
-    required TextEditingController controller,
-    required String hintText,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: TextInputType.numberWithOptions(decimal: true),
-      style: TextStyle(color: ColorsConstants.primaryBrownColor),
-      decoration: InputDecoration(
-        labelStyle: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 16.sp,
-          color: ColorsConstants.primaryBrownColorWithOpacity,
-        ),
-        hintText: hintText,
-        filled: true,
-        fillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12).r,
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12).r,
-          borderSide: BorderSide(
-            color: ColorsConstants.primaryBrownColor,
-            width: 2.0.w,
-          ),
-        ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-        hintStyle: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 16.sp,
-          color: ColorsConstants.primaryBrownColorWithOpacity,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Дата публикации',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Wrap(
-          spacing: 8.w,
-          runSpacing: 8.h,
-          children: [
-            _buildDateChip('Любая', DateFilter.any),
-            _buildDateChip('За 3 дня', DateFilter.last3Days),
-            _buildDateChip('За 5 дней', DateFilter.last5Days),
-            _buildDateChip('За 7 дней', DateFilter.last7Days),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateChip(String label, DateFilter value) {
-    final isSelected = _currentFilter.dateFilter == value;
-    return ChoiceChip(
-      label: Text(
-        label,
-        style: TextStyle(
-          color: ColorsConstants.primaryBrownColor,
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      selected: isSelected,
-      onSelected: (bool selected) {
-        setState(() {
-          if (selected) {
-            _currentFilter = _currentFilter.copyWith(dateFilter: value);
-          }
-        });
-      },
-      selectedColor: ColorsConstants.primaryButtonBackgroundColor,
-      backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-    );
-  }
-
-  Widget _buildCheckboxSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          child: _buildCheckbox(
-            title: 'Подходят самосвалы',
-            value: _currentFilter.suitableForDumpTrucks,
-            onChanged: (value) {
-              setState(() {
-                _currentFilter = _currentFilter.copyWith(
-                  suitableForDumpTrucks: value ?? false,
-                );
-              });
-            },
-          ),
-        ),
-        SizedBox(height: 12.h),
-        Container(
-          decoration: BoxDecoration(
-            color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          child: _buildCheckbox(
-            title: 'Перевозчик работает по хартии',
-            value: _currentFilter.charterCarrier,
-            onChanged: (value) {
-              setState(() {
-                _currentFilter = _currentFilter.copyWith(
-                  charterCarrier: value ?? false,
-                );
-              });
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCheckbox({
-    required String title,
-    required bool value,
-    required Function(bool?) onChanged,
-  }) {
-    return Row(
-      children: [
-        Checkbox(
-          value: value,
-          onChanged: onChanged,
-          activeColor: ColorsConstants.primaryBrownColor,
-          checkColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-        ),
-        SizedBox(width: 8.w),
-        Expanded(
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: ColorsConstants.primaryBrownColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -571,7 +462,7 @@ class FilterScreenState extends State<FilterScreen> {
                     ),
                     onTap: () {
                       onSelected('');
-                      Navigator.of(context).pop();
+                      context.router.pop();
                     },
                   ),
                 );
@@ -591,7 +482,7 @@ class FilterScreenState extends State<FilterScreen> {
                   ),
                   onTap: () {
                     onSelected(item);
-                    Navigator.of(context).pop();
+                    context.router.pop();
                   },
                 ),
               );
@@ -600,7 +491,7 @@ class FilterScreenState extends State<FilterScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => context.router.pop(),
             child: Text(
               'Отмена',
               style: TextStyle(
@@ -617,10 +508,13 @@ class FilterScreenState extends State<FilterScreen> {
 
   @override
   void dispose() {
+    _loadingRegionController.dispose();
+    _unloadingRegionController.dispose();
     _minPriceController.dispose();
     _maxPriceController.dispose();
     _minDistanceController.dispose();
     _maxDistanceController.dispose();
+    _cropController.dispose();
     super.dispose();
   }
 }

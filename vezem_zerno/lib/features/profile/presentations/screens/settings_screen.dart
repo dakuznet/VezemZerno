@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/core/widgets/primary_loading_indicator.dart';
 import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
-import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_state.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/widgets/delete_account_confirmation_dialog.dart';
@@ -32,7 +32,6 @@ class _SettingScreenState extends State<SettingScreen> {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is AccountDeleted) {
-          context.read<AuthBloc>().add(AuthLogoutEvent());
           AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
           PrimarySnackBar.show(
             context,
@@ -42,15 +41,30 @@ class _SettingScreenState extends State<SettingScreen> {
         } else if (state is AccountDeleteError) {
           PrimarySnackBar.show(
             context,
-            text: 'Ошибка удаления аккаунта\n${state.message}',
+            text: 'Ошибка удаления аккаунта',
             borderColor: Colors.red,
           );
         }
       },
       builder: (context, state) {
-        final isDeleting = state is AccountDeleting;
         return Scaffold(
-          appBar: _buildAppBar(context, state),
+          appBar: AppBar(
+            backgroundColor:
+                ColorsConstants.primaryTextFormFieldBackgorundColor,
+            centerTitle: true,
+            title: Text(
+              'Настройки',
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w500,
+                color: ColorsConstants.primaryBrownColor,
+              ),
+            ),
+            leading: IconButton(
+              onPressed: () => context.router.pop(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
           backgroundColor: ColorsConstants.backgroundColor,
           body: SafeArea(
             child: Stack(
@@ -60,23 +74,14 @@ class _SettingScreenState extends State<SettingScreen> {
                   child: Center(
                     child: PrimaryButton(
                       text: 'Удалить аккаунт',
-                      onPressed: isDeleting
-                          ? null
-                          : () async {
-                              _showDeleteAccountConfirmationDialog(context);
-                            },
+                      isLoading: state is AccountDeleting,
+                      onPressed: () async {
+                        _showDeleteAccountConfirmationDialog(context);
+                      },
                     ),
                   ),
                 ),
-                if (isDeleting)
-                  Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 4.w,
-                      backgroundColor:
-                          ColorsConstants.primaryTextFormFieldBackgorundColor,
-                      color: ColorsConstants.primaryBrownColor,
-                    ),
-                  ),
+                if (state is AccountDeleting) const PrimaryLoadingIndicator(),
               ],
             ),
           ),
@@ -84,24 +89,4 @@ class _SettingScreenState extends State<SettingScreen> {
       },
     );
   }
-}
-
-PreferredSizeWidget _buildAppBar(BuildContext context, ProfileState state) {
-  return AppBar(
-    backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-    centerTitle: true,
-    title: Text(
-      'Настройки',
-      style: TextStyle(
-        fontSize: 20.sp,
-        fontWeight: FontWeight.w500,
-        color: ColorsConstants.primaryBrownColor,
-      ),
-    ),
-    leading: IconButton(
-      onPressed: () =>
-          state is AccountDeleting ? null : AutoRouter.of(context).back(),
-      icon: const Icon(Icons.arrow_back),
-    ),
-  );
 }

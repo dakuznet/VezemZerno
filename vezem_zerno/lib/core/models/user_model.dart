@@ -1,13 +1,13 @@
-import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
   const UserModel({
     required super.id,
     required super.phone,
-    super.name,
-    super.surname,
-    super.organization,
-    super.role,
+    required super.name,
+    required super.surname,
+    required super.organization,
+    required super.role,
     super.profileImage,
     super.sessionId,
     super.applications = const [],
@@ -39,6 +39,7 @@ class UserModel extends UserEntity {
       role: role,
       profileImage: profileImage,
       applications: applications,
+      responses: responses,
     );
   }
 }

@@ -2,8 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:vezem_zerno/core/error/failures.dart';
 import 'package:vezem_zerno/core/services/appwrite_service.dart';
-import 'package:vezem_zerno/features/auth/data/models/user_model.dart';
-import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
 import 'auth_remote_data_source.dart';
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -72,25 +71,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Either<Failure, UserModel>> login(
+  Future<Either<Failure, UserEntity>> login(
     String phone,
     String password,
   ) async {
     try {
-      final session = await _appwriteService.createSession(phone, password);
+      await _appwriteService.createSession(phone, password);
 
-      final userData = await _appwriteService.getUserByPhone(phone);
+      final user = await _appwriteService.getUserByPhone(phone);
 
-      return Right(
-        UserModel(
-          id: session.userId,
-          phone: phone,
-          name: userData['name'],
-          surname: userData['surname'],
-          organization: userData['organization'],
-          role: userData['role'],
-        ),
-      );
+      return Right(user.toEntity());
     } on AppwriteException catch (e) {
       return Left(
         ServerFailure(
@@ -125,32 +115,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Either<Failure, void>> forceLogout() async {
-    try {
-      await _appwriteService.forceLogout();
-      return const Right(null);
-    } catch (e) {
-      return Left(ServerFailure('Ошибка принудительного выхода: $e'));
-    }
-  }
-
-  @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
-      final user = await _appwriteService.account.get();
-      final phone = user.email.split('@')[0];
-      final userData = await _appwriteService.getUserByPhone(phone);
+      final currentUser = await _appwriteService.getCurrentUserDocument();
 
-      final userEntity = UserEntity(
-        id: user.$id,
-        phone: phone,
-        name: userData['name'] ?? '',
-        surname: userData['surname'] ?? '',
-        organization: userData['organization'] ?? '',
-        role: userData['role'] ?? '',
-      );
-
-      return Right(userEntity);
+      return Right(currentUser.toEntity());
     } catch (e) {
       return Left(ServerFailure('Ошибка получения пользователя: $e'));
     }

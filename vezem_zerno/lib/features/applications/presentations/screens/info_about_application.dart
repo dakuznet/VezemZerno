@@ -3,329 +3,299 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
-import 'package:vezem_zerno/core/services/appwrite_service.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
+import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
+import 'package:vezem_zerno/features/applications/presentations/bloc/applications_bloc.dart';
+import 'package:vezem_zerno/features/applications/presentations/screens/widgets/application_info_column.dart';
+import 'package:vezem_zerno/features/applications/presentations/screens/widgets/application_info_row.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
+import 'package:vezem_zerno/core/entities/application_entity.dart';
 
 @RoutePage()
 class InfoAboutApplicationScreen extends StatefulWidget {
-  final ApplicationModel application;
-
   const InfoAboutApplicationScreen({super.key, required this.application});
-
+  final ApplicationEntity application;
   @override
   State<InfoAboutApplicationScreen> createState() =>
       _InfoAboutApplicationScreenState();
 }
 
-class _InfoAboutApplicationScreenState extends State<InfoAboutApplicationScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _InfoAboutApplicationScreenState
+    extends State<InfoAboutApplicationScreen> {
+  void _respondToApplication() {
+    final userId = context.select<AuthBloc, String?>(
+      (authBloc) => authBloc.state is LoginSuccess
+          ? (authBloc.state as LoginSuccess).user.id
+          : null,
+    );
 
-  @override
-  void initState() {
-    super.initState();
-    // Изменить на 3 когда будут готовы остальные вкладки
-    _tabController = TabController(length: 1, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+    if (userId != null) {
+      context.read<ApplicationsBloc>().add(
+        RespondToApplicaitonEvent(
+          userId: userId,
+          applicationId: widget.application.id!,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorsConstants.backgroundColor,
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        centerTitle: true,
-        title: Text(
-          'Заявка',
-          style: TextStyle(
-            fontSize: 20.sp,
-            color: ColorsConstants.primaryBrownColor,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        backgroundColor:
-            ColorsConstants.primaryTextFormFieldBackgorundColor,
-        foregroundColor: ColorsConstants.primaryBrownColor,
-      ),
-      body: Column(
-        children: [
-          // Раскомментировать когда будут готовы остальные вкладки
-          /*
-          Container(
-            color: Colors.white,
-            child: TabBar(
-              controller: _tabController,
-              labelColor: Colors.blue[700],
-              unselectedLabelColor: Colors.grey[600],
-              indicatorColor: Colors.blue[700],
-              tabs: const [
-                Tab(text: 'Информация'),
-                // Tab(text: 'Отзывы'),
-                // Tab(text: 'Диалог'),
-              ],
-            ),
-          ),
-          */
-          Expanded(
-            child:
-                // Раскомментировать когда будут готовы остальные вкладки
-                // TabBarView(
-                //   controller: _tabController,
-                //   children: [
-                _buildInfoTab(),
-            // _buildReviewsTab(),
-            // _buildDialogueTab(),
-            //   ],
-            // ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRequestApplicationButton() {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, authState) {
-        final bool isCustomer = authState is SessionRestored
-            ? authState.user.role == 'Перевозчик'
-            : authState is LoginSuccess
-            ? authState.user.role == 'Перевозчик'
-            : false;
-
-        if (!isCustomer) return const SizedBox.shrink();
-
-        return PrimaryButton(text: 'Откликнуться', onPressed: () async {
-          await AppwriteService().respondToApplicaiton(applicationId: widget.application.id!);
-        });
+    return BlocListener<ApplicationsBloc, ApplicationsState>(
+      listener: (context, state) {
+        if (state is RespondToApplicaitonLoadingSuccess) {
+          PrimarySnackBar.show(
+            context,
+            text: 'Вы успешно откликнулись на заявку',
+            borderColor: Colors.green,
+          );
+        }
       },
-    );
-  }
-
-  Widget _buildInfoTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        spacing: 16.sp,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Основная информация
-          _buildInfoCard('Основная информация', [
-            _buildInfoRow('Культура', widget.application.crop),
-            _buildInfoRow('Объем перевозки', '${widget.application.tonnage} т'),
-            _buildInfoRow('Цена', '${widget.application.price} ₽/кг'),
-            _buildInfoRow('Расстояние', '${widget.application.distance} км'),
-            _buildInfoRow(
-              'Дата создания',
-              _formatDate(widget.application.createdAt),
+      child: Scaffold(
+        backgroundColor: ColorsConstants.backgroundColor,
+        appBar: AppBar(
+          surfaceTintColor: Colors.transparent,
+          centerTitle: true,
+          title: Text(
+            'Заявка',
+            style: TextStyle(
+              fontSize: 20.sp,
+              color: ColorsConstants.primaryBrownColor,
+              fontWeight: FontWeight.w500,
             ),
-          ]),
-
-          // Маршрут
-          _buildInfoCard('Маршрут', [
-            _buildLocationRow('Погрузка', widget.application.loadingPlace),
-            _buildLocationRow('Выгрузка', widget.application.unloadingPlace),
-          ]),
-
-          // Условия погрузки
-          _buildInfoCard('Условия погрузки', [
-            _buildInfoRow('Способ погрузки', widget.application.loadingMethod),
-            _buildInfoRow(
-              'Грузоподъемность весов',
-              '${widget.application.scalesCapacity} т',
-            ),
-            _buildInfoRow('Дата погрузки', widget.application.loadingDate),
-          ]),
-
-          // Детали перевозки
-          _buildInfoCard('Детали перевозки', [
-            _buildInfoRow('Простой', widget.application.downtime),
-            _buildInfoRow(
-              'Допустимая недостача',
-              '${widget.application.shortage} кг',
-            ),
-            _buildInfoRow('Вид оплаты', widget.application.paymentMethod),
-            _buildInfoRow('Сроки оплаты', widget.application.paymentTerms),
-            _buildInfoRow(
-              'Самосвалы',
-              widget.application.dumpTrucks ? 'Да' : 'Нет',
-            ),
-            _buildInfoRow(
-              'Перевозчик работает по хартии',
-              widget.application.charter ? 'Да' : 'Нет',
-            ),
-          ]),
-
-          // Заказчик
-          _buildInfoCard('Заказчик', [
-            _buildInfoRow('Организация', widget.application.organization),
-          ]),
-
-          _buildInfoCard('Комментарий', [
-            Text(
-              widget.application.comment,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: ColorsConstants.primaryBrownColor,
+          ),
+          backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
+          foregroundColor: ColorsConstants.primaryBrownColor,
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            spacing: 16.sp,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Основная информация
+              ApplicationInfoColumn(
+                title: 'Основная информация',
+                children: [
+                  ApplicationInfoRow(
+                    label: 'Культура',
+                    value: widget.application.crop,
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Объем перевозки',
+                    value: '${widget.application.tonnage} т',
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Цена',
+                    value: '${widget.application.price} ₽/кг',
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Расстояние',
+                    value: '${widget.application.distance} км',
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Дата создания',
+                    value:
+                        "${widget.application.createdAt!.day}.${widget.application.createdAt!.month}.${widget.application.createdAt!.year}",
+                  ),
+                ],
               ),
-            ),
-          ]),
 
-          _buildRequestApplicationButton(),
-        ],
-      ),
-    );
-  }
-
-  // Раскомментировать когда будем делать вкладку отзывов
-  /*
-  Widget _buildReviewsTab() {
-    return const Center(
-      child: Text(
-        'Раздел отзывов\n(не реализовано)',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 16, color: Colors.grey),
-      ),
-    );
-  }
-  */
-
-  // Раскомментировать когда будем делать вкладку диалога
-  /*
-  Widget _buildDialogueTab() {
-    return const Center(
-      child: Text(
-        'Раздел диалога\n(не реализовано)',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 16, color: Colors.grey),
-      ),
-    );
-  }
-  */
-
-  Widget _buildInfoCard(String title, List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.r),
-        color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      ),
-      width: double.infinity,
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: ColorsConstants.primaryBrownColor,
+              // Маршрут
+              ApplicationInfoColumn(
+                title: 'Маршрут',
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 24.w,
+                          height: 24.h,
+                          margin: EdgeInsets.only(right: 12.w),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.blue, width: 2.w),
+                          ),
+                          child: Icon(
+                            Icons.circle,
+                            size: 8.sp,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Погрузка',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: const Color.fromARGB(134, 66, 44, 26),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                '${widget.application.loadingRegion}\n${widget.application.loadingLocality}',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  color: ColorsConstants.primaryBrownColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 24.w,
+                          height: 24.h,
+                          margin: EdgeInsets.only(right: 12.w),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.red, width: 2.w),
+                          ),
+                          child: Icon(
+                            Icons.circle,
+                            size: 8.sp,
+                            color: Colors.red,
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Выгрузка',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: const Color.fromARGB(134, 66, 44, 26),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                '${widget.application.loadingRegion}\n${widget.application.loadingLocality}',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  color: ColorsConstants.primaryBrownColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 8.h),
-            ...children,
-          ],
+
+              // Условия погрузки
+              ApplicationInfoColumn(
+                title: 'Условия погрузки',
+                children: [
+                  ApplicationInfoRow(
+                    label: 'Способ погрузки',
+                    value: widget.application.loadingMethod,
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Грузоподъемность весов',
+                    value: '${widget.application.scalesCapacity} т',
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Дата погрузки',
+                    value: widget.application.loadingDate,
+                  ),
+                ],
+              ),
+
+              // Детали перевозки
+              ApplicationInfoColumn(
+                title: 'Детали перевозки',
+                children: [
+                  ApplicationInfoRow(
+                    label: 'Простой',
+                    value: widget.application.downtime,
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Допустимая недостача',
+                    value: '${widget.application.shortage} кг',
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Вид оплаты',
+                    value: widget.application.paymentMethod,
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Сроки оплаты',
+                    value: widget.application.paymentTerms,
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Самосвалы',
+                    value: widget.application.dumpTrucks ? 'Да' : 'Нет',
+                  ),
+                  ApplicationInfoRow(
+                    label: 'Перевозчик работает по хартии',
+                    value: widget.application.charter ? 'Да' : 'Нет',
+                  ),
+                ],
+              ),
+
+              // Заказчик
+              ApplicationInfoColumn(
+                title: 'Заказчик',
+                children: [
+                  ApplicationInfoRow(
+                    label: 'Организация',
+                    value: widget.application.organization,
+                  ),
+                ],
+              ),
+
+              //Комментарий
+              ApplicationInfoColumn(
+                title: 'Комментарий',
+                children: [
+                  Text(
+                    widget.application.comment,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, authState) {
+                  final bool isCustomer = authState is SessionRestored
+                      ? authState.user.role == 'Перевозчик'
+                      : authState is LoginSuccess
+                      ? authState.user.role == 'Перевозчик'
+                      : false;
+
+                  if (!isCustomer) return const SizedBox.shrink();
+
+                  return PrimaryButton(
+                    text: 'Откликнуться',
+                    onPressed: () => _respondToApplication,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
-        spacing: 12.w,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 1,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 16.sp,
-                color: const Color.fromARGB(134, 66, 44, 26),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: ColorsConstants.primaryBrownColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationRow(String type, String location) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 24.w,
-            height: 24.h,
-            margin: EdgeInsets.only(right: 12.w),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: type == 'Погрузка' ? Colors.blue : Colors.red,
-                width: 2.w,
-              ),
-            ),
-            child: Icon(
-              Icons.circle,
-              size: 8.sp,
-              color: type == 'Погрузка' ? Colors.blue : Colors.red,
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  type,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: const Color.fromARGB(134, 66, 44, 26),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  location,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: ColorsConstants.primaryBrownColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Не указана';
-    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 }

@@ -9,6 +9,7 @@ import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/widgets/privacy_check_box.dart';
+import 'package:vezem_zerno/features/auth/presentation/screens/widgets/role_button.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
 @RoutePage()
@@ -72,245 +73,188 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: _handleAuthStateChanges,
-      builder: (context, state) => _buildScaffold(context, state),
-    );
-  }
-
-  Widget _buildScaffold(BuildContext context, AuthState state) {
-    return Scaffold(
-      appBar: _buildAppBar(context, state),
-      backgroundColor: ColorsConstants.backgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(16.w),
-            child: _buildRegistrationForm(context, state),
-          ),
-        ),
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context, AuthState state) {
-    return AppBar(
-      surfaceTintColor: Colors.transparent,
-      backgroundColor: ColorsConstants.backgroundColor,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        color: ColorsConstants.primaryBrownColor,
-        iconSize: 24.r,
-        onPressed: () =>
-            state is AuthLoading ? null : AutoRouter.of(context).back(),
-      ),
-    );
-  }
-
-  Widget _buildRegistrationForm(BuildContext context, AuthState state) {
-    return Form(
-      key: _registrationFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildTitle(),
-          SizedBox(height: 32.h),
-          _buildNameField(),
-          SizedBox(height: 16.h),
-          _buildSurnameField(),
-          SizedBox(height: 16.h),
-          _buildOrganizationField(),
-          SizedBox(height: 16.h),
-          _buildRoleSelection(),
-          SizedBox(height: 16.h),
-          _buildPhoneField(),
-          SizedBox(height: 16.h),
-          _buildPasswordField(),
-          SizedBox(height: 16.h),
-          _buildConfirmPasswordField(),
-          SizedBox(height: 16.h),
-          _buildPrivacyCheckbox(),
-          SizedBox(height: 32.h),
-          _buildRegisterButton(context, state),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTitle() {
-    return Text(
-      'Регистрация',
-      style: TextStyle(
-        color: ColorsConstants.primaryBrownColor,
-        fontSize: 24.sp,
-        fontWeight: FontWeight.w500,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _buildNameField() {
-    return PrimaryTextFormField(
-      readOnly: false,
-      labelBehavior: FloatingLabelBehavior.auto,
-      autoValidateMode: AutovalidateMode.onUserInteraction,
-      controller: _nameController,
-      labelText: 'Имя',
-      keyboardType: TextInputType.name,
-      prefixIcon: const Icon(Icons.person),
-      validator: _validateName,
-    );
-  }
-
-  Widget _buildSurnameField() {
-    return PrimaryTextFormField(
-      readOnly: false,
-      labelBehavior: FloatingLabelBehavior.auto,
-      autoValidateMode: AutovalidateMode.onUserInteraction,
-      controller: _surnameController,
-      labelText: 'Фамилия',
-      keyboardType: TextInputType.name,
-      prefixIcon: const Icon(Icons.person),
-      validator: _validateSurname,
-    );
-  }
-
-  Widget _buildOrganizationField() {
-    return PrimaryTextFormField(
-      readOnly: false,
-      labelBehavior: FloatingLabelBehavior.auto,
-      autoValidateMode: AutovalidateMode.onUserInteraction,
-      controller: _organizationController,
-      labelText: 'Организация',
-      prefixIcon: const Icon(Icons.business),
-      keyboardType: TextInputType.text,
-      validator: _validateOrganization,
-    );
-  }
-
-  Widget _buildRoleSelection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: _buildRoleButton(role: 'Заказчик', label: 'Заказчик'),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: _buildRoleButton(role: 'Перевозчик', label: 'Перевозчик'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRoleButton({required String role, required String label}) {
-    final isSelected = _selectedRole == role;
-
-    return ElevatedButton(
-      onPressed: () => setState(() => _selectedRole = role),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected
-            ? ColorsConstants.primaryButtonBackgroundColor
-            : ColorsConstants.notSelectedTextButtonColor,
-        foregroundColor: isSelected
-            ? ColorsConstants.notSelectedTextButtonColor
-            : ColorsConstants.primaryButtonBackgroundColor,
-        padding: EdgeInsets.symmetric(vertical: 16.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 16.sp,
-          color: isSelected
-              ? ColorsConstants.primaryBrownColor
-              : ColorsConstants.primaryBrownColorWithOpacity,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhoneField() {
-    return StatefulBuilder(
-      builder: (context, setLocalState) {
-        return PrimaryTextFormField(
-          readOnly: false,
-          autoValidateMode: AutovalidateMode.onUserInteraction,
-          controller: _phoneController,
-          labelText: 'Номер телефона',
-          keyboardType: TextInputType.phone,
-          inputFormatters: [_phoneMaskFormatter],
-          prefixIcon: const Icon(Icons.phone),
-          validator: _validatePhone,
-          onTap: () => _handlePhoneFieldTap(setLocalState),
-        );
-      },
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return StatefulBuilder(
-      builder: (context, setLocalState) {
-        return PrimaryTextFormField(
-          readOnly: false,
-          labelBehavior: FloatingLabelBehavior.never,
-          autoValidateMode: AutovalidateMode.onUserInteraction,
-          controller: _passwordController,
-          labelText: 'Пароль',
-          obscureText: _obscurePassword,
-          prefixIcon: const Icon(Icons.lock_outline),
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            surfaceTintColor: Colors.transparent,
+            backgroundColor: ColorsConstants.backgroundColor,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              color: ColorsConstants.primaryBrownColor,
+              iconSize: 24.r,
+              onPressed: () =>
+                  state is AuthLoading ? null : AutoRouter.of(context).back(),
             ),
-            onPressed: () => _togglePasswordVisibility(setLocalState),
           ),
-          validator: _validatePassword,
-        );
-      },
-    );
-  }
-
-  Widget _buildConfirmPasswordField() {
-    return StatefulBuilder(
-      builder: (context, setLocalState) {
-        return PrimaryTextFormField(
-          readOnly: false,
-          labelBehavior: FloatingLabelBehavior.never,
-          controller: _confirmPasswordController,
-          labelText: 'Повторите пароль',
-          obscureText: _obscureConfirmPassword,
-          autoValidateMode: AutovalidateMode.onUserInteraction,
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+          backgroundColor: ColorsConstants.backgroundColor,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(16.w),
+                child: Form(
+                  key: _registrationFormKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Регистрация',
+                        style: TextStyle(
+                          color: ColorsConstants.primaryBrownColor,
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 32.h),
+                      PrimaryTextFormField(
+                        readOnly: false,
+                        labelBehavior: FloatingLabelBehavior.auto,
+                        autoValidateMode: AutovalidateMode.onUserInteraction,
+                        controller: _nameController,
+                        labelText: 'Имя',
+                        keyboardType: TextInputType.name,
+                        prefixIcon: const Icon(Icons.person),
+                        validator: _validateName,
+                      ),
+                      SizedBox(height: 16.h),
+                      PrimaryTextFormField(
+                        readOnly: false,
+                        labelBehavior: FloatingLabelBehavior.auto,
+                        autoValidateMode: AutovalidateMode.onUserInteraction,
+                        controller: _surnameController,
+                        labelText: 'Фамилия',
+                        keyboardType: TextInputType.name,
+                        prefixIcon: const Icon(Icons.person),
+                        validator: _validateSurname,
+                      ),
+                      SizedBox(height: 16.h),
+                      PrimaryTextFormField(
+                        readOnly: false,
+                        labelBehavior: FloatingLabelBehavior.auto,
+                        autoValidateMode: AutovalidateMode.onUserInteraction,
+                        controller: _organizationController,
+                        labelText: 'Организация',
+                        prefixIcon: const Icon(Icons.business),
+                        keyboardType: TextInputType.text,
+                        validator: _validateOrganization,
+                      ),
+                      SizedBox(height: 16.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: RoleButton(
+                              role: 'Заказчик',
+                              label: 'Заказчик',
+                              onPressed: () =>
+                                  setState(() => _selectedRole = 'Заказчик'),
+                              selectedRole: _selectedRole,
+                            ),
+                          ),
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            child: RoleButton(
+                              role: 'Перевозчик',
+                              label: 'Перевозчик',
+                              onPressed: () =>
+                                  setState(() => _selectedRole = 'Перевозчик'),
+                              selectedRole: _selectedRole,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16.h),
+                      StatefulBuilder(
+                        builder: (context, setLocalState) {
+                          return PrimaryTextFormField(
+                            readOnly: false,
+                            autoValidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            controller: _phoneController,
+                            labelText: 'Номер телефона',
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [_phoneMaskFormatter],
+                            prefixIcon: const Icon(Icons.phone),
+                            validator: _validatePhone,
+                            onTap: () => _handlePhoneFieldTap(setLocalState),
+                          );
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+                      StatefulBuilder(
+                        builder: (context, setLocalState) {
+                          return PrimaryTextFormField(
+                            readOnly: false,
+                            labelBehavior: FloatingLabelBehavior.never,
+                            autoValidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            controller: _passwordController,
+                            labelText: 'Пароль',
+                            obscureText: _obscurePassword,
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: () =>
+                                  _togglePasswordVisibility(setLocalState),
+                            ),
+                            validator: _validatePassword,
+                          );
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+                      StatefulBuilder(
+                        builder: (context, setLocalState) {
+                          return PrimaryTextFormField(
+                            readOnly: false,
+                            labelBehavior: FloatingLabelBehavior.never,
+                            controller: _confirmPasswordController,
+                            labelText: 'Повторите пароль',
+                            obscureText: _obscureConfirmPassword,
+                            autoValidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: () => _toggleConfirmPasswordVisibility(
+                                setLocalState,
+                              ),
+                            ),
+                            validator: _validateConfirmPassword,
+                          );
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+                      PrivacyCheckbox(
+                        initialValue: _isPrivacyAccepted,
+                        onChanged: (value) =>
+                            setState(() => _isPrivacyAccepted = value),
+                        errorText: _isPrivacyAccepted
+                            ? null
+                            : 'Необходимо принять политику конфиденциальности',
+                      ),
+                      SizedBox(height: 32.h),
+                      PrimaryButton(
+                        text: 'Зарегистрироваться',
+                        onPressed: state is AuthLoading
+                            ? null
+                            : () => _handleRegistration(context),
+                        isLoading: state is AuthLoading,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            onPressed: () => _toggleConfirmPasswordVisibility(setLocalState),
           ),
-          validator: _validateConfirmPassword,
         );
       },
-    );
-  }
-
-  Widget _buildPrivacyCheckbox() {
-    return PrivacyCheckbox(
-      initialValue: _isPrivacyAccepted,
-      onChanged: (value) => setState(() => _isPrivacyAccepted = value),
-      errorText: _isPrivacyAccepted
-          ? null
-          : 'Необходимо принять политику конфиденциальности',
-    );
-  }
-
-  Widget _buildRegisterButton(BuildContext context, AuthState state) {
-    return PrimaryButton(
-      text: 'Зарегистрироваться',
-      onPressed: state is AuthLoading
-          ? null
-          : () => _handleRegistration(context),
-      isLoading: state is AuthLoading,
     );
   }
 

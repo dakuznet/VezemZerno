@@ -49,163 +49,107 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         } else if (state is PasswordUpdateError) {
           PrimarySnackBar.show(
             context,
-            text: 'Ошибка изменения пароля\n${state.message}',
+            text: 'Произошла ошибка...\nПроверьте соединение с интернетом',
             borderColor: Colors.red,
           );
         }
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: _buildAppBar(state),
-          backgroundColor: ColorsConstants.backgroundColor,
-          body: SafeArea(child: _buildContent(state)),
-        );
-      },
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(ProfileState state) {
-    final isProcessing = state is PasswordUpdating;
-    final hasNoInternet = state is NoInternetConnection;
-
-    return AppBar(
-      backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      centerTitle: true,
-      title: Text(
-        'Изменение пароля',
-        style: TextStyle(
-          fontSize: 20.sp,
-          fontWeight: FontWeight.w500,
-          color: ColorsConstants.primaryBrownColor,
-        ),
-      ),
-      leading: IconButton(
-        onPressed: hasNoInternet || isProcessing
-            ? null
-            : () => AutoRouter.of(context).pop(),
-        icon: const Icon(Icons.arrow_back),
-        color: hasNoInternet
-            ? ColorsConstants.primaryBrownColorWithOpacity
-            : ColorsConstants.primaryBrownColor,
-      ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            strokeWidth: 4.w,
+          appBar: AppBar(
             backgroundColor:
                 ColorsConstants.primaryTextFormFieldBackgorundColor,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-          SizedBox(height: 24.h),
-          Text(
-            'Загрузка...',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 18.sp,
+            centerTitle: true,
+            title: Text(
+              'Изменение пароля',
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w500,
+                color: ColorsConstants.primaryBrownColor,
+              ),
+            ),
+            leading: IconButton(
+              onPressed: () => context.router.pop(),
+              icon: const Icon(Icons.arrow_back),
               color: ColorsConstants.primaryBrownColor,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContent(ProfileState state) {
-    final isLoading = state is PasswordUpdating;
-    final hasNoInternet = state is NoInternetConnection;
-
-    if (hasNoInternet) {
-      return _buildLoadingIndicator();
-    }
-
-    return Padding(
-      padding: EdgeInsets.all(16.w),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildOldPasswordField(isLoading),
-            SizedBox(height: 32.h),
-            _buildNewPasswordFields(isLoading),
-            SizedBox(height: 32.h),
-            _buildSaveButton(isLoading),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOldPasswordField(bool isLoading) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Старый пароль:',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: ColorsConstants.primaryBrownColor,
+          backgroundColor: ColorsConstants.backgroundColor,
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Старый пароль:',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                            color: ColorsConstants.primaryBrownColor,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        PrimaryTextFormField(
+                          controller: _oldPasswordController,
+                          obscureText: true,
+                          labelBehavior: FloatingLabelBehavior.never,
+                          labelText: 'Введите старый пароль',
+                          validator: _validateOldPassword,
+                          readOnly: state is PasswordUpdating,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 32.h),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Новый пароль:',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                            color: ColorsConstants.primaryBrownColor,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        PrimaryTextFormField(
+                          readOnly: state is PasswordUpdating,
+                          controller: _newPasswordController,
+                          obscureText: true,
+                          labelBehavior: FloatingLabelBehavior.never,
+                          labelText: 'Введите новый пароль',
+                          validator: _validateNewPassword,
+                        ),
+                        SizedBox(height: 16.h),
+                        PrimaryTextFormField(
+                          readOnly: state is PasswordUpdating,
+                          controller: _confirmPasswordController,
+                          obscureText: true,
+                          labelBehavior: FloatingLabelBehavior.never,
+                          labelText: 'Подтвердите новый пароль',
+                          validator: _validateConfirmPassword,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 32.h),
+                    PrimaryButton(
+                      text: 'Сохранить',
+                      onPressed: _handleUpdatePassword,
+                      isLoading: state is PasswordUpdating,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-        SizedBox(height: 8.h),
-        PrimaryTextFormField(
-          controller: _oldPasswordController,
-          obscureText: true,
-          labelBehavior: FloatingLabelBehavior.never,
-          labelText: 'Введите старый пароль',
-          validator: _validateOldPassword,
-          readOnly: isLoading,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNewPasswordFields(bool isLoading) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Новый пароль:',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        PrimaryTextFormField(
-          readOnly: isLoading,
-          controller: _newPasswordController,
-          obscureText: true,
-          labelBehavior: FloatingLabelBehavior.never,
-          labelText: 'Введите новый пароль',
-          validator: _validateNewPassword,
-        ),
-        SizedBox(height: 16.h),
-        PrimaryTextFormField(
-          readOnly: isLoading,
-          controller: _confirmPasswordController,
-          obscureText: true,
-          labelBehavior: FloatingLabelBehavior.never,
-          labelText: 'Подтвердите новый пароль',
-          validator: _validateConfirmPassword,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSaveButton(bool isLoading) {
-    return PrimaryButton(
-      text: 'Сохранить',
-      onPressed: isLoading ? null : _handleUpdatePassword,
-      isLoading: isLoading,
+        );
+      },
     );
   }
 

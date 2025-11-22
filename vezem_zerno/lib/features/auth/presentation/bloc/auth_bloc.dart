@@ -2,9 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vezem_zerno/core/error/failures.dart';
-import 'package:vezem_zerno/features/auth/domain/entities/user_entity.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/confirm_password_reset_usecase.dart';
-import 'package:vezem_zerno/features/auth/domain/usecases/force_logout_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/login_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/logout_usecase.dart';
@@ -23,7 +22,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyCodeUseCase verifyCodeUseCase;
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
-  final ForceLogoutUseCase forceLogoutUseCase;
   final RestoreSessionUseCase restoreSessionUseCase;
   final GetCurrentUserUsecase getCurrentUserUseCase;
   final RequestPasswordResetUsecase requestPasswordResetUsecase;
@@ -39,7 +37,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.registerUseCase,
     required this.verifyCodeUseCase,
     required this.loginUseCase,
-    required this.forceLogoutUseCase,
     required this.getCurrentUserUseCase,
     required this.logoutUseCase,
     required this.restoreSessionUseCase,
@@ -54,7 +51,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RestoreSessionEvent>(_onRestoreSession);
     on<AuthLogoutEvent>(_onLogout);
     on<CheckInternetConnection>(_onCheckInternetConnection);
-    on<ForceLogoutEvent>(_onForceLogout);
     on<RequestPasswordResetEvent>(_onRequestPasswordReset);
     on<ConfirmPasswordResetEvent>(_onConfirmPasswordReset);
 
@@ -136,7 +132,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
           userResult.fold(
             (failure) => emit(Unauthenticated()),
-            (userEntity) => emit(SessionRestored(userEntity)),
+            (userEntity) => emit(LoginSuccess(userEntity)),
           );
         },
       );
@@ -172,29 +168,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogout(AuthLogoutEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-
-    final hasConnection = await _checkInternetAccess();
-
-    final result = hasConnection
-        ? await logoutUseCase.call()
-        : await forceLogoutUseCase.call();
+    final result = await logoutUseCase.call();
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
       (_) => emit(Unauthenticated()),
     );
-  }
-
-  Future<void> _onForceLogout(
-    ForceLogoutEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading());
-    try {
-      await forceLogoutUseCase.call();
-      emit(Unauthenticated());
-    } catch (e) {
-      emit(Unauthenticated());
-    }
   }
 
   Future<void> _onRequestPasswordReset(

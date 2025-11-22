@@ -97,117 +97,100 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  if (!_codeSent) _buildPhoneField(),
+                  if (!_codeSent)
+                    PrimaryTextFormField(
+                      readOnly: false,
+                      controller: _phoneController,
+                      labelText: 'Номер телефона',
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [_phoneMaskFormatter],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Введите номер телефона';
+                        }
+                        final digits = value.replaceAll(RegExp(r'[^\d]'), '');
+                        if (digits.length < 11) {
+                          return 'Номер должен содержать 11 цифр';
+                        }
+                        return null;
+                      },
+                    ),
                   if (_codeSent) ...[
-                    _buildCodeField(),
+                    PrimaryTextFormField(
+                      readOnly: false,
+                      controller: _codeController,
+                      labelText: 'Код из SMS',
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Введите код';
+                        }
+                        if (value.length != 6) {
+                          return 'Код должен содержать 6 цифр';
+                        }
+                        return null;
+                      },
+                    ),
                     SizedBox(height: 16.h),
-                    _buildPasswordField(),
+                    PrimaryTextFormField(
+                      readOnly: false,
+                      controller: _passwordController,
+                      labelText: 'Новый пароль',
+                      obscureText: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Введите пароль';
+                        }
+                        if (value.length < 8) {
+                          return 'Пароль должен быть не менее 8 символов';
+                        }
+                        return null;
+                      },
+                    ),
                     SizedBox(height: 16.h),
-                    _buildConfirmPasswordField(),
+                    PrimaryTextFormField(
+                      readOnly: false,
+                      controller: _confirmPasswordController,
+                      labelText: 'Подтвердите пароль',
+                      obscureText: true,
+                      validator: (value) {
+                        if (value != _passwordController.text) {
+                          return 'Пароли не совпадают';
+                        }
+                        return null;
+                      },
+                    ),
                   ],
                   SizedBox(height: 16.h),
-                  _buildActionButton(context, state),
+                  PrimaryButton(
+                    text: _codeSent ? 'Сменить пароль' : 'Отправить код',
+                    isLoading: state is PasswordResetLoading,
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        if (!_codeSent) {
+                          context.read<AuthBloc>().add(
+                            RequestPasswordResetEvent(
+                              phone: _phoneController.text,
+                            ),
+                          );
+                        } else {
+                          context.read<AuthBloc>().add(
+                            ConfirmPasswordResetEvent(
+                              phone: _phoneController.text,
+                              code: _codeController.text,
+                              newPassword: _passwordController.text,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
                 ],
               ),
             );
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildPhoneField() {
-    return PrimaryTextFormField(
-      readOnly: false,
-      controller: _phoneController,
-      labelText: 'Номер телефона',
-      keyboardType: TextInputType.phone,
-      inputFormatters: [_phoneMaskFormatter],
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Введите номер телефона';
-        }
-        final digits = value.replaceAll(RegExp(r'[^\d]'), '');
-        if (digits.length < 11) {
-          return 'Номер должен содержать 11 цифр';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildCodeField() {
-    return PrimaryTextFormField(
-      readOnly: false,
-      controller: _codeController,
-      labelText: 'Код из SMS',
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Введите код';
-        }
-        if (value.length != 6) {
-          return 'Код должен содержать 6 цифр';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return PrimaryTextFormField(
-      readOnly: false,
-      controller: _passwordController,
-      labelText: 'Новый пароль',
-      obscureText: true,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Введите пароль';
-        }
-        if (value.length < 8) {
-          return 'Пароль должен быть не менее 8 символов';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildConfirmPasswordField() {
-    return PrimaryTextFormField(
-      readOnly: false,
-      controller: _confirmPasswordController,
-      labelText: 'Подтвердите пароль',
-      obscureText: true,
-      validator: (value) {
-        if (value != _passwordController.text) {
-          return 'Пароли не совпадают';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildActionButton(BuildContext context, AuthState state) {
-    return PrimaryButton(
-      text: _codeSent ? 'Сменить пароль' : 'Отправить код',
-      isLoading: state is PasswordResetLoading,
-      onPressed: () {
-        if (_formKey.currentState?.validate() ?? false) {
-          if (!_codeSent) {
-            context.read<AuthBloc>().add(
-              RequestPasswordResetEvent(phone: _phoneController.text),
-            );
-          } else {
-            context.read<AuthBloc>().add(
-              ConfirmPasswordResetEvent(
-                phone: _phoneController.text,
-                code: _codeController.text,
-                newPassword: _passwordController.text,
-              ),
-            );
-          }
-        }
-      },
     );
   }
 }

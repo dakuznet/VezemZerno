@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/widgets/primary_loading_indicator.dart';
 import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/routes/router.dart';
@@ -75,43 +76,48 @@ class _SplashScreenState extends State<SplashScreen>
       body: BlocListener<AuthBloc, AuthState>(
         listener: _handleAuthStateChange,
         child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) => _buildBody(state),
+          builder: (context, state) {
+            if (!_isMinimumLoadingTimePassed) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const PrimaryLoadingIndicator(),
+                    SizedBox(height: 24.h),
+                    Text(
+                      'Загрузка...',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18.sp,
+                        color: ColorsConstants.primaryBrownColor,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            if (state is AuthFailure && !_hasNavigated) {}
+
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const PrimaryLoadingIndicator(),
+                  SizedBox(height: 24.h),
+                  Text(
+                    'Загрузка...',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18.sp,
+                      color: ColorsConstants.primaryBrownColor,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-      ),
-    );
-  }
-
-  Widget _buildBody(AuthState state) {
-    if (!_isMinimumLoadingTimePassed) {
-      return _buildLoadingIndicator();
-    }
-
-    if (state is AuthFailure && !_hasNavigated) {}
-
-    return _buildLoadingIndicator();
-  }
-
-  Widget _buildLoadingIndicator() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            strokeWidth: 4.w,
-            backgroundColor:
-                ColorsConstants.primaryTextFormFieldBackgorundColor,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-          SizedBox(height: 24.h),
-          Text(
-            'Загрузка...',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 18.sp,
-              color: ColorsConstants.primaryBrownColor,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -168,7 +174,7 @@ class _SplashScreenState extends State<SplashScreen>
       );
     }
 
-    if (state is SessionRestored || state is LoginSuccess) {
+    if (state is LoginSuccess || state is SessionRestored) {
       _hasNavigated = true;
       _retryTimer?.cancel();
       _minimumLoadingTimer?.cancel();
@@ -177,11 +183,7 @@ class _SplashScreenState extends State<SplashScreen>
       _hasNavigated = true;
       _retryTimer?.cancel();
       _minimumLoadingTimer?.cancel();
-      if (state is AuthFailure) {
-        setState(() {});
-      } else {
-        AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
-      }
+      AutoRouter.of(context).replaceAll([const WelcomeRoute()]);
     }
   }
 }

@@ -48,133 +48,97 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorsConstants.backgroundColor,
-      appBar: _buildAppBar(context),
+      appBar: AppBar(
+        backgroundColor: ColorsConstants.backgroundColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: ColorsConstants.primaryBrownColor,
+          iconSize: 24.r,
+          onPressed: () => context.router.pop(),
+        ),
+      ),
       body: SafeArea(
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: _handleAuthStateChanges,
-          builder: (context, state) => _buildContent(context, state),
+          builder: (context, state) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.all(24.r),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          'Мы отправили SMS с кодом подтверждения на номер:',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.sp,
+                            color: ColorsConstants.primaryBrownColor,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          widget.phone,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16.sp,
+                            color: ColorsConstants.primaryBrownColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 32.h),
+                    PinCodeTextField(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      appContext: context,
+                      length: _codeLength,
+                      obscureText: false,
+                      animationType: AnimationType.fade,
+                      keyboardType: TextInputType.number,
+                      cursorColor: ColorsConstants.primaryBrownColor,
+                      pinTheme: PinTheme(
+                        shape: PinCodeFieldShape.box,
+                        borderRadius: BorderRadius.circular(8.r),
+                        fieldHeight: 50.h,
+                        fieldWidth: 40.w,
+                        selectedFillColor:
+                            ColorsConstants.primaryTextFormFieldBackgorundColor,
+                        selectedColor:
+                            ColorsConstants.primaryTextFormFieldBackgorundColor,
+                        inactiveFillColor:
+                            ColorsConstants.primaryTextFormFieldBackgorundColor,
+                        inactiveColor:
+                            ColorsConstants.primaryTextFormFieldBackgorundColor,
+                        activeFillColor:
+                            ColorsConstants.primaryTextFormFieldBackgorundColor,
+                        activeColor: ColorsConstants.primaryBrownColor,
+                      ),
+                      animationDuration: const Duration(milliseconds: 300),
+                      enableActiveFill: true,
+                      controller: _codeController,
+                      validator: (value) => _validateCode(value),
+                      onChanged: (value) => _handleCodeChange(value, state),
+                      onCompleted: (value) =>
+                          _handleCodeCompletion(value, context),
+                    ),
+                    SizedBox(height: 24.h),
+                    PrimaryButton(
+                      text: 'Подтвердить',
+                      onPressed: () => state is AuthLoading
+                          ? null
+                          : _handleVerification(context),
+                      isLoading: state is AuthLoading,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: ColorsConstants.backgroundColor,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        color: ColorsConstants.primaryBrownColor,
-        iconSize: 24.r,
-        onPressed: () => AutoRouter.of(context).back(),
-      ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, AuthState state) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(24.r),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            _buildHeaderText(),
-            SizedBox(height: 32.h),
-            _buildPinCodeField(state),
-            SizedBox(height: 24.h),
-            _buildConfirmButton(state),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderText() {
-    return Column(
-      children: [
-        Text(
-          'Мы отправили SMS с кодом подтверждения на номер:',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 16.sp,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        Text(
-          widget.phone,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontWeight: FontWeight.w600,
-            fontSize: 16.sp,
-            color: ColorsConstants.primaryBrownColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPinCodeField(AuthState state) {
-    return Column(
-      children: [
-        PinCodeTextField(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          appContext: context,
-          length: _codeLength,
-          obscureText: false,
-          animationType: AnimationType.fade,
-          keyboardType: TextInputType.number,
-          cursorColor: ColorsConstants.primaryBrownColor,
-          pinTheme: _buildPinTheme(),
-          animationDuration: const Duration(milliseconds: 300),
-          enableActiveFill: true,
-          controller: _codeController,
-          validator: (value) => _validateCode(value),
-          onChanged: (value) => _handleCodeChange(value, state),
-          onCompleted: (value) => _handleCodeCompletion(value, context),
-        ),
-        if (state is AuthFailure && _codeController.text.isNotEmpty)
-          _buildErrorText(state),
-      ],
-    );
-  }
-
-  PinTheme _buildPinTheme() {
-    return PinTheme(
-      shape: PinCodeFieldShape.box,
-      borderRadius: BorderRadius.circular(8.r),
-      fieldHeight: 50.h,
-      fieldWidth: 40.w,
-      selectedFillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      selectedColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      inactiveFillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      inactiveColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      activeFillColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      activeColor: ColorsConstants.primaryBrownColor,
-    );
-  }
-
-  Widget _buildErrorText(AuthFailure state) {
-    return Padding(
-      padding: EdgeInsets.only(top: 16.h),
-      child: Text(
-        state.message,
-        style: TextStyle(
-          color: Colors.red,
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConfirmButton(AuthState state) {
-    return PrimaryButton(
-      text: 'Подтвердить',
-      onPressed: () =>
-          state is AuthLoading ? null : _handleVerification(context),
-      isLoading: state is AuthLoading,
     );
   }
 
@@ -182,7 +146,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
     if (state is AuthFailure) {
       PrimarySnackBar.show(
         context,
-        text: 'Ошибка регистрации\n${state.message}',
+        text: 'Ошибка регистрации',
         borderColor: Colors.red,
       );
     } else if (state is NoInternetConnection) {

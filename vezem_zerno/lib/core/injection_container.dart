@@ -8,13 +8,13 @@ import 'package:vezem_zerno/features/applications/data/repositories/applications
 import 'package:vezem_zerno/features/applications/domain/repositories/applications_list_repository.dart';
 import 'package:vezem_zerno/features/applications/domain/usecases/get_applications_by_status_usecase.dart';
 import 'package:vezem_zerno/features/applications/domain/usecases/get_user_responses_usecase.dart';
+import 'package:vezem_zerno/features/applications/domain/usecases/respond_to_application_usecase.dart';
 import 'package:vezem_zerno/features/applications/presentations/bloc/applications_bloc.dart';
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:vezem_zerno/features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import 'package:vezem_zerno/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:vezem_zerno/features/auth/domain/repositories/auth_repository.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/confirm_password_reset_usecase.dart';
-import 'package:vezem_zerno/features/auth/domain/usecases/force_logout_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/login_usecase.dart';
 import 'package:vezem_zerno/features/auth/domain/usecases/logout_usecase.dart';
@@ -37,8 +37,13 @@ import 'package:vezem_zerno/features/user_applications/data/datasources/user_app
 import 'package:vezem_zerno/features/user_applications/data/datasources/user_applications_remote_data_source_impl.dart';
 import 'package:vezem_zerno/features/user_applications/data/repositories/user_applications_repository_impl.dart';
 import 'package:vezem_zerno/features/user_applications/domain/repositories/user_applications_repository.dart';
+import 'package:vezem_zerno/features/user_applications/domain/usecases/accept_response_usecase.dart';
 import 'package:vezem_zerno/features/user_applications/domain/usecases/create_application_usecase.dart';
+import 'package:vezem_zerno/features/user_applications/domain/usecases/get_application_respones_usecase.dart';
+import 'package:vezem_zerno/features/user_applications/domain/usecases/get_info_about_carrier_usecase.dart';
 import 'package:vezem_zerno/features/user_applications/domain/usecases/get_user_applications_usecase.dart';
+import 'package:vezem_zerno/features/user_applications/domain/usecases/mark_application_completed_usecase.dart';
+import 'package:vezem_zerno/features/user_applications/domain/usecases/mark_application_delivered_usecase.dart';
 import 'package:vezem_zerno/features/user_applications/presentations/bloc/user_applications_bloc.dart';
 
 final getIt = GetIt.instance;
@@ -85,7 +90,6 @@ void init() {
   getIt.registerLazySingleton(() => LogoutUseCase(getIt()));
   getIt.registerLazySingleton(() => RestoreSessionUseCase(getIt()));
   getIt.registerLazySingleton(() => GetCurrentUserUsecase(getIt()));
-  getIt.registerLazySingleton(() => ForceLogoutUseCase(getIt()));
   getIt.registerLazySingleton(() => RequestPasswordResetUsecase(getIt()));
   getIt.registerLazySingleton(() => ConfirmPasswordResetUsecase(getIt()));
 
@@ -99,12 +103,18 @@ void init() {
   // Applications
   getIt.registerLazySingleton(() => GetApplicationsByStatusUsecase(getIt()));
   getIt.registerLazySingleton(() => GetUserResponsesUsecase(getIt()));
+  getIt.registerLazySingleton(() => RespondToApplicationUsecase(getIt()));
 
   // User applications
   getIt.registerLazySingleton(
     () => GetUserApplicationsByStatusUsecase(getIt()),
   );
   getIt.registerLazySingleton(() => CreateUserApplicationUsecase(getIt()));
+  getIt.registerLazySingleton(() => GetApplicationResponesUsecase(getIt()));
+  getIt.registerLazySingleton(() => AcceptResponseUsecase(getIt()));
+  getIt.registerLazySingleton(() => MarkApplicationCompletedUsecase(getIt()));
+  getIt.registerLazySingleton(() => MarkApplicationDeliveredUsecase(getIt()));
+  getIt.registerLazySingleton(() => GetInfoAboutCarrierUsecase(getIt()));
 
   // ===== BLOC =====
   getIt.registerLazySingleton(
@@ -113,7 +123,6 @@ void init() {
       verifyCodeUseCase: getIt(),
       loginUseCase: getIt(),
       logoutUseCase: getIt(),
-      forceLogoutUseCase: getIt(),
       getCurrentUserUseCase: getIt(),
       restoreSessionUseCase: getIt(),
       requestPasswordResetUsecase: getIt(),
@@ -130,8 +139,6 @@ void init() {
       changePasswordUseCase: getIt(),
       deleteAccountUseCase: getIt(),
       uploadImageUseCase: getIt(),
-      connectionChecker: getIt(),
-      connectivity: getIt(),
     ),
   );
 
@@ -139,13 +146,19 @@ void init() {
     () => ApplicationsBloc(
       getApplicationsByStatusUsecase: getIt(),
       getUserResponsesUsecase: getIt(),
+      respondToApplicationUsecase: getIt(),
     ),
   );
 
   getIt.registerFactory(
     () => UserApplicationsBloc(
+      markApplicationCompletedUsecase: getIt(),
       getUserApplicationsByStatusUsecase: getIt(),
       createUserApplicationUsecase: getIt(),
+      getApplicationResponesUsecase: getIt(),
+      acceptResponseUsecase: getIt(),
+      getInfoAboutCarrierUsecase: getIt(),
+      markApplicationDeliveredUsecase: getIt(),
     ),
   );
 }

@@ -11,6 +11,60 @@
 part of 'router.dart';
 
 /// generated route for
+/// [ApplicationResponsesScreen]
+class ApplicationResponsesRoute
+    extends PageRouteInfo<ApplicationResponsesRouteArgs> {
+  ApplicationResponsesRoute({
+    Key? key,
+    required String applicationId,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ApplicationResponsesRoute.name,
+         args: ApplicationResponsesRouteArgs(
+           key: key,
+           applicationId: applicationId,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'ApplicationResponsesRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ApplicationResponsesRouteArgs>();
+      return ApplicationResponsesScreen(
+        key: args.key,
+        applicationId: args.applicationId,
+      );
+    },
+  );
+}
+
+class ApplicationResponsesRouteArgs {
+  const ApplicationResponsesRouteArgs({this.key, required this.applicationId});
+
+  final Key? key;
+
+  final String applicationId;
+
+  @override
+  String toString() {
+    return 'ApplicationResponsesRouteArgs{key: $key, applicationId: $applicationId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ApplicationResponsesRouteArgs) return false;
+    return key == other.key && applicationId == other.applicationId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ applicationId.hashCode;
+}
+
+/// generated route for
 /// [ApplicationsListScreen]
 class ApplicationsListRoute extends PageRouteInfo<void> {
   const ApplicationsListRoute({List<PageRouteInfo>? children})
@@ -64,7 +118,7 @@ class FilterRoute extends PageRouteInfo<FilterRouteArgs> {
   FilterRoute({
     Key? key,
     required ApplicationFilter initialFilter,
-    List<PageRouteInfo>? children, required Null Function(ApplicationFilter p1) onFilterApplied,
+    List<PageRouteInfo>? children,
   }) : super(
          FilterRoute.name,
          args: FilterRouteArgs(key: key, initialFilter: initialFilter),
@@ -106,12 +160,69 @@ class FilterRouteArgs {
 }
 
 /// generated route for
+/// [InfoAboutApplicationMyResponsesScreen]
+class InfoAboutApplicationMyResponsesRoute
+    extends PageRouteInfo<InfoAboutApplicationMyResponsesRouteArgs> {
+  InfoAboutApplicationMyResponsesRoute({
+    Key? key,
+    required ApplicationEntity application,
+    List<PageRouteInfo>? children,
+  }) : super(
+         InfoAboutApplicationMyResponsesRoute.name,
+         args: InfoAboutApplicationMyResponsesRouteArgs(
+           key: key,
+           application: application,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'InfoAboutApplicationMyResponsesRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<InfoAboutApplicationMyResponsesRouteArgs>();
+      return InfoAboutApplicationMyResponsesScreen(
+        key: args.key,
+        application: args.application,
+      );
+    },
+  );
+}
+
+class InfoAboutApplicationMyResponsesRouteArgs {
+  const InfoAboutApplicationMyResponsesRouteArgs({
+    this.key,
+    required this.application,
+  });
+
+  final Key? key;
+
+  final ApplicationEntity application;
+
+  @override
+  String toString() {
+    return 'InfoAboutApplicationMyResponsesRouteArgs{key: $key, application: $application}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! InfoAboutApplicationMyResponsesRouteArgs) return false;
+    return key == other.key && application == other.application;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ application.hashCode;
+}
+
+/// generated route for
 /// [InfoAboutApplicationScreen]
 class InfoAboutApplicationRoute
     extends PageRouteInfo<InfoAboutApplicationRouteArgs> {
   InfoAboutApplicationRoute({
     Key? key,
-    required ApplicationModel application,
+    required ApplicationEntity application,
     List<PageRouteInfo>? children,
   }) : super(
          InfoAboutApplicationRoute.name,
@@ -141,7 +252,7 @@ class InfoAboutApplicationRouteArgs {
 
   final Key? key;
 
-  final ApplicationModel application;
+  final ApplicationEntity application;
 
   @override
   String toString() {
@@ -418,6 +529,57 @@ class SplashRoute extends PageRouteInfo<void> {
       return const SplashScreen();
     },
   );
+}
+
+/// generated route for
+/// [UserApplicationInfoScreen]
+class UserApplicationInfoRoute
+    extends PageRouteInfo<UserApplicationInfoRouteArgs> {
+  UserApplicationInfoRoute({
+    Key? key,
+    required ApplicationEntity application,
+    List<PageRouteInfo>? children,
+  }) : super(
+         UserApplicationInfoRoute.name,
+         args: UserApplicationInfoRouteArgs(key: key, application: application),
+         initialChildren: children,
+       );
+
+  static const String name = 'UserApplicationInfoRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<UserApplicationInfoRouteArgs>();
+      return UserApplicationInfoScreen(
+        key: args.key,
+        application: args.application,
+      );
+    },
+  );
+}
+
+class UserApplicationInfoRouteArgs {
+  const UserApplicationInfoRouteArgs({this.key, required this.application});
+
+  final Key? key;
+
+  final ApplicationEntity application;
+
+  @override
+  String toString() {
+    return 'UserApplicationInfoRouteArgs{key: $key, application: $application}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! UserApplicationInfoRouteArgs) return false;
+    return key == other.key && application == other.application;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ application.hashCode;
 }
 
 /// generated route for

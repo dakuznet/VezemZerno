@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/widgets/primary_loading_indicator.dart';
 import 'package:vezem_zerno/features/applications/presentations/bloc/applications_bloc.dart';
 import 'package:vezem_zerno/features/applications/presentations/screens/widgets/application_card_widget.dart';
+import 'package:vezem_zerno/features/applications/presentations/screens/widgets/tab_bar_sliver_delegate.dart';
+import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/filter/data/models/application_filter_model.dart';
-import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
 import 'package:vezem_zerno/routes/router.dart';
 
 @RoutePage()
@@ -22,524 +24,429 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
   static const _tabCount = 2;
 
   late final TabController _tabController;
-  List<ApplicationModel> _responses = [];
-  late List<ApplicationModel> _filteredResponses = [];
-  List<ApplicationModel> _applications = [];
-  late List<ApplicationModel> _filteredApplications = [];
-  late ApplicationFilter _currentFilter = ApplicationFilter();
+  ApplicationFilter _currentFilter = ApplicationFilter();
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _tabController = TabController(length: _tabCount, vsync: this);
+    _tabController.addListener(_handleTabChange);
+    _loadActiveApplications();
+  }
+
+  void _loadActiveApplications() {
     context.read<ApplicationsBloc>().add(
-      LoadApplicationsEvent(applicationStatus: 'active'),
+      LoadApplicationsEvent(
+        applicationStatus: 'active',
+        filter: _currentFilter,
+      ),
     );
-    context.read<ApplicationsBloc>().add(LoadResponsesEvent());
+  }
+
+  void _loadResponses() {
+    final authState = context.read<AuthBloc>().state;
+    final userId = authState is LoginSuccess ? authState.user.id : null;
+    context.read<ApplicationsBloc>().add(LoadResponsesEvent(userId: userId!));
+  }
+
+  void _handleTabChange() {
+    if (!_tabController.indexIsChanging) {
+      switch (_tabController.index) {
+        case 0:
+          _loadActiveApplications();
+          break;
+        case 1:
+          _loadResponses();
+          break;
+      }
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _tabController.removeListener(_handleTabChange);
     super.dispose();
   }
 
   void _applyFilter(ApplicationFilter filter) {
     setState(() {
       _currentFilter = filter;
-      _filteredApplications = _filterApplications(_applications, filter);
     });
-  }
-
-  List<ApplicationModel> _filterApplications(
-    List<ApplicationModel> applications,
-    ApplicationFilter filter,
-  ) {
-    return applications.where((app) {
-      if (filter.loadingRegion != null &&
-          filter.loadingRegion!.isNotEmpty &&
-          !app.loadingPlace.toLowerCase().contains(
-            filter.loadingRegion!.toLowerCase(),
-          )) {
-        return false;
-      }
-
-      if (filter.loadingDistrict != null &&
-          filter.loadingDistrict!.isNotEmpty &&
-          !app.loadingPlace.toLowerCase().contains(
-            filter.loadingDistrict!.toLowerCase(),
-          )) {
-        return false;
-      }
-
-      if (filter.unloadingRegion != null &&
-          filter.unloadingRegion!.isNotEmpty &&
-          !app.unloadingPlace.toLowerCase().contains(
-            filter.unloadingRegion!.toLowerCase(),
-          )) {
-        return false;
-      }
-
-      if (filter.unloadingDistrict != null &&
-          filter.unloadingDistrict!.isNotEmpty &&
-          !app.unloadingPlace.toLowerCase().contains(
-            filter.unloadingDistrict!.toLowerCase(),
-          )) {
-        return false;
-      }
-
-      if (filter.crop != null &&
-          filter.crop!.isNotEmpty &&
-          !app.crop.toLowerCase().contains(filter.crop!.toLowerCase())) {
-        return false;
-      }
-
-      final appPrice = double.tryParse(app.price.replaceAll(',', '.'));
-      if (filter.minPrice != null && appPrice != null) {
-        if (appPrice < filter.minPrice!) return false;
-      }
-      if (filter.maxPrice != null && appPrice != null) {
-        if (appPrice > filter.maxPrice!) return false;
-      }
-
-      final appDistance = double.tryParse(app.distance.replaceAll(',', '.'));
-      if (filter.minDistance != null && appDistance != null) {
-        if (appDistance < filter.minDistance!) return false;
-      }
-      if (filter.maxDistance != null && appDistance != null) {
-        if (appDistance > filter.maxDistance!) return false;
-      }
-
-      if (app.createdAt != null) {
-        final now = DateTime.now();
-        final difference = now.difference(app.createdAt!).inDays;
-
-        switch (filter.dateFilter) {
-          case DateFilter.last3Days:
-            if (difference > 3) return false;
-            break;
-          case DateFilter.last5Days:
-            if (difference > 5) return false;
-            break;
-          case DateFilter.last7Days:
-            if (difference > 7) return false;
-            break;
-          case DateFilter.any:
-            break;
-        }
-      }
-
-      if (filter.suitableForDumpTrucks && !app.dumpTrucks) {
-        return false;
-      }
-
-      if (filter.charterCarrier && !app.charter) {
-        return false;
-      }
-
-      return true;
-    }).toList();
-  }
-
-  Future<void> _openFilterScreen() async {
-    final result = await context.pushRoute<ApplicationFilter?>(
-      FilterRoute(
-        initialFilter: _currentFilter,
-        onFilterApplied: (ApplicationFilter p1) {},
-      ),
+    context.read<ApplicationsBloc>().add(
+      LoadApplicationsEvent(applicationStatus: 'active', filter: filter),
     );
+  }
 
-    if (result != null) {
+  void _openFilterScreen() async {
+    final result = await AutoRouter.of(
+      context,
+    ).push(FilterRoute(initialFilter: _currentFilter));
+
+    if (result is ApplicationFilter) {
       _applyFilter(result);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final displayApplications = _currentFilter.hasActiveFilters
-        ? _filteredApplications
-        : _applications;
-
-    final displayResponses = _currentFilter.hasActiveFilters
-        ? _filteredResponses
-        : _responses;
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: ColorsConstants.backgroundColor,
-      body: BlocConsumer<ApplicationsBloc, ApplicationsState>(
-        listener: (context, state) {
-          if (state is ApplicationsLoaded) {
-            setState(() {
-              _applications = state.applications;
-              if (_currentFilter.hasActiveFilters) {
-                _filteredApplications = _filterApplications(
-                  _applications,
-                  _currentFilter,
-                );
-              }
-            });
-          } else if (state is ResponsesLoaded) {
-            setState(() {
-              _responses = state.applications;
-              if (_currentFilter.hasActiveFilters) {
-                _filteredResponses = _filterApplications(
-                  _applications,
-                  _currentFilter,
-                );
-              }
-            });
-          }
-        },
-        builder: (context, state) {
-          return _buildNestedScrollView(
-            state,
-            displayApplications,
-            displayResponses,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildNestedScrollView(
-    ApplicationsState state,
-    List<ApplicationModel> displayApplications,
-    List<ApplicationModel> displayResponses,
-  ) {
-    return NestedScrollView(
-      headerSliverBuilder: (context, innerBoxIsScrolled) => [
-        _buildSliverAppBar(),
-        _buildSliverTabBar(),
-      ],
-      body: _buildTabBarView(state, displayApplications, displayResponses),
-    );
-  }
-
-  SliverAppBar _buildSliverAppBar() {
-    return SliverAppBar(
-      backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      title: Text(
-        'Заявки',
-        style: TextStyle(
-          fontSize: 20.sp,
-          color: ColorsConstants.primaryBrownColor,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      centerTitle: true,
-      pinned: true,
-      floating: true,
-      snap: true,
-      actions: [
-        Stack(
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.filter_list_alt,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          SliverAppBar(
+            backgroundColor:
+                ColorsConstants.primaryTextFormFieldBackgorundColor,
+            title: Text(
+              'Заявки',
+              style: TextStyle(
+                fontSize: 20.sp,
                 color: ColorsConstants.primaryBrownColor,
-                size: 24.0.sp,
+                fontWeight: FontWeight.w500,
               ),
-              onPressed: _openFilterScreen,
             ),
-            if (_currentFilter.hasActiveFilters)
-              Positioned(
-                right: 8.w,
-                top: 8.h,
-                child: Container(
-                  padding: EdgeInsets.all(2.w),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(6.w),
+            centerTitle: true,
+            pinned: true,
+            floating: true,
+            snap: true,
+            actions: [
+              Stack(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.filter_list_alt,
+                      color: ColorsConstants.primaryBrownColor,
+                      size: 24.0.sp,
+                    ),
+                    onPressed: _openFilterScreen,
                   ),
-                  constraints: BoxConstraints(minWidth: 8.w, minHeight: 8.h),
-                ),
+                  if (_currentFilter.hasActiveFilters)
+                    Positioned(
+                      right: 8.w,
+                      top: 8.h,
+                      child: Container(
+                        padding: EdgeInsets.all(2.w),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(6.w),
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 8.w,
+                          minHeight: 8.h,
+                        ),
+                      ),
+                    ),
+                ],
               ),
+            ],
+            surfaceTintColor:
+                ColorsConstants.primaryTextFormFieldBackgorundColor,
+          ),
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: TabBarSliverDelegate(
+              tabController: _tabController,
+              onTabChanged: _handleTabChange,
+              height:
+                  (50 * MediaQuery.of(context).devicePixelRatio).round() /
+                  MediaQuery.of(context).devicePixelRatio,
+            ),
+          ),
+        ],
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            BlocBuilder<ApplicationsBloc, ApplicationsState>(
+              builder: (context, state) {
+                return RefreshIndicator(
+                  color: ColorsConstants.primaryBrownColor,
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  onRefresh: () async => _loadActiveApplications(),
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      if (state is ApplicationsLoading)
+                        SliverFillRemaining(
+                          child: const PrimaryLoadingIndicator(),
+                        )
+                      else if (state is ApplicationsLoadingFailure)
+                        SliverFillRemaining(
+                          child: Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.w),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 80.w,
+                                    height: 80.h,
+                                    decoration: BoxDecoration(
+                                      color: ColorsConstants
+                                          .primaryTextFormFieldBackgorundColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.error_outline,
+                                      size: 40.sp,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  Text(
+                                    'Не удалось загрузить заявки',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  TextButton(
+                                    onPressed: () => _loadActiveApplications(),
+                                    child: Text(
+                                      'Повторить',
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        color:
+                                            ColorsConstants.primaryBrownColor,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (state is ApplicationsLoadingSuccess) ...[
+                        if (state.applications.isEmpty)
+                          SliverFillRemaining(
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.w),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 80.w,
+                                      height: 80.h,
+                                      decoration: BoxDecoration(
+                                        color: ColorsConstants
+                                            .primaryTextFormFieldBackgorundColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.list_alt_outlined,
+                                        size: 40.sp,
+                                        color: ColorsConstants
+                                            .primaryBrownColorWithOpacity,
+                                      ),
+                                    ),
+                                    SizedBox(height: 16.h),
+                                    Text(
+                                      _currentFilter.hasActiveFilters
+                                          ? 'По вашему запросу ничего не найдено'
+                                          : 'Список доступных заявок пуст',
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        color: ColorsConstants
+                                            .primaryBrownColorWithOpacity,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    if (_currentFilter.hasActiveFilters)
+                                      TextButton(
+                                        onPressed: _openFilterScreen,
+                                        child: Text(
+                                          'Изменить фильтры',
+                                          style: TextStyle(
+                                            color: ColorsConstants
+                                                .primaryBrownColor,
+                                            fontSize: 16.sp,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          SliverList.builder(
+                            itemBuilder: (context, index) {
+                              if (index >= state.applications.length - 5 &&
+                                  !state.hasReachedMax &&
+                                  state is! ApplicationsLoadingMore) {
+                                context.read<ApplicationsBloc>().add(
+                                  LoadMoreApplicationsEvent(
+                                    applicationStatus: 'active',
+                                    filter: _currentFilter,
+                                  ),
+                                );
+                              }
+
+                              return ApplicationCard(
+                                application: state.applications[index],
+                                onTap: () => context.router.push(
+                                  InfoAboutApplicationRoute(
+                                    application: state.applications[index],
+                                  ),
+                                ),
+                              );
+                            },
+                            itemCount:
+                                state.applications.length +
+                                (state is ApplicationsLoadingMore ? 1 : 0),
+                          ),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            ),
+            BlocBuilder<ApplicationsBloc, ApplicationsState>(
+              builder: (context, state) {
+                return RefreshIndicator(
+                  color: ColorsConstants.primaryBrownColor,
+                  backgroundColor:
+                      ColorsConstants.primaryTextFormFieldBackgorundColor,
+                  onRefresh: () async => _loadResponses(),
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      if (state is ResponsesLoading)
+                        SliverFillRemaining(
+                          child: const PrimaryLoadingIndicator(),
+                        )
+                      else if (state is ResponsesLoadingFailure)
+                        SliverFillRemaining(
+                          child: Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.w),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 80.w,
+                                    height: 80.h,
+                                    decoration: BoxDecoration(
+                                      color: ColorsConstants
+                                          .primaryTextFormFieldBackgorundColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.error_outline,
+                                      size: 40.sp,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  Text(
+                                    'Не удалось загрузить заявки',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  TextButton(
+                                    onPressed: () => _loadResponses(),
+                                    child: Text(
+                                      'Повторить',
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        color:
+                                            ColorsConstants.primaryBrownColor,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (state is ResponsesLoadingSuccess) ...[
+                        if (state.applications.isEmpty)
+                          SliverFillRemaining(
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.w),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 80.w,
+                                      height: 80.h,
+                                      decoration: BoxDecoration(
+                                        color: ColorsConstants
+                                            .primaryTextFormFieldBackgorundColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.list_alt_outlined,
+                                        size: 40.sp,
+                                        color: ColorsConstants
+                                            .primaryBrownColorWithOpacity,
+                                      ),
+                                    ),
+                                    SizedBox(height: 16.h),
+                                    Text(
+                                      _currentFilter.hasActiveFilters
+                                          ? 'По вашему запросу ничего не найдено'
+                                          : 'Список заявок с Вашим откликом пуст',
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        color: ColorsConstants
+                                            .primaryBrownColorWithOpacity,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    if (_currentFilter.hasActiveFilters)
+                                      TextButton(
+                                        onPressed: _openFilterScreen,
+                                        child: Text(
+                                          'Изменить фильтры',
+                                          style: TextStyle(
+                                            color: ColorsConstants
+                                                .primaryBrownColor,
+                                            fontSize: 16.sp,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          SliverList.builder(
+                            itemBuilder: (context, index) => ApplicationCard(
+                              application: state.applications[index],
+                              onTap: () => context.router.push(
+                                InfoAboutApplicationMyResponsesRoute(
+                                  application: state.applications[index],
+                                ),
+                              ),
+                            ),
+                            itemCount: state.applications.length,
+                          ),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
-      ],
-      surfaceTintColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-    );
-  }
-
-  SliverPersistentHeader _buildSliverTabBar() {
-    return SliverPersistentHeader(
-      pinned: true,
-      delegate: _TabBarSliverDelegate(
-        tabController: _tabController,
-        height: _calculateTabBarHeight(context),
       ),
     );
-  }
-
-  double _calculateTabBarHeight(BuildContext context) {
-    final rawHeight = 48.h;
-    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-    return (rawHeight * devicePixelRatio).round() / devicePixelRatio;
-  }
-
-  Widget _buildTabBarView(
-    ApplicationsState state,
-    List<ApplicationModel> displayApplications,
-    List<ApplicationModel> displayResponses,
-  ) {
-    return TabBarView(
-      controller: _tabController,
-      children: [
-        _buildAllApplicationsTab(state, displayApplications),
-        _buildMyResponsesTab(state, displayResponses),
-      ],
-    );
-  }
-
-  Widget _buildAllApplicationsTab(
-    ApplicationsState state,
-    List<ApplicationModel> displayApplications,
-  ) {
-    return RefreshIndicator(
-      color: ColorsConstants.primaryBrownColor,
-      backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      onRefresh: () async => context.read<ApplicationsBloc>().add(
-        LoadApplicationsEvent(applicationStatus: 'active'),
-      ),
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          if (state is ApplicationsLoading)
-            SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 4.w,
-                  backgroundColor:
-                      ColorsConstants.primaryTextFormFieldBackgorundColor,
-                  color: ColorsConstants.primaryBrownColor,
-                ),
-              ),
-            )
-          else if (state is ApplicationsLoadingFailure)
-            SliverFillRemaining(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 4.w,
-                    backgroundColor:
-                        ColorsConstants.primaryTextFormFieldBackgorundColor,
-                    color: ColorsConstants.primaryBrownColor,
-                  ),
-                ),
-              ),
-            )
-          else if (displayApplications.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 80.w,
-                        height: 80.h,
-                        decoration: BoxDecoration(
-                          color: ColorsConstants
-                              .primaryTextFormFieldBackgorundColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.list_alt_outlined,
-                          size: 40.sp,
-                          color: ColorsConstants.primaryBrownColorWithOpacity,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        _currentFilter.hasActiveFilters
-                            ? 'По вашему запросу ничего не найдено'
-                            : 'Список доступных заявок пуст',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: ColorsConstants.primaryBrownColorWithOpacity,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (_currentFilter.hasActiveFilters)
-                        TextButton(
-                          onPressed: _openFilterScreen,
-                          child: Text(
-                            'Изменить фильтры',
-                            style: TextStyle(
-                              color: ColorsConstants.primaryBrownColor,
-                              fontSize: 16.sp,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) =>
-                    ApplicationCard(application: displayApplications[index]),
-                childCount: displayApplications.length,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMyResponsesTab(
-    ApplicationsState state,
-    List<ApplicationModel> displayApplications,
-  ) {
-    return RefreshIndicator(
-      color: ColorsConstants.primaryBrownColor,
-      backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      onRefresh: () async =>
-          context.read<ApplicationsBloc>().add(LoadResponsesEvent()),
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          if (state is ApplicationsLoading)
-            SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 4.w,
-                  backgroundColor:
-                      ColorsConstants.primaryTextFormFieldBackgorundColor,
-                  color: ColorsConstants.primaryBrownColor,
-                ),
-              ),
-            )
-          else if (state is ApplicationsLoadingFailure)
-            SliverFillRemaining(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 4.w,
-                    backgroundColor:
-                        ColorsConstants.primaryTextFormFieldBackgorundColor,
-                    color: ColorsConstants.primaryBrownColor,
-                  ),
-                ),
-              ),
-            )
-          else if (displayApplications.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 80.w,
-                        height: 80.h,
-                        decoration: BoxDecoration(
-                          color: ColorsConstants
-                              .primaryTextFormFieldBackgorundColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.list_alt_outlined,
-                          size: 40.sp,
-                          color: ColorsConstants.primaryBrownColorWithOpacity,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        _currentFilter.hasActiveFilters
-                            ? 'По вашему запросу ничего не найдено'
-                            : 'Список заявок с Вашим откликом пуст',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: ColorsConstants.primaryBrownColorWithOpacity,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (_currentFilter.hasActiveFilters)
-                        TextButton(
-                          onPressed: _openFilterScreen,
-                          child: Text(
-                            'Изменить фильтры',
-                            style: TextStyle(
-                              color: ColorsConstants.primaryBrownColor,
-                              fontSize: 16.sp,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) =>
-                    ApplicationCard(application: displayApplications[index]),
-                childCount: displayApplications.length,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
-  final TabController tabController;
-  final double height;
-
-  _TabBarSliverDelegate({required this.tabController, required this.height});
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: ColorsConstants.primaryTextFormFieldBackgorundColor,
-      height: height,
-      child: TabBar(
-        controller: tabController,
-        tabs: const [
-          Tab(text: 'Все заявки'),
-          Tab(text: 'С моим откликом'),
-        ],
-        labelColor: ColorsConstants.primaryBrownColor,
-        labelStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-        unselectedLabelColor: ColorsConstants.primaryBrownColorWithOpacity,
-        unselectedLabelStyle: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w400,
-        ),
-        indicatorColor: ColorsConstants.primaryBrownColor,
-        indicatorSize: TabBarIndicatorSize.tab,
-        indicatorWeight: 2.0,
-        splashBorderRadius: BorderRadius.zero,
-        labelPadding: EdgeInsets.symmetric(horizontal: 8.w),
-      ),
-    );
-  }
-
-  @override
-  double get maxExtent => height;
-
-  @override
-  double get minExtent => height;
-
-  @override
-  bool shouldRebuild(covariant _TabBarSliverDelegate oldDelegate) {
-    return tabController != oldDelegate.tabController ||
-        height != oldDelegate.height;
   }
 }

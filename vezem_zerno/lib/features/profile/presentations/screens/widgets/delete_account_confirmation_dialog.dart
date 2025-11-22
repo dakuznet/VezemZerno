@@ -22,7 +22,6 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
           title: Text(
             'Удалить аккаунт',
             style: TextStyle(
-              //fontFamily: 'Unbounded',
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: ColorsConstants.primaryBrownColor,
@@ -31,7 +30,6 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
           content: Text(
             'Вы уверены, что хотите удалить свой аккаунт? Все ваши данные будут безвозвратно удалены.',
             style: TextStyle(
-              //fontFamily: 'Unbounded',
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
               color: const Color.fromARGB(195, 66, 44, 26),
@@ -43,7 +41,7 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
                 Expanded(
                   child: TextButton(
                     onPressed: () =>
-                        isDeleting ? null : AutoRouter.of(context).pop(),
+                        isDeleting ? null : context.router.pop(),
                     style: TextButton.styleFrom(
                       foregroundColor: ColorsConstants.primaryBrownColor,
                       padding: EdgeInsets.symmetric(
@@ -56,7 +54,6 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
                       style: TextStyle(
                         color: ColorsConstants.primaryBrownColor,
                         fontSize: 16.sp,
-                        //fontFamily: 'Unbounded',
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -71,7 +68,7 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
                             context.read<ProfileBloc>().add(
                               DeleteAccountEvent(),
                             ),
-                            AutoRouter.of(context).pop(),
+                            context.router.pop(),
                           },
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -85,7 +82,6 @@ class DeleteAccountConfirmationDialog extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16.sp,
-                        //fontFamily: 'Unbounded',
                         fontWeight: FontWeight.w500,
                       ),
                     ),

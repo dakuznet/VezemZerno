@@ -20,78 +20,64 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       resizeToAvoidBottomInset: false,
       backgroundColor: ColorsConstants.backgroundColor,
       body: SafeArea(
-        child: Stack(children: [_buildBackground(), _buildContent(context)]),
-      ),
-    );
-  }
-
-  Widget _buildBackground() {
-    return Positioned(
-      left: 0.w,
-      bottom: 0.h,
-      child: Image.asset(
-        'assets/png/wheat.png',
-        fit: BoxFit.cover,
-        filterQuality: FilterQuality.high,
-      ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: 96.h),
-          _buildLogo(),
-          SizedBox(height: 48.h),
-          _buildRegistrationButton(),
-          SizedBox(height: 16.h),
-          _buildLoginButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Center(
-      child: Image.asset(
-        'assets/png/logo.png',
-        cacheHeight: 230,
-        cacheWidth: 230,
-        width: 230.w,
-        height: 230.h,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-      ),
-    );
-  }
-
-  Widget _buildRegistrationButton() {
-    return PrimaryButton(
-      text: "Регистрация",
-      onPressed: () => AutoRouter.of(context).push(const RegistrationRoute()),
-    );
-  }
-
-  Widget _buildLoginButton() {
-    return Center(
-      child: TextButton(
-        onPressed: () => AutoRouter.of(context).push(const LoginRoute()),
-        style: TextButton.styleFrom(
-          foregroundColor: ColorsConstants.primaryBrownColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-        ),
-        child: Text(
-          "Уже есть аккаунт",
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: ColorsConstants.primaryBrownColor,
-          ),
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0.w,
+              bottom: 0.h,
+              child: Image.asset(
+                'assets/png/wheat.png',
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 96.h),
+                  Center(
+                    child: Image.asset(
+                      'assets/png/logo.png',
+                      cacheHeight: 230,
+                      cacheWidth: 230,
+                      width: 230.w,
+                      height: 230.h,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
+                  SizedBox(height: 48.h),
+                  PrimaryButton(
+                    text: "Регистрация",
+                    onPressed: () =>
+                        context.router.push(const RegistrationRoute()),
+                  ),
+                  SizedBox(height: 16.h),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context.router.push(const LoginRoute()),
+                      style: TextButton.styleFrom(
+                        foregroundColor: ColorsConstants.primaryBrownColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      child: Text(
+                        "Уже есть аккаунт",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                          color: ColorsConstants.primaryBrownColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -19,7 +19,9 @@ class MainScreen extends StatelessWidget {
           body: child,
           bottomNavigationBar: CustomBottomNavigationBar(
             currentIndex: tabsRouter.activeIndex,
-            onTap: tabsRouter.setActiveIndex,
+            onTap: (index) {
+              tabsRouter.setActiveIndex(index);
+            },
           ),
         );
       },

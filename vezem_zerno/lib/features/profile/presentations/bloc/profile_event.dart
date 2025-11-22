@@ -16,6 +16,7 @@ class SaveProfileEvent extends ProfileEvent {
   final String role;
   final String phone;
   final io.File? imageFile;
+  final String userId;
 
   SaveProfileEvent({
     required this.name,
@@ -23,11 +24,19 @@ class SaveProfileEvent extends ProfileEvent {
     required this.organization,
     required this.role,
     required this.phone,
-    this.imageFile,
+    this.imageFile, required this.userId,
   });
 
   @override
-  List<Object?> get props => [name, surname, organization, role, phone];
+  List<Object?> get props => [
+    name,
+    surname,
+    organization,
+    role,
+    phone,
+    imageFile,
+    userId
+  ];
 }
 
 class ProfileImageSelectedEvent extends ProfileEvent {

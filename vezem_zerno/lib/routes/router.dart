@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:vezem_zerno/features/applications/presentations/screens/info_about_application_my_responses.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:vezem_zerno/features/filter/data/models/application_filter_model.dart';
 import 'package:vezem_zerno/features/filter/presentations/screens/filter_screen.dart';
+import 'package:vezem_zerno/core/entities/application_entity.dart';
+import 'package:vezem_zerno/features/user_applications/presentations/screens/application_responses_screen.dart';
 import 'package:vezem_zerno/features/user_applications/presentations/screens/create_application_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/splash_screen.dart';
@@ -18,10 +21,10 @@ import 'package:vezem_zerno/features/profile/presentations/screens/change_passwo
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/profile_settings_screen.dart';
 import 'package:vezem_zerno/features/profile/presentations/screens/settings_screen.dart';
+import 'package:vezem_zerno/features/user_applications/presentations/screens/user_application_info_screen.dart';
 import 'package:vezem_zerno/features/user_applications/presentations/screens/user_applications_list_screen.dart';
 import 'package:vezem_zerno/core/main_screen.dart';
 import 'package:vezem_zerno/features/applications/presentations/screens/info_about_application.dart';
-import 'package:vezem_zerno/features/user_applications/data/models/application_model.dart';
 
 part 'router.gr.dart';
 
@@ -30,6 +33,9 @@ class AppRouter extends RootStackRouter {
   final AuthBloc authBloc;
 
   AppRouter({required this.authBloc});
+
+  @override
+  RouteType get defaultRouteType => RouteType.material();
 
   @override
   List<AutoRoute> get routes => [
@@ -61,8 +67,11 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: ChangePasswordRoute.page, path: '/change-password'),
     AutoRoute(page: CreateApplicationRoute.page, path: '/create-request-form'),
     AutoRoute(page: InfoAboutApplicationRoute.page, path: '/info-application'),
+    AutoRoute(page: InfoAboutApplicationMyResponsesRoute.page, path: '/info-application'),
     AutoRoute(page: FilterRoute.page, path: '/filters'),
+    AutoRoute(page: UserApplicationInfoRoute.page),
     AutoRoute(page: ResetPasswordRoute.page),
+    AutoRoute(page: ApplicationResponsesRoute.page),
   ];
 }
 

@@ -38,7 +38,6 @@ class ProfileActionTile extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    //fontFamily: 'Unbounded',
                     fontWeight: FontWeight.w500,
                     fontSize: 14.sp,
                     color: ColorsConstants.primaryBrownColor,
