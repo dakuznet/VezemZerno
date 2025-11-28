@@ -24,6 +24,8 @@ class DateChip extends StatelessWidget {
       onSelected: onSelected,
       selectedColor: ColorsConstants.primaryButtonBackgroundColor,
       backgroundColor: ColorsConstants.primaryTextFormFieldBackgorundColor,
+      side: BorderSide.none,
+      checkmarkColor: ColorsConstants.primaryBrownColor,
     );
   }
 }

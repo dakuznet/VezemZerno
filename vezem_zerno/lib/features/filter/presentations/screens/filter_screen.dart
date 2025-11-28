@@ -22,26 +22,17 @@ class FilterScreen extends StatefulWidget {
 class FilterScreenState extends State<FilterScreen> {
   late ApplicationFilter _currentFilter;
 
-  final TextEditingController _minPriceController = TextEditingController();
-  final TextEditingController _maxPriceController = TextEditingController();
-  final TextEditingController _minDistanceController = TextEditingController();
-  final TextEditingController _maxDistanceController = TextEditingController();
+  late final TextEditingController _minPriceController;
+  late final TextEditingController _maxPriceController;
+  late final TextEditingController _minDistanceController;
+  late final TextEditingController _maxDistanceController;
 
-  final TextEditingController _loadingRegionController =
-      TextEditingController();
-  final TextEditingController _unloadingRegionController =
-      TextEditingController();
-  final TextEditingController _cropController = TextEditingController();
+  late final TextEditingController _loadingRegionController;
+  late final TextEditingController _unloadingRegionController;
+  late final TextEditingController _cropController;
 
   final Map<String, List<String>> _demoData = {
-    'Регион погрузки': [
-      'Московская область',
-      'Ленинградская область',
-      'Краснодарский край',
-      'Ростовская область',
-      'Воронежская область',
-    ],
-    'Регион выгрузки': [
+    'Регион': [
       'Московская область',
       'Ленинградская область',
       'Краснодарский край',
@@ -61,6 +52,15 @@ class FilterScreenState extends State<FilterScreen> {
   @override
   void initState() {
     super.initState();
+
+    _minPriceController = TextEditingController();
+    _maxPriceController = TextEditingController();
+    _minDistanceController = TextEditingController();
+    _maxDistanceController = TextEditingController();
+    _loadingRegionController = TextEditingController();
+    _unloadingRegionController = TextEditingController();
+    _cropController = TextEditingController();
+
     _currentFilter = widget.initialFilter.copyWith();
     _updateControllers();
   }
@@ -146,7 +146,7 @@ class FilterScreenState extends State<FilterScreen> {
               readOnly: true,
               controller: _loadingRegionController,
               labelText: 'Регион погрузки',
-              onTap: () => _showSelectionDialog('Регион погрузки', (value) {
+              onTap: () => _showSelectionDialog('Регион', (value) {
                 setState(() {
                   _currentFilter = _currentFilter.copyWith(
                     loadingRegion: value,
@@ -160,7 +160,7 @@ class FilterScreenState extends State<FilterScreen> {
               readOnly: true,
               controller: _unloadingRegionController,
               labelText: 'Регион выгрузки',
-              onTap: () => _showSelectionDialog('Регион выгрузки', (value) {
+              onTap: () => _showSelectionDialog('Регион', (value) {
                 setState(() {
                   _currentFilter = _currentFilter.copyWith(
                     unloadingRegion: value,

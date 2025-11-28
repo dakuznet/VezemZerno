@@ -17,10 +17,6 @@ class ApplicationsBloc extends Bloc<ApplicationsEvent, ApplicationsState> {
   final GetUserResponsesUsecase getUserResponsesUsecase;
   final RespondToApplicationUsecase respondToApplicationUsecase;
 
-  ApplicationFilter? _currentFilter;
-  int _applicationsPage = 1;
-  final int _pageSize = 20;
-
   ApplicationsBloc({
     required this.getApplicationsByStatusUsecase,
     required this.getUserResponsesUsecase,
@@ -28,7 +24,6 @@ class ApplicationsBloc extends Bloc<ApplicationsEvent, ApplicationsState> {
   }) : super(ApplicationsInitial()) {
     on<LoadApplicationsEvent>(_onLoadApplications);
     on<LoadResponsesEvent>(_onLoadResponses);
-    on<LoadMoreApplicationsEvent>(_onLoadMoreApplications);
     on<RespondToApplicaitonEvent>(_onRespondToApplication);
   }
 
@@ -36,15 +31,11 @@ class ApplicationsBloc extends Bloc<ApplicationsEvent, ApplicationsState> {
     LoadApplicationsEvent event,
     Emitter<ApplicationsState> emit,
   ) async {
-    emit(ApplicationsLoading(isFirstLoad: true));
-    _applicationsPage = 1;
-    _currentFilter = event.filter;
+    emit(ApplicationsLoading());
 
     final result = await getApplicationsByStatusUsecase.call(
       applicationStatus: event.applicationStatus,
-      limit: _pageSize,
-      offset: 0,
-      filter: _currentFilter,
+      filter: event.filter,
     );
 
     result.fold(
@@ -52,53 +43,10 @@ class ApplicationsBloc extends Bloc<ApplicationsEvent, ApplicationsState> {
       (applications) => emit(
         ApplicationsLoadingSuccess(
           applications: applications,
-          currentPage: _applicationsPage,
-          hasReachedMax: applications.length < _pageSize,
-          filter: _currentFilter,
+          filter: event.filter,
         ),
       ),
     );
-  }
-
-  Future<void> _onLoadMoreApplications(
-    LoadMoreApplicationsEvent event,
-    Emitter<ApplicationsState> emit,
-  ) async {
-    if (state is ApplicationsLoadingSuccess) {
-      final currentState = state as ApplicationsLoadingSuccess;
-      if (currentState.hasReachedMax) return;
-
-      emit(ApplicationsLoadingMore(applications: currentState.applications));
-
-      _applicationsPage++;
-      final result = await getApplicationsByStatusUsecase.call(
-        applicationStatus: event.applicationStatus,
-        limit: _pageSize,
-        offset: (_applicationsPage - 1) * _pageSize,
-        filter: _currentFilter,
-      );
-
-      result.fold(
-        (failure) {
-          _applicationsPage--;
-          emit(ApplicationsLoadingFailure());
-        },
-        (newApplications) {
-          final allApplications = [
-            ...currentState.applications,
-            ...newApplications,
-          ];
-          emit(
-            ApplicationsLoadingSuccess(
-              applications: allApplications,
-              currentPage: _applicationsPage,
-              hasReachedMax: newApplications.length < _pageSize,
-              filter: _currentFilter,
-            ),
-          );
-        },
-      );
-    }
   }
 
   Future<void> _onLoadResponses(

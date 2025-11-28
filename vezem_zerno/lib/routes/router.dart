@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
 import 'package:vezem_zerno/features/applications/presentations/screens/info_about_application_my_responses.dart';
 import 'package:vezem_zerno/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:vezem_zerno/features/filter/data/models/application_filter_model.dart';
 import 'package:vezem_zerno/features/filter/presentations/screens/filter_screen.dart';
 import 'package:vezem_zerno/core/entities/application_entity.dart';
+import 'package:vezem_zerno/features/map/presentation/screens/map_screen.dart';
 import 'package:vezem_zerno/features/user_applications/presentations/screens/application_responses_screen.dart';
 import 'package:vezem_zerno/features/user_applications/presentations/screens/create_application_screen.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
@@ -67,11 +69,15 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: ChangePasswordRoute.page, path: '/change-password'),
     AutoRoute(page: CreateApplicationRoute.page, path: '/create-request-form'),
     AutoRoute(page: InfoAboutApplicationRoute.page, path: '/info-application'),
-    AutoRoute(page: InfoAboutApplicationMyResponsesRoute.page, path: '/info-application'),
+    AutoRoute(
+      page: InfoAboutApplicationMyResponsesRoute.page,
+      path: '/info-application',
+    ),
     AutoRoute(page: FilterRoute.page, path: '/filters'),
     AutoRoute(page: UserApplicationInfoRoute.page),
     AutoRoute(page: ResetPasswordRoute.page),
     AutoRoute(page: ApplicationResponsesRoute.page),
+    AutoRoute(page: MapRoute.page),
   ];
 }
 

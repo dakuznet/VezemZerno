@@ -40,6 +40,16 @@ class _InfoAboutApplicationScreenState
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocListener<ApplicationsBloc, ApplicationsState>(
       listener: (context, state) {
@@ -184,7 +194,7 @@ class _InfoAboutApplicationScreenState
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                '${widget.application.loadingRegion}\n${widget.application.loadingLocality}',
+                                '${widget.application.unloadingRegion}\n${widget.application.unloadingLocality}',
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   color: ColorsConstants.primaryBrownColor,

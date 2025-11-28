@@ -101,6 +101,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         (failure) => emit(ProfileError('Ошибка сохранения профиля')),
         (_) {
           emit(ProfileSaved());
+          add(LoadProfileEvent());
         },
       );
     } catch (e) {

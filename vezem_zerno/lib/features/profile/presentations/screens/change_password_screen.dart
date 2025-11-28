@@ -21,9 +21,17 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _oldPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  late final TextEditingController _oldPasswordController;
+  late final TextEditingController _newPasswordController;
+  late final TextEditingController _confirmPasswordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _oldPasswordController = TextEditingController();
+    _newPasswordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+  }
 
   @override
   void dispose() {

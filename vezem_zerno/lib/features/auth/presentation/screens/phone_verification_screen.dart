@@ -36,11 +36,18 @@ class PhoneVerificationScreen extends StatefulWidget {
 class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   static const _codeLength = 6;
 
-  final TextEditingController _codeController = TextEditingController();
+  late final TextEditingController _codeController;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    _codeController = TextEditingController();
+    super.initState();
+  }
+
+  @override
   void dispose() {
+    _codeController.dispose();
     super.dispose();
   }
 

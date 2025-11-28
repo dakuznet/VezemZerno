@@ -2,19 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
-import 'package:vezem_zerno/features/user_applications/presentations/screens/widgets/application_form_data.dart';
 import 'package:vezem_zerno/core/widgets/primary_checkbox_list_tile.dart';
 
-class TransportDetailsSection extends StatefulWidget {
-  final ApplicationFormData formData;
+class TransportDetailsSection extends StatelessWidget {
+  final bool suitableForDumpTrucks;
+  final ValueChanged<bool> onSuitableForDumpTrucksChanged;
+  final ValueChanged<bool> onCarrierWorksByCharterChanged;
+  final bool carrierWorksByCharter;
+  final TextEditingController shippingPriceController;
+  final TextEditingController downtimePaymentController;
+  final TextEditingController allowableShortageController;
+  final TextEditingController paymentTermsController;
 
-  const TransportDetailsSection({super.key, required this.formData});
+  const TransportDetailsSection({
+    super.key,
+    required this.suitableForDumpTrucks,
+    required this.carrierWorksByCharter,
+    required this.shippingPriceController,
+    required this.downtimePaymentController,
+    required this.allowableShortageController,
+    required this.paymentTermsController,
+    required this.onSuitableForDumpTrucksChanged,
+    required this.onCarrierWorksByCharterChanged,
+  });
 
-  @override
-  State<TransportDetailsSection> createState() => _TransportDetailsSectionState();
-}
-
-class _TransportDetailsSectionState extends State<TransportDetailsSection> {
   String? _validateNotEmpty(String? value, String fieldName) {
     if (value == null || value.isEmpty) {
       return 'Введите $fieldName';
@@ -38,21 +49,21 @@ class _TransportDetailsSectionState extends State<TransportDetailsSection> {
         SizedBox(height: 16.h),
         PrimaryCheckboxListTile(
           title: 'Подходят самосвалы',
-          value: widget.formData.suitableForDumpTrucks,
+          value: suitableForDumpTrucks,
           onChanged: (value) {
-            setState(() {
-              widget.formData.suitableForDumpTrucks = value ?? false;
-            });
+            if (value != null) {
+              onSuitableForDumpTrucksChanged(value);
+            }
           },
         ),
         SizedBox(height: 16.h),
         PrimaryCheckboxListTile(
           title: 'Перевозчик работает по хартии',
-          value: widget.formData.carrierWorksByCharter,
+          value: carrierWorksByCharter,
           onChanged: (value) {
-            setState(() {
-              widget.formData.carrierWorksByCharter = value ?? false;
-            });
+            if (value != null) {
+              onCarrierWorksByCharterChanged(value);
+            }
           },
         ),
         SizedBox(height: 16.h),
@@ -60,7 +71,7 @@ class _TransportDetailsSectionState extends State<TransportDetailsSection> {
           readOnly: false,
           autoValidateMode: AutovalidateMode.onUserInteraction,
           labelText: 'Цена перевозки ₽/кг',
-          controller: widget.formData.shippingPriceController,
+          controller: shippingPriceController,
           validator: (value) => _validateNotEmpty(value, 'цену перевозки'),
           keyboardType: TextInputType.number,
         ),
@@ -69,7 +80,7 @@ class _TransportDetailsSectionState extends State<TransportDetailsSection> {
           readOnly: false,
           autoValidateMode: AutovalidateMode.onUserInteraction,
           labelText: 'Как оплачиваете простой',
-          controller: widget.formData.downtimePaymentController,
+          controller: downtimePaymentController,
           validator: (value) =>
               _validateNotEmpty(value, 'условия оплаты простоя'),
         ),
@@ -78,7 +89,7 @@ class _TransportDetailsSectionState extends State<TransportDetailsSection> {
           readOnly: false,
           autoValidateMode: AutovalidateMode.onUserInteraction,
           labelText: 'Допустимая недостача, кг',
-          controller: widget.formData.allowableShortageController,
+          controller: allowableShortageController,
           validator: (value) =>
               _validateNotEmpty(value, 'допустимую недостачу'),
           keyboardType: TextInputType.number,
@@ -88,7 +99,7 @@ class _TransportDetailsSectionState extends State<TransportDetailsSection> {
           readOnly: false,
           autoValidateMode: AutovalidateMode.onUserInteraction,
           labelText: 'Сроки оплаты',
-          controller: widget.formData.paymentTermsController,
+          controller: paymentTermsController,
           validator: (value) => _validateNotEmpty(value, 'сроки оплаты'),
         ),
       ],

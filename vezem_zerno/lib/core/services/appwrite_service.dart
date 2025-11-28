@@ -369,15 +369,11 @@ class AppwriteService {
   Future<List<ApplicationModel>> getApplicationsByStatusWithFilter({
     required String applicationStatus,
     ApplicationFilter? filter,
-    int limit = 20,
-    int offset = 0,
   }) async {
     try {
       final queries = <String>[
         Query.equal('status', applicationStatus),
         Query.orderDesc('\$createdAt'),
-        Query.limit(limit),
-        Query.offset(offset),
       ];
 
       if (filter != null) {

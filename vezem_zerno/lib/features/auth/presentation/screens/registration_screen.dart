@@ -28,13 +28,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   final GlobalKey<FormState> _registrationFormKey = GlobalKey<FormState>();
 
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _surnameController = TextEditingController();
-  final TextEditingController _organizationController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _surnameController;
+  late final TextEditingController _organizationController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _passwordController;
+  late final TextEditingController _confirmPasswordController;
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -48,6 +47,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController();
+    _surnameController = TextEditingController();
+    _organizationController = TextEditingController();
+    _phoneController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
     _initializePhoneMask();
   }
 

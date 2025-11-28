@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
+import 'package:vezem_zerno/core/entities/user_entity.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
 import 'package:vezem_zerno/core/widgets/primary_loading_indicator.dart';
 import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
@@ -18,27 +19,36 @@ import 'package:vezem_zerno/features/profile/presentations/screens/widgets/profi
 
 @RoutePage()
 class ProfileSettingScreen extends StatefulWidget {
-  const ProfileSettingScreen({super.key});
+  final UserEntity? user;
+
+  const ProfileSettingScreen({super.key, required this.user});
 
   @override
   State<ProfileSettingScreen> createState() => _ProfileSettingScreenState();
 }
 
 class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _surnameController = TextEditingController();
-  final TextEditingController _organizationController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _roleController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _surnameController;
+  late final TextEditingController _organizationController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _roleController;
 
   io.File? _profileImage;
-  String? _currentImageUrl;
   bool _isImageLoading = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<ProfileBloc>().add(LoadProfileEvent());
+    _nameController = TextEditingController(text: widget.user?.name ?? '');
+    _surnameController = TextEditingController(
+      text: widget.user?.surname ?? '',
+    );
+    _organizationController = TextEditingController(
+      text: widget.user?.organization ?? '',
+    );
+    _phoneController = TextEditingController(text: widget.user?.phone ?? '');
+    _roleController = TextEditingController(text: widget.user?.role ?? '');
   }
 
   @override
@@ -108,17 +118,15 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
-        if (state is ProfileLoaded) {
-          setState(() {
-            _nameController.text = state.user.name;
-            _surnameController.text = state.user.surname;
-            _organizationController.text = state.user.organization;
-            _roleController.text = state.user.role;
-            _phoneController.text = state.user.phone;
-            _currentImageUrl = state.user.profileImage;
-          });
+        if (state is ProfileError) {
+          PrimarySnackBar.show(
+            context,
+            text: 'Произошла ошибка...\nПроверьте соединение с интернетом',
+            borderColor: Colors.red,
+          );
         }
         if (state is ProfileSaved) {
+          context.router.pop();
           PrimarySnackBar.show(
             context,
             text: 'Профиль сохранён',
@@ -212,7 +220,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                         isSaving: state is ProfileSaving,
                         isLoading: _isImageLoading,
                         onTap: _pickImage,
-                        currentImageUrl: _currentImageUrl,
+                        currentImageUrl: widget.user?.profileImage ?? '',
                         profileImage: _profileImage,
                       ),
                       SizedBox(height: 16.h),

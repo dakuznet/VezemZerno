@@ -13,14 +13,10 @@ class ApplicationsListRepositoryImpl extends ApplicationsListRepository {
   @override
   Future<Either<Failure, List<ApplicationEntity>>> getApplicationsByStatus({
     required String applicationStatus,
-    required int limit,
-    required int offset,
     ApplicationFilter? filter,
   }) async {
     return remoteDataSource.getApplicationsByStatus(
       applicationStatus: applicationStatus,
-      limit: limit,
-      offset: offset,
       filter: filter,
     );
   }

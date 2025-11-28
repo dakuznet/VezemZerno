@@ -24,17 +24,18 @@ class _LoginScreenState extends State<LoginScreen> {
   static const _phoneDigitCount = 11;
 
   final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  late final TextEditingController _phoneController;
+  late final TextEditingController _passwordController;
+  late final MaskTextInputFormatter _phoneMaskFormatter;
 
   bool _obscurePassword = true;
   bool _isFirstInteraction = true;
 
-  late final MaskTextInputFormatter _phoneMaskFormatter;
-
   @override
   void initState() {
     super.initState();
+    _phoneController = TextEditingController();
+    _passwordController = TextEditingController();
     _initializePhoneMask();
   }
 

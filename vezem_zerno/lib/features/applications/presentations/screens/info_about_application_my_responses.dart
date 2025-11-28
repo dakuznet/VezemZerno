@@ -8,7 +8,10 @@ import 'package:vezem_zerno/core/entities/application_entity.dart';
 
 @RoutePage()
 class InfoAboutApplicationMyResponsesScreen extends StatefulWidget {
-  const InfoAboutApplicationMyResponsesScreen({super.key, required this.application});
+  const InfoAboutApplicationMyResponsesScreen({
+    super.key,
+    required this.application,
+  });
   final ApplicationEntity application;
   @override
   State<InfoAboutApplicationMyResponsesScreen> createState() =>
@@ -17,6 +20,17 @@ class InfoAboutApplicationMyResponsesScreen extends StatefulWidget {
 
 class _InfoAboutApplicationMyResponsesScreenState
     extends State<InfoAboutApplicationMyResponsesScreen> {
+      
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +77,8 @@ class _InfoAboutApplicationMyResponsesScreenState
                 ),
                 ApplicationInfoRow(
                   label: 'Дата создания',
-                  value: "${widget.application.createdAt!.day}.${widget.application.createdAt!.month}.${widget.application.createdAt!.year}",
+                  value:
+                      "${widget.application.createdAt!.day}.${widget.application.createdAt!.month}.${widget.application.createdAt!.year}",
                 ),
               ],
             ),

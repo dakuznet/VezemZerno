@@ -19,10 +19,10 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   static const _phoneMask = '+7 (###) ###-##-##';
-  final _phoneController = TextEditingController();
-  final _codeController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  late final TextEditingController _phoneController;
+  late final TextEditingController _codeController;
+  late final TextEditingController _passwordController;
+  late final TextEditingController _confirmPasswordController;
 
   late final MaskTextInputFormatter _phoneMaskFormatter;
 
@@ -32,10 +32,23 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   void initState() {
     super.initState();
+    _phoneController = TextEditingController();
+    _codeController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
     _phoneMaskFormatter = MaskTextInputFormatter(
       mask: _phoneMask,
       filter: {'#': RegExp(r'[0-9]')},
     );
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _codeController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   @override

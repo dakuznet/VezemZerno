@@ -32,10 +32,10 @@ class TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
         unselectedLabelColor: ColorsConstants.primaryBrownColorWithOpacity,
         unselectedLabelStyle: TextStyle(
           fontSize: 16.sp,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w500,
         ),
         indicatorColor: ColorsConstants.primaryBrownColor,
-        indicatorSize: TabBarIndicatorSize.tab,
+        indicatorSize: TabBarIndicatorSize.label,
         indicatorWeight: 2.0,
         splashBorderRadius: BorderRadius.zero,
         labelPadding: EdgeInsets.symmetric(horizontal: 8.w),

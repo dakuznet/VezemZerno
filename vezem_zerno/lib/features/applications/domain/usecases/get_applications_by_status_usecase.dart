@@ -11,14 +11,10 @@ class GetApplicationsByStatusUsecase {
 
   Future<Either<Failure, List<ApplicationEntity>>> call({
     required String applicationStatus,
-    required int limit,
     ApplicationFilter? filter,
-    required int offset,
   }) async {
     return repository.getApplicationsByStatus(
       applicationStatus: applicationStatus,
-      limit: limit,
-      offset: offset,
       filter: filter,
     );
   }

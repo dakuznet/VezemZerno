@@ -29,7 +29,11 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabCount, vsync: this);
+    _tabController = TabController(
+      length: _tabCount,
+      vsync: this,
+      initialIndex: 0,
+    );
     _tabController.addListener(_handleTabChange);
     _loadActiveApplications();
   }
@@ -91,6 +95,16 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: ColorsConstants.primaryBrownColor,
+        child: const Icon(
+          Icons.map_outlined,
+          color: ColorsConstants.primaryTextFormFieldBackgorundColor,
+        ),
+        onPressed: () {
+          context.router.push(MapRoute());
+        },
+      ),
       resizeToAvoidBottomInset: false,
       backgroundColor: ColorsConstants.backgroundColor,
       body: NestedScrollView(
@@ -108,8 +122,6 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
             ),
             centerTitle: true,
             pinned: true,
-            floating: true,
-            snap: true,
             actions: [
               Stack(
                 children: [
@@ -140,17 +152,14 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
                 ],
               ),
             ],
-            surfaceTintColor:
-                ColorsConstants.primaryTextFormFieldBackgorundColor,
+            surfaceTintColor: Colors.transparent,
           ),
           SliverPersistentHeader(
             pinned: true,
             delegate: TabBarSliverDelegate(
               tabController: _tabController,
               onTabChanged: _handleTabChange,
-              height:
-                  (50 * MediaQuery.of(context).devicePixelRatio).round() /
-                  MediaQuery.of(context).devicePixelRatio,
+              height: 50.h,
             ),
           ),
         ],
@@ -278,17 +287,6 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
                         else
                           SliverList.builder(
                             itemBuilder: (context, index) {
-                              if (index >= state.applications.length - 5 &&
-                                  !state.hasReachedMax &&
-                                  state is! ApplicationsLoadingMore) {
-                                context.read<ApplicationsBloc>().add(
-                                  LoadMoreApplicationsEvent(
-                                    applicationStatus: 'active',
-                                    filter: _currentFilter,
-                                  ),
-                                );
-                              }
-
                               return ApplicationCard(
                                 application: state.applications[index],
                                 onTap: () => context.router.push(
@@ -298,9 +296,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
                                 ),
                               );
                             },
-                            itemCount:
-                                state.applications.length +
-                                (state is ApplicationsLoadingMore ? 1 : 0),
+                            itemCount: state.applications.length,
                           ),
                       ],
                     ],

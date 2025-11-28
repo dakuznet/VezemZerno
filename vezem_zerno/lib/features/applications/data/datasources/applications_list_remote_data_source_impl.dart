@@ -14,16 +14,12 @@ class ApplicationsListRemoteDataSourceImpl
   @override
   Future<Either<Failure, List<ApplicationEntity>>> getApplicationsByStatus({
     required String applicationStatus,
-    required int limit,
-    required int offset,
     ApplicationFilter? filter,
   }) async {
     try {
       final applications = await _appwriteService
           .getApplicationsByStatusWithFilter(
             applicationStatus: applicationStatus,
-            limit: limit,
-            offset: offset,
             filter: filter,
           );
 

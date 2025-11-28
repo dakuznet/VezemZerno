@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
 import 'package:vezem_zerno/core/widgets/primary_button.dart';
 import 'package:vezem_zerno/core/widgets/primary_divider.dart';
+import 'package:vezem_zerno/core/widgets/primary_snack_bar.dart';
 import 'package:vezem_zerno/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_bloc.dart';
 import 'package:vezem_zerno/features/profile/presentations/bloc/profile_event.dart';
@@ -28,19 +29,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    context.read<ProfileBloc>().add(LoadProfileEvent());
   }
 
-  void _loadProfile() {
-    context.read<ProfileBloc>().add(LoadProfileEvent());
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
-        if (state is ProfileSaved) {
-          _loadProfile();
+        if (state is ProfileError) {
+          PrimarySnackBar.show(
+            context,
+            text: 'Произошла ошибка...\nПроверьте соединение с интернетом',
+            borderColor: Colors.red,
+          );
         }
       },
       builder: (context, state) {
@@ -77,7 +83,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 iconPath: 'assets/svg/user_edit_icon.svg',
                                 title: 'Управление профилем',
                                 onTap: () => context.router.push(
-                                  const ProfileSettingRoute(),
+                                  ProfileSettingRoute(
+                                    user: state is ProfileLoaded
+                                        ? state.user
+                                        : null,
+                                  ),
                                 ),
                               ),
                               const PrimaryDivider(),

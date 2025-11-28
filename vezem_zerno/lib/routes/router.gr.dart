@@ -303,6 +303,22 @@ class MainRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [MapScreen]
+class MapRoute extends PageRouteInfo<void> {
+  const MapRoute({List<PageRouteInfo>? children})
+    : super(MapRoute.name, initialChildren: children);
+
+  static const String name = 'MapRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const MapScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [PhoneVerificationScreen]
 class PhoneVerificationRoute extends PageRouteInfo<PhoneVerificationRouteArgs> {
   PhoneVerificationRoute({
@@ -453,18 +469,49 @@ class ProfileRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [ProfileSettingScreen]
-class ProfileSettingRoute extends PageRouteInfo<void> {
-  const ProfileSettingRoute({List<PageRouteInfo>? children})
-    : super(ProfileSettingRoute.name, initialChildren: children);
+class ProfileSettingRoute extends PageRouteInfo<ProfileSettingRouteArgs> {
+  ProfileSettingRoute({
+    Key? key,
+    required UserEntity? user,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ProfileSettingRoute.name,
+         args: ProfileSettingRouteArgs(key: key, user: user),
+         initialChildren: children,
+       );
 
   static const String name = 'ProfileSettingRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const ProfileSettingScreen();
+      final args = data.argsAs<ProfileSettingRouteArgs>();
+      return ProfileSettingScreen(key: args.key, user: args.user);
     },
   );
+}
+
+class ProfileSettingRouteArgs {
+  const ProfileSettingRouteArgs({this.key, required this.user});
+
+  final Key? key;
+
+  final UserEntity? user;
+
+  @override
+  String toString() {
+    return 'ProfileSettingRouteArgs{key: $key, user: $user}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ProfileSettingRouteArgs) return false;
+    return key == other.key && user == other.user;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ user.hashCode;
 }
 
 /// generated route for

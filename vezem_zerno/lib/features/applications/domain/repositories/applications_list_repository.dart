@@ -6,8 +6,6 @@ import 'package:vezem_zerno/features/filter/data/models/application_filter_model
 abstract class ApplicationsListRepository {
   Future<Either<Failure, List<ApplicationEntity>>> getApplicationsByStatus({
     required String applicationStatus,
-    required int limit,
-    required int offset, 
     ApplicationFilter? filter,
   });
 

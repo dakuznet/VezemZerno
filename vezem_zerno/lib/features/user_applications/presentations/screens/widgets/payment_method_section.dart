@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:vezem_zerno/core/constants/colors_constants.dart';
-import 'package:vezem_zerno/features/user_applications/presentations/screens/widgets/application_form_data.dart';
 import 'package:vezem_zerno/features/user_applications/presentations/screens/widgets/payment_method_radio_tile.dart';
 
-class PaymentMethodSection extends StatefulWidget {
-  final ApplicationFormData formData;
+class PaymentMethodSection extends StatelessWidget {
+  final String paymentMethod;
+  final ValueChanged<String> onPaymentMethodChanged;
 
-  const PaymentMethodSection({super.key, required this.formData});
+  const PaymentMethodSection({
+    super.key,
+    required this.paymentMethod,
+    required this.onPaymentMethodChanged,
+  });
 
-  @override
-  State<PaymentMethodSection> createState() => _PaymentMethodSectionState();
-}
-
-class _PaymentMethodSectionState extends State<PaymentMethodSection> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -33,23 +32,19 @@ class _PaymentMethodSectionState extends State<PaymentMethodSection> {
             PaymentMethodRadioTile(
               title: 'Наличные',
               value: 'Наличные',
-              groupValue: widget.formData.paymentMethod,
+              groupValue: paymentMethod,
               onChanged: (value) {
-                setState(() {
-                  widget.formData.paymentMethod = value;
-                });
-              },
+                onPaymentMethodChanged(value);
+                            },
             ),
             SizedBox(height: 16.h),
             PaymentMethodRadioTile(
               title: 'Безналичные',
               value: 'Безналичные',
-              groupValue: widget.formData.paymentMethod,
+              groupValue: paymentMethod,
               onChanged: (value) {
-                setState(() {
-                  widget.formData.paymentMethod = value;
-                });
-              },
+                onPaymentMethodChanged(value);
+                            },
             ),
           ],
         ),

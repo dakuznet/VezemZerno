@@ -34,7 +34,11 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabCount, vsync: this);
+    _tabController = TabController(
+      length: _tabCount,
+      vsync: this,
+      initialIndex: 0,
+    );
     _tabController.addListener(_handleTabChange);
     _loadActiveApplications();
   }
@@ -127,6 +131,7 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
             SliverAppBar(
               backgroundColor:
                   ColorsConstants.primaryTextFormFieldBackgorundColor,
+              surfaceTintColor: Colors.transparent,
               title: Text(
                 'Мои заявки',
                 style: TextStyle(
@@ -137,10 +142,6 @@ class _UserApplicationsListScreenState extends State<UserApplicationsListScreen>
               ),
               centerTitle: true,
               pinned: true,
-              floating: true,
-              snap: true,
-              surfaceTintColor:
-                  ColorsConstants.primaryTextFormFieldBackgorundColor,
             ),
             SliverPersistentHeader(
               pinned: true,

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:vezem_zerno/core/widgets/primary_text_form_field.dart';
-import 'package:vezem_zerno/features/user_applications/presentations/screens/widgets/application_form_data.dart';
 
 class CommentSection extends StatelessWidget {
-  final ApplicationFormData formData;
+  final TextEditingController descriptionController;
 
-  const CommentSection({super.key, required this.formData});
+  const CommentSection({super.key, required this.descriptionController});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +12,7 @@ class CommentSection extends StatelessWidget {
       readOnly: false,
       autoValidateMode: AutovalidateMode.onUserInteraction,
       labelText: 'Комментарий к заявке',
-      controller: formData.descriptionController,
+      controller: descriptionController,
       maxLines: 5,
     );
   }

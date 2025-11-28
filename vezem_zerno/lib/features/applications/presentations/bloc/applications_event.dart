@@ -5,15 +5,10 @@ sealed class ApplicationsEvent {}
 
 final class LoadApplicationsEvent extends ApplicationsEvent {
   final String applicationStatus;
-  final int limit;
   final ApplicationFilter? filter;
-  final int offset;
 
   LoadApplicationsEvent({
-    required this.applicationStatus,
-    this.limit = 20,
-    this.filter,
-    this.offset = 0,
+    required this.applicationStatus, this.filter,
   });
 }
 
