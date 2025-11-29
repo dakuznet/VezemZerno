@@ -396,7 +396,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen>
                                     Text(
                                       _currentFilter.hasActiveFilters
                                           ? 'По вашему запросу ничего не найдено'
-                                          : 'Список заявок с Вашим откликом пуст',
+                                          : 'Список заявок пуст',
                                       style: TextStyle(
                                         fontSize: 16.sp,
                                         color: ColorsConstants

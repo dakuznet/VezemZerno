@@ -44,45 +44,198 @@ class _MapScreenState extends State<MapScreen> {
 
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      LocationPermission permission = await Geolocator.checkPermission();
-
       if (!serviceEnabled) {
-        _moveToDefaultLocation();
+        _showLocationServiceDisabledDialog();
         return;
       }
 
+      LocationPermission permission = await Geolocator.checkPermission();
+
       if (permission == LocationPermission.denied) {
-        _moveToDefaultLocation();
-        return;
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _showLocationPermissionDeniedDialog();
+          return;
+        }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _moveToDefaultLocation();
+        _showLocationPermissionPermanentlyDeniedDialog();
         return;
       }
 
-      final position = await Geolocator.getCurrentPosition();
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        final position = await Geolocator.getCurrentPosition();
 
-      setState(() {
-        _userPosition = position;
-      });
+        setState(() {
+          _userPosition = position;
+        });
 
-      await _mapController!.moveCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: Point(
-              latitude: position.latitude,
-              longitude: position.longitude,
+        await _mapController!.moveCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: Point(
+                latitude: position.latitude,
+                longitude: position.longitude,
+              ),
+              zoom: 10,
             ),
-            zoom: 10,
           ),
-        ),
-        animation: const MapAnimation(duration: 1),
-      );
+          animation: const MapAnimation(duration: 1),
+        );
+      }
     } catch (e) {
-      print('Ошибка получения геолокации: $e');
       _moveToDefaultLocation();
     }
+  }
+
+  void _showLocationServiceDisabledDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: ColorsConstants.backgroundColor,
+          title: Text(
+            'Геолокация отключена',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: ColorsConstants.primaryBrownColor,
+            ),
+          ),
+          content: Text(
+            'Пожалуйста, включите геолокацию в настройках устройства.',
+            style: TextStyle(fontSize: 16.sp),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.router.pop();
+                _moveToDefaultLocation();
+              },
+              child: Text(
+                'Ок',
+                style: TextStyle(
+                  color: ColorsConstants.primaryBrownColor,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16.sp,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLocationPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: ColorsConstants.backgroundColor,
+          title: Text(
+            'Доступ к геолокации запрещен',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: ColorsConstants.primaryBrownColor,
+            ),
+          ),
+          content: Text(
+            'Для определения вашего местоположения необходимо разрешить доступ к геолокации.',
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: ColorsConstants.primaryBrownColor,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.router.pop();
+                _moveToDefaultLocation();
+              },
+              child: Text(
+                'Продолжить без геолокации',
+                style: TextStyle(
+                  color: ColorsConstants.primaryBrownColor,
+                  fontSize: 16.sp,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                context.router.pop();
+                await Geolocator.openAppSettings();
+              },
+              child: Text(
+                'Настройки',
+                style: TextStyle(
+                  color: ColorsConstants.primaryBrownColor,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLocationPermissionPermanentlyDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: ColorsConstants.backgroundColor,
+          title: Text(
+            'Доступ к геолокации заблокирован',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: ColorsConstants.primaryBrownColor,
+            ),
+          ),
+          content: Text(
+            'Доступ к геолокации заблокирован. Пожалуйста, разрешите доступ в настройках приложения.',
+            style: TextStyle(fontSize: 16.sp),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.router.pop();
+                _moveToDefaultLocation();
+              },
+              child: Text(
+                'Продолжить без геолокации',
+                style: TextStyle(
+                  color: ColorsConstants.primaryBrownColor,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                context.router.pop();
+                await Geolocator.openAppSettings();
+              },
+              child: Text(
+                'Перейти к настройкам',
+                style: TextStyle(
+                  color: ColorsConstants.primaryBrownColor,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _moveToDefaultLocation() {
@@ -170,7 +323,6 @@ class _MapScreenState extends State<MapScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Ошибка инициализации карты: $e');
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -332,7 +484,6 @@ class _MapScreenState extends State<MapScreen> {
       final SearchSessionResult result = await resultFuture;
 
       if (result.error != null) {
-        print('Error during geocoding: ${result.error}');
         return null;
       }
 
@@ -346,13 +497,11 @@ class _MapScreenState extends State<MapScreen> {
 
         return point;
       } else {
-        print('No results found for address: $address');
         return null;
       }
     } catch (e) {
-      print('Ошибка геокодирования адреса $address: $e');
+      return null;
     }
-    return null;
   }
 
   void _showApplicationsList(List<ApplicationEntity> applications) {
